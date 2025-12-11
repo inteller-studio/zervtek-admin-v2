@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { getCookie } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
 import { LayoutProvider } from '@/context/layout-provider'
@@ -13,7 +14,40 @@ type AuthenticatedLayoutProps = {
 }
 
 export function AuthenticatedLayout({ children }: AuthenticatedLayoutProps) {
-  const defaultOpen = getCookie('sidebar_state') !== 'false'
+  // Use consistent initial value for SSR/client hydration
+  const [defaultOpen, setDefaultOpen] = useState(true)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    // Read cookie only on client after mount
+    const cookieValue = getCookie('sidebar_state')
+    setDefaultOpen(cookieValue !== 'false')
+    setMounted(true)
+  }, [])
+
+  // Render a placeholder during SSR to ensure consistent hydration
+  if (!mounted) {
+    return (
+      <SearchProvider>
+        <LayoutProvider>
+          <SidebarProvider defaultOpen={true}>
+            <SkipToMain />
+            <AppSidebar />
+            <SidebarInset
+              className={cn(
+                '@container/content',
+                'has-data-[layout=fixed]:h-svh',
+                'peer-data-[variant=inset]:has-data-[layout=fixed]:h-[calc(100svh-(var(--spacing)*4))]'
+              )}
+            >
+              {children}
+            </SidebarInset>
+          </SidebarProvider>
+        </LayoutProvider>
+      </SearchProvider>
+    )
+  }
+
   return (
     <SearchProvider>
       <LayoutProvider>

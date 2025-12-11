@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import Link from 'next/link'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -265,9 +266,11 @@ export function Bids() {
             <Badge variant='outline' className='px-3 py-1'>
               {filteredBids.length} Bids
             </Badge>
-            <Button>
-              <Plus className='mr-2 h-4 w-4' />
-              Assist Customer Bid
+            <Button asChild>
+              <Link href='/bids/place-bid'>
+                <Plus className='mr-2 h-4 w-4' />
+                Assist Customer Bid
+              </Link>
             </Button>
           </div>
         </div>

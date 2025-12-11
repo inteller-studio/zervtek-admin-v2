@@ -27,8 +27,8 @@ export function AppTitle() {
               onClick={() => setOpenMobile(false)}
               className='grid flex-1 text-start text-sm leading-tight'
             >
-              <span className='truncate font-bold'>Zervtek Admin</span>
-              <span className='truncate text-xs'>Next.js + ShadcnUI</span>
+              <span className='truncate font-bold'>Zervtek</span>
+              <span className='truncate text-xs'>Admin Dashboard</span>
             </Link>
             <ToggleSidebar />
           </div>

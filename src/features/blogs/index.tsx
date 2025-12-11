@@ -72,6 +72,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -958,16 +959,11 @@ export function Blogs() {
 
               <div className='space-y-2'>
                 <Label htmlFor='content'>Content</Label>
-                <Textarea
-                  id='content'
+                <RichTextEditor
+                  content={newPost.content}
+                  onChange={(content) => setNewPost({ ...newPost, content })}
                   placeholder='Write your blog post content here...'
-                  value={newPost.content}
-                  onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
-                  rows={10}
                 />
-                <p className='text-muted-foreground text-xs'>
-                  HTML formatting is supported
-                </p>
               </div>
             </div>
 

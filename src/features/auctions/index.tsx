@@ -7,7 +7,6 @@ import { ProfileDropdown } from '@/components/profile-dropdown'
 import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { AuctionsTable } from './components/auctions-table'
-import { AuctionsPrimaryButtons } from './components/auctions-primary-buttons'
 import { auctions } from './data/auctions'
 
 export function Auctions() {
@@ -30,7 +29,6 @@ export function Auctions() {
               Manage your vehicle auctions and track bidding activity.
             </p>
           </div>
-          <AuctionsPrimaryButtons />
         </div>
         <AuctionsTable data={auctions} />
       </Main>

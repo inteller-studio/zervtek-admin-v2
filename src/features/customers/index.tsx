@@ -81,6 +81,8 @@ import { format } from 'date-fns'
 import { toast } from 'sonner'
 
 // Types
+type UserLevel = 'bronze' | 'silver' | 'gold' | 'platinum' | 'vip'
+
 interface Customer {
   id: string
   name: string
@@ -94,6 +96,7 @@ interface Customer {
   totalBids: number
   wonAuctions: number
   verificationStatus: 'verified' | 'pending' | 'unverified'
+  userLevel: UserLevel
   createdAt: Date
   lastActivity: Date
 }
@@ -126,6 +129,7 @@ const mockCustomers: Customer[] = [
     totalBids: 23,
     wonAuctions: 8,
     verificationStatus: 'verified',
+    userLevel: 'gold',
     createdAt: new Date('2023-01-15'),
     lastActivity: new Date('2024-01-25'),
   },
@@ -142,6 +146,7 @@ const mockCustomers: Customer[] = [
     totalBids: 45,
     wonAuctions: 12,
     verificationStatus: 'verified',
+    userLevel: 'platinum',
     createdAt: new Date('2022-11-20'),
     lastActivity: new Date('2024-01-24'),
   },
@@ -158,6 +163,7 @@ const mockCustomers: Customer[] = [
     totalBids: 8,
     wonAuctions: 2,
     verificationStatus: 'verified',
+    userLevel: 'bronze',
     createdAt: new Date('2023-06-10'),
     lastActivity: new Date('2023-12-15'),
   },
@@ -174,6 +180,7 @@ const mockCustomers: Customer[] = [
     totalBids: 3,
     wonAuctions: 0,
     verificationStatus: 'pending',
+    userLevel: 'bronze',
     createdAt: new Date('2024-01-20'),
     lastActivity: new Date('2024-01-20'),
   },
@@ -190,6 +197,7 @@ const mockCustomers: Customer[] = [
     totalBids: 67,
     wonAuctions: 18,
     verificationStatus: 'verified',
+    userLevel: 'vip',
     createdAt: new Date('2022-03-25'),
     lastActivity: new Date('2024-01-23'),
   },
@@ -206,6 +214,7 @@ const mockCustomers: Customer[] = [
     totalBids: 15,
     wonAuctions: 5,
     verificationStatus: 'verified',
+    userLevel: 'silver',
     createdAt: new Date('2023-04-12'),
     lastActivity: new Date('2024-01-22'),
   },
@@ -222,6 +231,7 @@ const mockCustomers: Customer[] = [
     totalBids: 52,
     wonAuctions: 15,
     verificationStatus: 'verified',
+    userLevel: 'platinum',
     createdAt: new Date('2022-08-18'),
     lastActivity: new Date('2024-01-21'),
   },
@@ -238,6 +248,7 @@ const mockCustomers: Customer[] = [
     totalBids: 28,
     wonAuctions: 3,
     verificationStatus: 'verified',
+    userLevel: 'silver',
     createdAt: new Date('2023-02-28'),
     lastActivity: new Date('2023-11-10'),
   },
@@ -254,6 +265,7 @@ const mockCustomers: Customer[] = [
     totalBids: 31,
     wonAuctions: 7,
     verificationStatus: 'verified',
+    userLevel: 'gold',
     createdAt: new Date('2022-12-05'),
     lastActivity: new Date('2024-01-20'),
   },
@@ -270,6 +282,7 @@ const mockCustomers: Customer[] = [
     totalBids: 1,
     wonAuctions: 0,
     verificationStatus: 'unverified',
+    userLevel: 'bronze',
     createdAt: new Date('2024-01-18'),
     lastActivity: new Date('2024-01-18'),
   },
@@ -286,6 +299,7 @@ const mockCustomers: Customer[] = [
     totalBids: 19,
     wonAuctions: 4,
     verificationStatus: 'verified',
+    userLevel: 'silver',
     createdAt: new Date('2023-07-22'),
     lastActivity: new Date('2024-01-19'),
   },
@@ -302,6 +316,7 @@ const mockCustomers: Customer[] = [
     totalBids: 12,
     wonAuctions: 1,
     verificationStatus: 'verified',
+    userLevel: 'bronze',
     createdAt: new Date('2023-03-14'),
     lastActivity: new Date('2023-10-25'),
   },
@@ -425,6 +440,22 @@ export function Customers() {
     )
   }
 
+  const getUserLevelBadge = (level: UserLevel) => {
+    const config = {
+      bronze: { label: 'Bronze', className: 'bg-amber-100 text-amber-800 border-amber-300' },
+      silver: { label: 'Silver', className: 'bg-slate-100 text-slate-700 border-slate-300' },
+      gold: { label: 'Gold', className: 'bg-yellow-100 text-yellow-700 border-yellow-400' },
+      platinum: { label: 'Platinum', className: 'bg-cyan-100 text-cyan-700 border-cyan-300' },
+      vip: { label: 'VIP', className: 'bg-purple-100 text-purple-700 border-purple-400' },
+    }
+    return (
+      <Badge variant='outline' className={config[level].className}>
+        <Award className='mr-1 h-3 w-3' />
+        {config[level].label}
+      </Badge>
+    )
+  }
+
   const getDaysSinceActive = (date: Date) => {
     const days = Math.floor((new Date().getTime() - date.getTime()) / (1000 * 60 * 60 * 24))
     if (days === 0) return 'Today'
@@ -462,10 +493,22 @@ export function Customers() {
   const handleVerifyCustomer = (customer: Customer) => {
     setCustomers(
       customers.map((c) =>
-        c.id === customer.id ? { ...c, verificationStatus: 'verified' as const } : c
+        c.id === customer.id ? { ...c, verificationStatus: 'verified' as const, status: 'active' as const } : c
       )
     )
     toast.success(`${customer.name} has been verified`)
+  }
+
+  const handleChangeUserLevel = (customer: Customer, newLevel: UserLevel) => {
+    setCustomers(
+      customers.map((c) =>
+        c.id === customer.id ? { ...c, userLevel: newLevel } : c
+      )
+    )
+    if (selectedCustomer?.id === customer.id) {
+      setSelectedCustomer({ ...customer, userLevel: newLevel })
+    }
+    toast.success(`${customer.name}'s level changed to ${newLevel.charAt(0).toUpperCase() + newLevel.slice(1)}`)
   }
 
   const handleDeleteCustomer = (customer: Customer) => {
@@ -697,6 +740,7 @@ export function Customers() {
                           <div className='flex flex-col gap-1'>
                             {getStatusBadge(customer.status)}
                             {getVerificationBadge(customer.verificationStatus)}
+                            {getUserLevelBadge(customer.userLevel)}
                           </div>
                         </TableCell>
                         <TableCell>
@@ -750,6 +794,33 @@ export function Customers() {
                                   Verify Customer
                                 </DropdownMenuItem>
                               )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel>User Level</DropdownMenuLabel>
+                              <DropdownMenuItem onClick={() => handleChangeUserLevel(customer, 'bronze')}>
+                                <Award className='mr-2 h-4 w-4 text-amber-600' />
+                                Bronze
+                                {customer.userLevel === 'bronze' && <CheckCircle className='ml-auto h-3 w-3' />}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeUserLevel(customer, 'silver')}>
+                                <Award className='mr-2 h-4 w-4 text-slate-500' />
+                                Silver
+                                {customer.userLevel === 'silver' && <CheckCircle className='ml-auto h-3 w-3' />}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeUserLevel(customer, 'gold')}>
+                                <Award className='mr-2 h-4 w-4 text-yellow-500' />
+                                Gold
+                                {customer.userLevel === 'gold' && <CheckCircle className='ml-auto h-3 w-3' />}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeUserLevel(customer, 'platinum')}>
+                                <Award className='mr-2 h-4 w-4 text-cyan-500' />
+                                Platinum
+                                {customer.userLevel === 'platinum' && <CheckCircle className='ml-auto h-3 w-3' />}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => handleChangeUserLevel(customer, 'vip')}>
+                                <Award className='mr-2 h-4 w-4 text-purple-500' />
+                                VIP
+                                {customer.userLevel === 'vip' && <CheckCircle className='ml-auto h-3 w-3' />}
+                              </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               {customer.status === 'suspended' ? (
                                 <DropdownMenuItem onClick={() => handleActivateCustomer(customer)}>
@@ -857,13 +928,40 @@ export function Customers() {
                   </Avatar>
                   <div>
                     <div className='text-xl'>{selectedCustomer.name}</div>
-                    <div className='text-muted-foreground flex items-center gap-2 text-sm font-normal'>
+                    <div className='text-muted-foreground flex items-center gap-2 text-sm font-normal flex-wrap'>
                       {getStatusBadge(selectedCustomer.status)}
                       {getVerificationBadge(selectedCustomer.verificationStatus)}
+                      {getUserLevelBadge(selectedCustomer.userLevel)}
                     </div>
                   </div>
                 </DialogTitle>
               </DialogHeader>
+
+              {/* Verification & Level Actions */}
+              <div className='flex flex-wrap gap-2 mt-2'>
+                {selectedCustomer.verificationStatus !== 'verified' && (
+                  <Button size='sm' variant='outline' onClick={() => handleVerifyCustomer(selectedCustomer)}>
+                    <CheckCircle className='mr-2 h-4 w-4 text-green-600' />
+                    Verify User
+                  </Button>
+                )}
+                <Select
+                  value={selectedCustomer.userLevel}
+                  onValueChange={(value: UserLevel) => handleChangeUserLevel(selectedCustomer, value)}
+                >
+                  <SelectTrigger className='w-[160px]'>
+                    <Award className='mr-2 h-4 w-4' />
+                    <SelectValue placeholder='User Level' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='bronze'>Bronze</SelectItem>
+                    <SelectItem value='silver'>Silver</SelectItem>
+                    <SelectItem value='gold'>Gold</SelectItem>
+                    <SelectItem value='platinum'>Platinum</SelectItem>
+                    <SelectItem value='vip'>VIP</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               <Tabs defaultValue='overview' className='mt-4'>
                 <TabsList>

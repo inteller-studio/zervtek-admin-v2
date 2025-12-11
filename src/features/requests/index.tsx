@@ -84,14 +84,51 @@ import {
 } from '@/components/ui/table'
 
 import { requests as initialRequests, type ServiceRequest, type RequestThread } from './data/requests'
+import { StatsCard } from '@/features/dashboard/components/stats-card'
 
 const CURRENT_ADMIN_ID = 'admin1'
 const CURRENT_ADMIN_NAME = 'Current Admin'
+
+interface NewRequestForm {
+  type: 'inspection' | 'translation'
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  customerName: string
+  customerEmail: string
+  // Inspection fields
+  vehicleMake: string
+  vehicleModel: string
+  vehicleYear: string
+  vehicleVin: string
+  // Translation fields
+  sourceLanguage: string
+  targetLanguage: string
+  documentType: string
+}
+
+const emptyRequest: NewRequestForm = {
+  type: 'inspection',
+  title: '',
+  description: '',
+  priority: 'medium',
+  customerName: '',
+  customerEmail: '',
+  vehicleMake: '',
+  vehicleModel: '',
+  vehicleYear: '',
+  vehicleVin: '',
+  sourceLanguage: '',
+  targetLanguage: '',
+  documentType: '',
+}
 
 export function Requests() {
   const [requests, setRequests] = useState<ServiceRequest[]>(initialRequests)
   const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null)
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
+  const [isNewRequestOpen, setIsNewRequestOpen] = useState(false)
+  const [newRequest, setNewRequest] = useState<NewRequestForm>(emptyRequest)
   const [activeTab, setActiveTab] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [filterType, setFilterType] = useState('all')
@@ -290,6 +327,44 @@ export function Requests() {
 
   const hasActiveFilters = typeFilters.length > 0 || statusFilters.length > 0 || priorityFilters.length > 0 || searchQuery
 
+  const handleCreateRequest = () => {
+    if (!newRequest.title || !newRequest.customerName || !newRequest.customerEmail) {
+      toast.error('Please fill in required fields')
+      return
+    }
+
+    const request: ServiceRequest = {
+      id: String(Date.now()),
+      requestId: `REQ-${Date.now().toString().slice(-6)}`,
+      type: newRequest.type,
+      title: newRequest.title,
+      description: newRequest.description,
+      status: 'pending',
+      priority: newRequest.priority,
+      customerName: newRequest.customerName,
+      customerEmail: newRequest.customerEmail,
+      customerId: `cust-${Date.now()}`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      threads: [],
+      attachments: [],
+      vehicleInfo: newRequest.type === 'inspection' ? {
+        make: newRequest.vehicleMake,
+        model: newRequest.vehicleModel,
+        year: Number(newRequest.vehicleYear) || new Date().getFullYear(),
+        vin: newRequest.vehicleVin,
+      } : undefined,
+      sourceLanguage: newRequest.type === 'translation' ? newRequest.sourceLanguage : undefined,
+      targetLanguage: newRequest.type === 'translation' ? newRequest.targetLanguage : undefined,
+      documentType: newRequest.type === 'translation' ? newRequest.documentType : undefined,
+    }
+
+    setRequests([request, ...requests])
+    setIsNewRequestOpen(false)
+    setNewRequest(emptyRequest)
+    toast.success('Request created successfully')
+  }
+
   return (
     <>
       <Header fixed>
@@ -314,7 +389,7 @@ export function Requests() {
               <RefreshCw className='h-4 w-4 mr-2' />
               Refresh
             </Button>
-            <Button size='sm'>
+            <Button size='sm' onClick={() => setIsNewRequestOpen(true)}>
               <Plus className='h-4 w-4 mr-2' />
               New Request
             </Button>
@@ -323,50 +398,30 @@ export function Requests() {
 
         {/* Stats */}
         <div className='grid gap-4 md:grid-cols-4'>
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Total Requests</CardTitle>
-              <MessageSquare className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{stats.total}</div>
-              <p className='text-xs text-muted-foreground'>
-                {stats.inspections} inspections, {stats.translations} translations
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Pending</CardTitle>
-              <Clock className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{stats.pending}</div>
-              <p className='text-xs text-muted-foreground'>Awaiting assignment</p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>In Progress</CardTitle>
-              <Zap className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{stats.inProgress + stats.assigned}</div>
-              <p className='text-xs text-muted-foreground'>
-                {stats.assigned} assigned, {stats.inProgress} active
-              </p>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-              <CardTitle className='text-sm font-medium'>Completed Today</CardTitle>
-              <CheckCircle className='h-4 w-4 text-muted-foreground' />
-            </CardHeader>
-            <CardContent>
-              <div className='text-2xl font-bold'>{stats.completedToday}</div>
-              <p className='text-xs text-muted-foreground'>{stats.completed} total completed</p>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title='Total Requests'
+            value={stats.total}
+            change={8}
+            description='vs last month'
+          />
+          <StatsCard
+            title='Pending'
+            value={stats.pending}
+            change={-5}
+            description='awaiting assignment'
+          />
+          <StatsCard
+            title='In Progress'
+            value={stats.inProgress + stats.assigned}
+            change={12}
+            description='currently active'
+          />
+          <StatsCard
+            title='Completed Today'
+            value={stats.completedToday}
+            change={15}
+            description={`${stats.completed} total completed`}
+          />
         </div>
 
         {/* Filters */}
@@ -876,6 +931,226 @@ export function Requests() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* New Request Dialog */}
+        <Dialog open={isNewRequestOpen} onOpenChange={setIsNewRequestOpen}>
+          <DialogContent className='flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden sm:max-w-2xl'>
+            <DialogHeader>
+              <DialogTitle>Create New Request</DialogTitle>
+              <DialogDescription>
+                Submit a new inspection or translation request
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className='flex-1 overflow-y-auto'>
+              <div className='space-y-6 p-1'>
+                {/* Request Type */}
+                <div className='space-y-3'>
+                  <label className='text-sm font-medium'>Request Type *</label>
+                  <div className='flex gap-4'>
+                    <Button
+                      type='button'
+                      variant={newRequest.type === 'inspection' ? 'default' : 'outline'}
+                      className='flex-1'
+                      onClick={() => setNewRequest({ ...newRequest, type: 'inspection' })}
+                    >
+                      <Shield className='h-4 w-4 mr-2' />
+                      Inspection
+                    </Button>
+                    <Button
+                      type='button'
+                      variant={newRequest.type === 'translation' ? 'default' : 'outline'}
+                      className='flex-1'
+                      onClick={() => setNewRequest({ ...newRequest, type: 'translation' })}
+                    >
+                      <Languages className='h-4 w-4 mr-2' />
+                      Translation
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Basic Information */}
+                <div className='space-y-4'>
+                  <h3 className='font-semibold'>Basic Information</h3>
+                  <div>
+                    <label className='text-sm font-medium'>Title *</label>
+                    <Input
+                      placeholder='Enter request title'
+                      value={newRequest.title}
+                      onChange={(e) => setNewRequest({ ...newRequest, title: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <label className='text-sm font-medium'>Description</label>
+                    <Textarea
+                      placeholder='Describe the request details...'
+                      value={newRequest.description}
+                      onChange={(e) => setNewRequest({ ...newRequest, description: e.target.value })}
+                      rows={3}
+                    />
+                  </div>
+                  <div>
+                    <label className='text-sm font-medium'>Priority</label>
+                    <Select
+                      value={newRequest.priority}
+                      onValueChange={(value: 'low' | 'medium' | 'high' | 'urgent') =>
+                        setNewRequest({ ...newRequest, priority: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='low'>Low</SelectItem>
+                        <SelectItem value='medium'>Medium</SelectItem>
+                        <SelectItem value='high'>High</SelectItem>
+                        <SelectItem value='urgent'>Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Customer Information */}
+                <div className='space-y-4'>
+                  <h3 className='font-semibold'>Customer Information</h3>
+                  <div className='grid gap-4 md:grid-cols-2'>
+                    <div>
+                      <label className='text-sm font-medium'>Customer Name *</label>
+                      <Input
+                        placeholder='John Doe'
+                        value={newRequest.customerName}
+                        onChange={(e) => setNewRequest({ ...newRequest, customerName: e.target.value })}
+                      />
+                    </div>
+                    <div>
+                      <label className='text-sm font-medium'>Customer Email *</label>
+                      <Input
+                        type='email'
+                        placeholder='john@example.com'
+                        value={newRequest.customerEmail}
+                        onChange={(e) => setNewRequest({ ...newRequest, customerEmail: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Inspection-specific fields */}
+                {newRequest.type === 'inspection' && (
+                  <div className='space-y-4'>
+                    <h3 className='font-semibold'>Vehicle Information</h3>
+                    <div className='grid gap-4 md:grid-cols-2'>
+                      <div>
+                        <label className='text-sm font-medium'>Make</label>
+                        <Input
+                          placeholder='Toyota'
+                          value={newRequest.vehicleMake}
+                          onChange={(e) => setNewRequest({ ...newRequest, vehicleMake: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium'>Model</label>
+                        <Input
+                          placeholder='Camry'
+                          value={newRequest.vehicleModel}
+                          onChange={(e) => setNewRequest({ ...newRequest, vehicleModel: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium'>Year</label>
+                        <Input
+                          type='number'
+                          placeholder='2024'
+                          value={newRequest.vehicleYear}
+                          onChange={(e) => setNewRequest({ ...newRequest, vehicleYear: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium'>VIN</label>
+                        <Input
+                          placeholder='Vehicle Identification Number'
+                          value={newRequest.vehicleVin}
+                          onChange={(e) => setNewRequest({ ...newRequest, vehicleVin: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Translation-specific fields */}
+                {newRequest.type === 'translation' && (
+                  <div className='space-y-4'>
+                    <h3 className='font-semibold'>Translation Details</h3>
+                    <div className='grid gap-4 md:grid-cols-2'>
+                      <div>
+                        <label className='text-sm font-medium'>Source Language</label>
+                        <Select
+                          value={newRequest.sourceLanguage}
+                          onValueChange={(value) => setNewRequest({ ...newRequest, sourceLanguage: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select language' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='japanese'>Japanese</SelectItem>
+                            <SelectItem value='english'>English</SelectItem>
+                            <SelectItem value='chinese'>Chinese</SelectItem>
+                            <SelectItem value='korean'>Korean</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <label className='text-sm font-medium'>Target Language</label>
+                        <Select
+                          value={newRequest.targetLanguage}
+                          onValueChange={(value) => setNewRequest({ ...newRequest, targetLanguage: value })}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select language' />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value='english'>English</SelectItem>
+                            <SelectItem value='japanese'>Japanese</SelectItem>
+                            <SelectItem value='chinese'>Chinese</SelectItem>
+                            <SelectItem value='korean'>Korean</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <div>
+                      <label className='text-sm font-medium'>Document Type</label>
+                      <Select
+                        value={newRequest.documentType}
+                        onValueChange={(value) => setNewRequest({ ...newRequest, documentType: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder='Select document type' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value='vehicle_registration'>Vehicle Registration</SelectItem>
+                          <SelectItem value='export_certificate'>Export Certificate</SelectItem>
+                          <SelectItem value='auction_sheet'>Auction Sheet</SelectItem>
+                          <SelectItem value='inspection_report'>Inspection Report</SelectItem>
+                          <SelectItem value='other'>Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer Buttons */}
+            <div className='flex justify-end gap-2 border-t pt-4'>
+              <Button variant='outline' onClick={() => setIsNewRequestOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleCreateRequest}>
+                <Plus className='h-4 w-4 mr-2' />
+                Create Request
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Request Details Dialog */}
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>

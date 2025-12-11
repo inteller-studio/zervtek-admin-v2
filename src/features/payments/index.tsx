@@ -66,6 +66,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
+import { StatsCard } from '@/features/dashboard/components/stats-card'
 
 interface Payment {
   id: string
@@ -383,59 +384,32 @@ export function Payments() {
 
         {/* Stats */}
         <div className='grid gap-4 md:grid-cols-4'>
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardDescription>Total Revenue</CardDescription>
-              <CardTitle className='text-2xl'>
-                {formatCurrency(stats.totalRevenue, 'USD')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-muted-foreground flex items-center text-xs'>
-                <TrendingUp className='mr-1 h-3 w-3 text-green-600' />
-                <span className='text-green-600'>+12.5%</span>
-                <span className='ml-1'>from last month</span>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardDescription>Today&apos;s Revenue</CardDescription>
-              <CardTitle className='text-2xl'>
-                {formatCurrency(stats.todayRevenue, 'USD')}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-muted-foreground flex items-center text-xs'>
-                <Calendar className='mr-1 h-3 w-3' />
-                {new Date().toLocaleDateString()}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardDescription>Pending Review</CardDescription>
-              <CardTitle className='text-2xl'>{stats.pendingPayments}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-muted-foreground flex items-center text-xs'>
-                <Clock className='mr-1 h-3 w-3 text-yellow-600' />
-                Requires manual review
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className='pb-3'>
-              <CardDescription>Failed Payments</CardDescription>
-              <CardTitle className='text-2xl'>{stats.failedPayments}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className='text-muted-foreground flex items-center text-xs'>
-                <XCircle className='mr-1 h-3 w-3 text-red-600' />
-                Needs attention
-              </div>
-            </CardContent>
-          </Card>
+          <StatsCard
+            title='Total Revenue'
+            value={stats.totalRevenue}
+            change={12}
+            prefix='$'
+            description='vs last month'
+          />
+          <StatsCard
+            title="Today's Revenue"
+            value={stats.todayRevenue}
+            change={8}
+            prefix='$'
+            description={new Date().toLocaleDateString()}
+          />
+          <StatsCard
+            title='Pending Review'
+            value={stats.pendingPayments}
+            change={-3}
+            description='requires manual review'
+          />
+          <StatsCard
+            title='Failed Payments'
+            value={stats.failedPayments}
+            change={-15}
+            description='needs attention'
+          />
         </div>
 
         {/* Tabs */}

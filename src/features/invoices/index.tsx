@@ -809,7 +809,7 @@ export function Invoices() {
 
       {/* View Invoice Dialog */}
       <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
-        <DialogContent className='max-h-[90vh] max-w-4xl overflow-y-auto'>
+        <DialogContent className='flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden sm:max-w-4xl'>
           {selectedInvoice && (
             <>
               <DialogHeader>
@@ -844,6 +844,7 @@ export function Invoices() {
                 </div>
               </DialogHeader>
 
+              <div className='flex-1 overflow-y-auto'>
               <div className='space-y-6'>
                 {/* Header */}
                 <div className='flex justify-between'>
@@ -1025,6 +1026,7 @@ export function Invoices() {
                   </p>
                 </div>
               </div>
+              </div>
             </>
           )}
         </DialogContent>
@@ -1032,7 +1034,7 @@ export function Invoices() {
 
       {/* Create Invoice Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent className='max-h-[90vh] max-w-5xl overflow-y-auto'>
+        <DialogContent className='flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden sm:max-w-5xl'>
           <DialogHeader>
             <DialogTitle>
               {previewMode ? 'Invoice Preview' : 'Create New Invoice'}
@@ -1042,6 +1044,7 @@ export function Invoices() {
             </DialogDescription>
           </DialogHeader>
 
+          <div className='flex-1 overflow-y-auto'>
           {previewMode ? (
             // Preview Mode
             <div className='space-y-6'>
@@ -1634,6 +1637,7 @@ export function Invoices() {
               </div>
             </div>
           )}
+          </div>
         </DialogContent>
       </Dialog>
     </>

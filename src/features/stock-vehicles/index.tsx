@@ -23,6 +23,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Textarea } from '@/components/ui/textarea'
+import { toast } from 'sonner'
 import { Slider } from '@/components/ui/slider'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -42,13 +51,51 @@ import {
 } from 'lucide-react'
 import { vehicles as initialVehicles, type Vehicle } from './data/vehicles'
 
+interface NewVehicleForm {
+  make: string
+  model: string
+  year: number
+  price: number
+  mileage: number
+  transmission: string
+  exteriorColor: string
+  interiorColor: string
+  fuelType: string
+  engineSize: string
+  stockNumber: string
+  location: string
+  grade: string
+  description: string
+  status: 'available' | 'reserved' | 'sold'
+}
+
+const emptyVehicle: NewVehicleForm = {
+  make: '',
+  model: '',
+  year: new Date().getFullYear(),
+  price: 0,
+  mileage: 0,
+  transmission: 'automatic',
+  exteriorColor: '',
+  interiorColor: '',
+  fuelType: 'gasoline',
+  engineSize: '',
+  stockNumber: '',
+  location: '',
+  grade: '',
+  description: '',
+  status: 'available',
+}
+
 export function StockVehicles() {
-  const [vehicles] = useState(initialVehicles)
+  const [vehicles, setVehicles] = useState(initialVehicles)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [activeTab, setActiveTab] = useState('all')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
+  const [addDialogOpen, setAddDialogOpen] = useState(false)
+  const [newVehicle, setNewVehicle] = useState(emptyVehicle)
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
@@ -189,6 +236,47 @@ export function StockVehicles() {
     mileageRange[0] !== 0 ||
     mileageRange[1] !== 200000
 
+  const handleAddVehicle = () => {
+    if (!newVehicle.make || !newVehicle.model) {
+      toast.error('Please fill in required fields (Make and Model)')
+      return
+    }
+
+    const vehicle: Vehicle = {
+      id: String(Date.now()),
+      make: newVehicle.make,
+      model: newVehicle.model,
+      modelCode: '',
+      year: newVehicle.year,
+      price: newVehicle.price,
+      priceDisplay: `¥${newVehicle.price.toLocaleString()}`,
+      mileage: newVehicle.mileage,
+      mileageDisplay: `${newVehicle.mileage.toLocaleString()} km`,
+      transmission: newVehicle.transmission,
+      exteriorColor: newVehicle.exteriorColor,
+      exteriorGrade: '',
+      interiorGrade: newVehicle.interiorColor,
+      fuelType: newVehicle.fuelType,
+      displacement: newVehicle.engineSize,
+      stockNumber: newVehicle.stockNumber || `STK-${Date.now().toString().slice(-6)}`,
+      location: newVehicle.location || 'Tokyo',
+      grade: newVehicle.grade,
+      status: newVehicle.status,
+      images: [],
+      auctionHouse: 'Direct',
+      score: '',
+      history: '',
+      dateAvailable: new Date().toISOString().split('T')[0],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+
+    setVehicles([vehicle, ...vehicles])
+    setAddDialogOpen(false)
+    setNewVehicle(emptyVehicle)
+    toast.success('Vehicle added successfully')
+  }
+
   return (
     <>
       <Header fixed>
@@ -210,7 +298,7 @@ export function StockVehicles() {
             <Badge variant='outline' className='px-3 py-1'>
               {filteredVehicles.length} Vehicles
             </Badge>
-            <Button>
+            <Button onClick={() => setAddDialogOpen(true)}>
               <Plus className='mr-2 h-4 w-4' />
               Add Vehicle
             </Button>
@@ -709,6 +797,222 @@ export function StockVehicles() {
           </div>
         )}
       </Main>
+
+      {/* Add Vehicle Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className='flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden sm:max-w-3xl'>
+          <DialogHeader>
+            <DialogTitle>Add New Vehicle</DialogTitle>
+            <DialogDescription>
+              Enter the vehicle details to add it to your inventory
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className='flex-1 overflow-y-auto'>
+            <div className='space-y-6 p-1'>
+              {/* Basic Information */}
+              <div className='space-y-4'>
+                <h3 className='font-semibold'>Basic Information</h3>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div>
+                    <Label>Make *</Label>
+                    <Input
+                      placeholder='Toyota'
+                      value={newVehicle.make}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, make: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Model *</Label>
+                    <Input
+                      placeholder='Camry'
+                      value={newVehicle.model}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, model: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Year</Label>
+                    <Input
+                      type='number'
+                      min='1990'
+                      max={new Date().getFullYear() + 1}
+                      value={newVehicle.year}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, year: Number(e.target.value) })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Pricing & Mileage */}
+              <div className='space-y-4'>
+                <h3 className='font-semibold'>Pricing & Mileage</h3>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div>
+                    <Label>Price (¥)</Label>
+                    <Input
+                      type='number'
+                      min='0'
+                      placeholder='2500000'
+                      value={newVehicle.price || ''}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, price: Number(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Mileage (km)</Label>
+                    <Input
+                      type='number'
+                      min='0'
+                      placeholder='50000'
+                      value={newVehicle.mileage || ''}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, mileage: Number(e.target.value) })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Status</Label>
+                    <Select
+                      value={newVehicle.status}
+                      onValueChange={(value: 'available' | 'reserved' | 'sold') =>
+                        setNewVehicle({ ...newVehicle, status: value })
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='available'>Available</SelectItem>
+                        <SelectItem value='reserved'>Reserved</SelectItem>
+                        <SelectItem value='sold'>Sold</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Vehicle Details */}
+              <div className='space-y-4'>
+                <h3 className='font-semibold'>Vehicle Details</h3>
+                <div className='grid gap-4 md:grid-cols-3'>
+                  <div>
+                    <Label>Transmission</Label>
+                    <Select
+                      value={newVehicle.transmission}
+                      onValueChange={(value) => setNewVehicle({ ...newVehicle, transmission: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='automatic'>Automatic</SelectItem>
+                        <SelectItem value='manual'>Manual</SelectItem>
+                        <SelectItem value='cvt'>CVT</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Fuel Type</Label>
+                    <Select
+                      value={newVehicle.fuelType}
+                      onValueChange={(value) => setNewVehicle({ ...newVehicle, fuelType: value })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value='gasoline'>Gasoline</SelectItem>
+                        <SelectItem value='diesel'>Diesel</SelectItem>
+                        <SelectItem value='hybrid'>Hybrid</SelectItem>
+                        <SelectItem value='electric'>Electric</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Engine Size</Label>
+                    <Input
+                      placeholder='2.5L'
+                      value={newVehicle.engineSize}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, engineSize: e.target.value })}
+                    />
+                  </div>
+                </div>
+                <div className='grid gap-4 md:grid-cols-2'>
+                  <div>
+                    <Label>Exterior Color</Label>
+                    <Input
+                      placeholder='White'
+                      value={newVehicle.exteriorColor}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, exteriorColor: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Interior Color</Label>
+                    <Input
+                      placeholder='Black'
+                      value={newVehicle.interiorColor}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, interiorColor: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Identification */}
+              <div className='space-y-4'>
+                <h3 className='font-semibold'>Identification</h3>
+                <div className='grid gap-4 md:grid-cols-2'>
+                  <div>
+                    <Label>Stock Number</Label>
+                    <Input
+                      placeholder='STK-001'
+                      value={newVehicle.stockNumber}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, stockNumber: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Location</Label>
+                    <Input
+                      placeholder='Tokyo'
+                      value={newVehicle.location}
+                      onChange={(e) => setNewVehicle({ ...newVehicle, location: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Info */}
+              <div className='space-y-4'>
+                <h3 className='font-semibold'>Additional Information</h3>
+                <div>
+                  <Label>Grade</Label>
+                  <Input
+                    placeholder='Grade information'
+                    value={newVehicle.grade}
+                    onChange={(e) => setNewVehicle({ ...newVehicle, grade: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label>Description</Label>
+                  <Textarea
+                    placeholder='Vehicle description, features, condition notes...'
+                    value={newVehicle.description}
+                    onChange={(e) => setNewVehicle({ ...newVehicle, description: e.target.value })}
+                    rows={3}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Buttons */}
+          <div className='flex justify-end gap-2 border-t pt-4'>
+            <Button variant='outline' onClick={() => setAddDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddVehicle}>
+              <Plus className='mr-2 h-4 w-4' />
+              Add Vehicle
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Download, Filter, Hand } from 'lucide-react'
 
@@ -12,9 +13,11 @@ export function BidsPrimaryButtons() {
         <Download className='mr-2 h-4 w-4' />
         Export
       </Button>
-      <Button size='sm'>
-        <Hand className='mr-2 h-4 w-4' />
-        Place Bid
+      <Button size='sm' asChild>
+        <Link href='/bids/place-bid'>
+          <Hand className='mr-2 h-4 w-4' />
+          Assist Customer Bid
+        </Link>
       </Button>
     </div>
   )
