@@ -1,5 +1,6 @@
 'use client'
 
+import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import {
   Card,
@@ -12,7 +13,7 @@ import {
 import { AuthLayout } from '../auth-layout'
 import { UserAuthForm } from './components/user-auth-form'
 
-export function SignIn() {
+function SignInContent() {
   const searchParams = useSearchParams()
   const redirect = searchParams.get('redirect') || undefined
 
@@ -50,5 +51,13 @@ export function SignIn() {
         </CardFooter>
       </Card>
     </AuthLayout>
+  )
+}
+
+export function SignIn() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SignInContent />
+    </Suspense>
   )
 }

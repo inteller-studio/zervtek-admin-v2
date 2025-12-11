@@ -31,7 +31,8 @@ const getStatusBadge = (status: Bid['status']) => {
     winning: 'text-green-600 bg-green-100',
     won: 'text-purple-600 bg-purple-100',
     lost: 'text-gray-600 bg-gray-100',
-    cancelled: 'text-red-600 bg-red-100',
+    retracted: 'text-red-600 bg-red-100',
+    expired: 'text-yellow-600 bg-yellow-100',
   }
 
   return (
@@ -60,32 +61,32 @@ export function BidsTable({ data }: BidsTableProps) {
         <TableBody>
           {data.slice(0, 20).map((bid) => (
             <TableRow key={bid.id}>
-              <TableCell className='font-medium'>{bid.bidId}</TableCell>
+              <TableCell className='font-medium'>{bid.bidNumber}</TableCell>
               <TableCell className='text-muted-foreground'>{bid.auctionId}</TableCell>
               <TableCell>
                 <div>
                   <p className='font-medium'>
-                    {bid.vehicleInfo.year} {bid.vehicleInfo.make}
+                    {bid.vehicle.year} {bid.vehicle.make}
                   </p>
-                  <p className='text-sm text-muted-foreground'>{bid.vehicleInfo.model}</p>
+                  <p className='text-sm text-muted-foreground'>{bid.vehicle.model}</p>
                 </div>
               </TableCell>
               <TableCell>
                 <div>
-                  <p className='font-medium'>{bid.customerName}</p>
-                  <p className='text-sm text-muted-foreground'>{bid.customerEmail}</p>
+                  <p className='font-medium'>{bid.bidder.name}</p>
+                  <p className='text-sm text-muted-foreground'>{bid.bidder.email}</p>
                 </div>
               </TableCell>
               <TableCell>
                 <div>
                   <p className='font-medium'>${bid.amount.toLocaleString()}</p>
-                  {bid.isAutoBid && (
+                  {bid.type === 'assisted' && (
                     <Badge variant='outline' className='text-xs'>Auto</Badge>
                   )}
                 </div>
               </TableCell>
               <TableCell>{getStatusBadge(bid.status)}</TableCell>
-              <TableCell>{format(bid.bidTime, 'MMM dd, HH:mm')}</TableCell>
+              <TableCell>{format(bid.timestamp, 'MMM dd, HH:mm')}</TableCell>
               <TableCell className='text-right'>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>

@@ -110,7 +110,7 @@ export const requests: ServiceRequest[] = Array.from({ length: 120 }, (_, index)
     return {
       id: faker.string.uuid(),
       sender,
-      senderType: isAdmin ? 'admin' : 'customer',
+      senderType: (isAdmin ? 'admin' : 'customer') as 'admin' | 'customer',
       message: faker.lorem.sentences({ min: 1, max: 3 }),
       attachments: tIndex === 0 && !isAdmin ? [{
         id: faker.string.uuid(),
@@ -168,7 +168,7 @@ export const requests: ServiceRequest[] = Array.from({ length: 120 }, (_, index)
     sourceLanguage: type === 'translation' ? faker.helpers.arrayElement(languages) : undefined,
     targetLanguage: type === 'translation' ? 'English' : undefined,
     documentType: type === 'translation' ? faker.helpers.arrayElement(documentTypes) : undefined,
-    attachments: faker.helpers.maybe(() => [faker.image.url()]) || [],
+    attachments: [...(faker.helpers.maybe(() => [faker.image.url()]) || [])],
     documents,
     threads,
     notes: faker.helpers.maybe(() => faker.lorem.sentence()),

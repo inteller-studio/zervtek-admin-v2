@@ -503,8 +503,8 @@ export function BidActivityChart({ data, loading }: { data?: ChartDataPoint[]; l
         borderColor: 'rgba(255, 255, 255, 0.1)',
         borderWidth: 1,
         callbacks: {
-          label: function(context: { parsed: { y: number } }) {
-            return `${context.parsed.y} bids placed`
+          label: function(context: { parsed: { y: number | null } }) {
+            return `${context.parsed.y ?? 0} bids placed`
           }
         }
       },

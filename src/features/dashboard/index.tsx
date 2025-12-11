@@ -113,9 +113,6 @@ export function Dashboard() {
               title={config.title}
               value={stats?.[config.key as keyof typeof stats] || 0}
               change={(stats?.[`${config.key}Change` as keyof typeof stats] as number) || 0}
-              icon={config.icon}
-              color={config.color}
-              bgColor={config.bgColor}
               loading={statsLoading}
               prefix={config.prefix}
             />

@@ -28,16 +28,12 @@ const getStatusBadge = (status: Vehicle['status']) => {
     available: 'text-green-600 bg-green-100',
     reserved: 'text-yellow-600 bg-yellow-100',
     sold: 'text-purple-600 bg-purple-100',
-    maintenance: 'text-orange-600 bg-orange-100',
-    in_auction: 'text-blue-600 bg-blue-100',
   }
 
   const labels: Record<Vehicle['status'], string> = {
     available: 'Available',
     reserved: 'Reserved',
     sold: 'Sold',
-    maintenance: 'Maintenance',
-    in_auction: 'In Auction',
   }
 
   return (
@@ -47,17 +43,10 @@ const getStatusBadge = (status: Vehicle['status']) => {
   )
 }
 
-const getConditionBadge = (condition: Vehicle['condition']) => {
-  const variants: Record<Vehicle['condition'], string> = {
-    excellent: 'text-green-600 border-green-600',
-    good: 'text-blue-600 border-blue-600',
-    fair: 'text-yellow-600 border-yellow-600',
-    poor: 'text-red-600 border-red-600',
-  }
-
+const getGradeBadge = (grade: string) => {
   return (
-    <Badge variant='outline' className={variants[condition]}>
-      {condition.charAt(0).toUpperCase() + condition.slice(1)}
+    <Badge variant='outline' className='text-blue-600 border-blue-600'>
+      {grade || 'N/A'}
     </Badge>
   )
 }
@@ -70,7 +59,7 @@ export function VehiclesTable({ data }: VehiclesTableProps) {
           <TableRow>
             <TableHead>Stock #</TableHead>
             <TableHead>Vehicle</TableHead>
-            <TableHead>Condition</TableHead>
+            <TableHead>Grade</TableHead>
             <TableHead>Mileage</TableHead>
             <TableHead>Price</TableHead>
             <TableHead>Status</TableHead>
@@ -92,7 +81,7 @@ export function VehiclesTable({ data }: VehiclesTableProps) {
                   </p>
                 </div>
               </TableCell>
-              <TableCell>{getConditionBadge(vehicle.condition)}</TableCell>
+              <TableCell>{getGradeBadge(vehicle.grade)}</TableCell>
               <TableCell>{vehicle.mileage.toLocaleString()} mi</TableCell>
               <TableCell className='font-medium'>${vehicle.price.toLocaleString()}</TableCell>
               <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
