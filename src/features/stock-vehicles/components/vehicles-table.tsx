@@ -83,7 +83,7 @@ export function VehiclesTable({ data }: VehiclesTableProps) {
               </TableCell>
               <TableCell>{getGradeBadge(vehicle.grade)}</TableCell>
               <TableCell>{vehicle.mileage.toLocaleString()} mi</TableCell>
-              <TableCell className='font-medium'>${vehicle.price.toLocaleString()}</TableCell>
+              <TableCell className='font-medium'>¥{vehicle.price.toLocaleString()}</TableCell>
               <TableCell>{getStatusBadge(vehicle.status)}</TableCell>
               <TableCell>{vehicle.location}</TableCell>
               <TableCell className='text-right'>

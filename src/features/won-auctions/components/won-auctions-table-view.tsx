@@ -125,10 +125,10 @@ export function WonAuctionsTableView({
                 </TableCell>
                 <TableCell className='text-right'>
                   <div className='space-y-1'>
-                    <p className='font-bold'>${auction.winningBid.toLocaleString()}</p>
+                    <p className='font-bold'>¥{auction.winningBid.toLocaleString()}</p>
                     {auction.paidAmount < auction.totalAmount && (
                       <p className='text-xs text-orange-600'>
-                        Due: ${(auction.totalAmount - auction.paidAmount).toLocaleString()}
+                        Due: ¥{(auction.totalAmount - auction.paidAmount).toLocaleString()}
                       </p>
                     )}
                   </div>

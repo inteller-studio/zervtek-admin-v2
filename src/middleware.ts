@@ -45,7 +45,6 @@ const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/users', roles: ADMIN_ONLY },
   { path: '/settings', roles: ALL_ROLES },
   { path: '/security', roles: ALL_ROLES },
-  { path: '/help-center', roles: ALL_ROLES },
   { path: '/forbidden', roles: ALL_ROLES },
 ]
 

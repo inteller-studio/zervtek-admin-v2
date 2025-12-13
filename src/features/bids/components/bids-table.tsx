@@ -26,11 +26,13 @@ interface BidsTableProps {
 
 const getStatusBadge = (status: Bid['status']) => {
   const variants: Record<Bid['status'], string> = {
+    pending_approval: 'text-amber-600 bg-amber-100',
     active: 'text-blue-600 bg-blue-100',
     outbid: 'text-orange-600 bg-orange-100',
     winning: 'text-green-600 bg-green-100',
     won: 'text-purple-600 bg-purple-100',
     lost: 'text-gray-600 bg-gray-100',
+    declined: 'text-red-600 bg-red-100',
     retracted: 'text-red-600 bg-red-100',
     expired: 'text-yellow-600 bg-yellow-100',
   }

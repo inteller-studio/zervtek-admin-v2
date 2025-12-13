@@ -42,7 +42,7 @@ export const payments: Payment[] = Array.from({ length: 150 }, (_, index) => {
     amount: type === 'refund'
       ? -faker.number.int({ min: 500, max: 15000 })
       : faker.number.int({ min: 500, max: 50000 }),
-    currency: 'USD',
+    currency: 'JPY',
     status,
     paymentMethod: faker.helpers.arrayElement(paymentMethods),
     referenceNumber: faker.helpers.maybe(() => faker.string.alphanumeric(12).toUpperCase()),

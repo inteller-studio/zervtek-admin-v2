@@ -81,7 +81,7 @@ export function CustomersTable({ data }: CustomersTableProps) {
               <TableCell>{customer.country}</TableCell>
               <TableCell>{getStatusBadge(customer.status)}</TableCell>
               <TableCell>{getVerificationBadge(customer.verificationStatus)}</TableCell>
-              <TableCell className='font-medium'>${customer.totalSpent.toLocaleString()}</TableCell>
+              <TableCell className='font-medium'>¥{customer.totalSpent.toLocaleString()}</TableCell>
               <TableCell>{customer.wonAuctions}</TableCell>
               <TableCell>{format(customer.lastActivity, 'MMM dd, yyyy')}</TableCell>
               <TableCell className='text-right'>

@@ -141,7 +141,7 @@ export function WonAuctionsFilters({
           )}
           {(filters.valueRange.min !== undefined || filters.valueRange.max !== undefined) && (
             <Badge variant='secondary' className='gap-1'>
-              Value: ${valueMin.toLocaleString()} - ${valueMax.toLocaleString()}
+              Value: ¥{valueMin.toLocaleString()} - ¥{valueMax.toLocaleString()}
               <X
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('valueRange', {})}
@@ -232,7 +232,7 @@ export function WonAuctionsFilters({
                 {/* Value Range */}
                 <div className='space-y-3 lg:col-span-2'>
                   <Label className='text-sm font-medium'>
-                    Value Range: ${valueMin.toLocaleString()} - ${valueMax.toLocaleString()}
+                    Value Range: ¥{valueMin.toLocaleString()} - ¥{valueMax.toLocaleString()}
                   </Label>
                   <Slider
                     value={[valueMin, valueMax]}

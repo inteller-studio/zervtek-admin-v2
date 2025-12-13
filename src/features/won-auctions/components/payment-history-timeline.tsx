@@ -48,7 +48,7 @@ export function PaymentHistoryTimeline({ payments }: PaymentHistoryTimelineProps
             </div>
             <div className='min-w-0 flex-1'>
               <div className='flex items-center justify-between'>
-                <p className='text-sm font-medium'>${payment.amount.toLocaleString()}</p>
+                <p className='text-sm font-medium'>¥{payment.amount.toLocaleString()}</p>
                 <span className='text-xs text-muted-foreground'>
                   {format(new Date(payment.date), 'MMM dd, yyyy')}
                 </span>

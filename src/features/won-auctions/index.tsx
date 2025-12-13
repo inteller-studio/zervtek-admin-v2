@@ -1,8 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Download, LayoutGrid, LayoutList, RefreshCw } from 'lucide-react'
+import { Download, LayoutGrid, LayoutList, Plus, RefreshCw } from 'lucide-react'
 import { toast } from 'sonner'
+import { faker } from '@faker-js/faker'
 
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -27,6 +28,7 @@ import { WonAuctionsStats } from './components/won-auctions-stats'
 import { WonAuctionsPagination } from './components/won-auctions-pagination'
 import { VehicleCard } from './components/vehicle-card'
 import { WonAuctionsTableView } from './components/won-auctions-table-view'
+import { AddVehicleDrawer } from './components/dialogs/add-vehicle-drawer'
 import { useWonAuctionsFilters } from './hooks/use-won-auctions-filters'
 import { type ViewMode, type WonAuctionsDialogType } from './types'
 
@@ -34,6 +36,7 @@ function WonAuctionsContent() {
   const [auctions, setAuctions] = useState<WonAuction[]>(initialWonAuctions)
   const [viewMode, setViewMode] = useState<ViewMode>('card')
   const [activeTab, setActiveTab] = useState('all')
+  const [isAddVehicleOpen, setIsAddVehicleOpen] = useState(false)
 
   const { setOpen, setCurrentRow } = useWonAuctions()
 
@@ -208,6 +211,17 @@ function WonAuctionsContent() {
     toast.success('Auction completed successfully')
   }
 
+  // Add vehicle handler
+  const handleAddVehicle = (vehicleData: Omit<WonAuction, 'id' | 'createdAt' | 'updatedAt'>) => {
+    const newVehicle: WonAuction = {
+      ...vehicleData,
+      id: faker.string.uuid(),
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }
+    setAuctions((prev) => [newVehicle, ...prev])
+  }
+
   return (
     <>
       <Header fixed>
@@ -240,6 +254,10 @@ function WonAuctionsContent() {
             >
               <RefreshCw className='mr-2 h-4 w-4' />
               Refresh
+            </Button>
+            <Button size='sm' onClick={() => setIsAddVehicleOpen(true)}>
+              <Plus className='mr-2 h-4 w-4' />
+              Add Vehicle
             </Button>
           </div>
         </div>
@@ -339,6 +357,13 @@ function WonAuctionsContent() {
         onRecordPayment={handleRecordPayment}
         onUploadDocuments={handleUploadDocuments}
         onUpdateShipping={handleUpdateShipping}
+      />
+
+      {/* Add Vehicle Drawer */}
+      <AddVehicleDrawer
+        open={isAddVehicleOpen}
+        onOpenChange={setIsAddVehicleOpen}
+        onAddVehicle={handleAddVehicle}
       />
     </>
   )

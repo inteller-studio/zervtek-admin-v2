@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 interface StatsCardProps {
   title: string
   value: number | string
-  change: number
+  change?: number
   loading?: boolean
   prefix?: string
   suffix?: string
@@ -52,8 +52,8 @@ export function StatsCard({
     }
   }, [numericValue, loading, value])
 
-  const isPositive = change > 0
-  const isNeutral = change === 0
+  const isPositive = change !== undefined && change > 0
+  const isNeutral = change === undefined || change === 0
 
   if (loading) {
     return (
@@ -110,25 +110,27 @@ export function StatsCard({
 
           {/* Change indicator */}
           <div className='flex items-center gap-2'>
-            <span
-              className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
-                isNeutral && 'bg-muted text-muted-foreground',
-                isPositive &&
-                  'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
-                !isPositive &&
-                  !isNeutral &&
-                  'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400'
-              )}
-            >
-              {isPositive ? (
-                <TrendingUp className='h-3 w-3' />
-              ) : !isNeutral ? (
-                <TrendingDown className='h-3 w-3' />
-              ) : null}
-              {isPositive ? '+' : ''}
-              {change}%
-            </span>
+            {change !== undefined && (
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                  isNeutral && 'bg-muted text-muted-foreground',
+                  isPositive &&
+                    'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400',
+                  !isPositive &&
+                    !isNeutral &&
+                    'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+                )}
+              >
+                {isPositive ? (
+                  <TrendingUp className='h-3 w-3' />
+                ) : !isNeutral ? (
+                  <TrendingDown className='h-3 w-3' />
+                ) : null}
+                {isPositive ? '+' : ''}
+                {change}%
+              </span>
+            )}
             <span className='text-xs text-muted-foreground'>{description}</span>
           </div>
         </div>

@@ -67,7 +67,7 @@ export function InvoicesTable({ data }: InvoicesTableProps) {
                 </div>
               </TableCell>
               <TableCell>{invoice.items.length} items</TableCell>
-              <TableCell className='font-medium'>${invoice.total.toLocaleString()}</TableCell>
+              <TableCell className='font-medium'>¥{invoice.total.toLocaleString()}</TableCell>
               <TableCell>{getStatusBadge(invoice.status)}</TableCell>
               <TableCell>{format(invoice.dueDate, 'MMM dd, yyyy')}</TableCell>
               <TableCell>{format(invoice.createdAt, 'MMM dd, yyyy')}</TableCell>

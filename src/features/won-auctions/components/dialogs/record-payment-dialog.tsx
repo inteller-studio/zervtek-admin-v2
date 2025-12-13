@@ -97,7 +97,7 @@ export function RecordPaymentDialog({
   const handleSubmit = (data: PaymentForm) => {
     if (data.amount > outstandingBalance) {
       form.setError('amount', {
-        message: `Amount cannot exceed outstanding balance of $${outstandingBalance.toLocaleString()}`,
+        message: `Amount cannot exceed outstanding balance of ¥${outstandingBalance.toLocaleString()}`,
       })
       return
     }
@@ -111,7 +111,7 @@ export function RecordPaymentDialog({
     })
 
     toast.success('Payment recorded successfully', {
-      description: `$${data.amount.toLocaleString()} payment recorded for ${auction.auctionId}`,
+      description: `¥${data.amount.toLocaleString()} payment recorded for ${auction.auctionId}`,
     })
 
     form.reset()
@@ -141,18 +141,18 @@ export function RecordPaymentDialog({
             <div className='grid grid-cols-3 gap-4 text-sm'>
               <div>
                 <p className='text-muted-foreground'>Total Amount</p>
-                <p className='text-lg font-bold'>${auction.totalAmount.toLocaleString()}</p>
+                <p className='text-lg font-bold'>¥{auction.totalAmount.toLocaleString()}</p>
               </div>
               <div>
                 <p className='text-muted-foreground'>Amount Paid</p>
                 <p className='text-lg font-bold text-green-600'>
-                  ${auction.paidAmount.toLocaleString()}
+                  ¥{auction.paidAmount.toLocaleString()}
                 </p>
               </div>
               <div>
                 <p className='text-muted-foreground'>Outstanding</p>
                 <p className='text-lg font-bold text-orange-600'>
-                  ${outstandingBalance.toLocaleString()}
+                  ¥{outstandingBalance.toLocaleString()}
                 </p>
               </div>
             </div>
@@ -183,12 +183,12 @@ export function RecordPaymentDialog({
                 name='amount'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Payment Amount ($)</FormLabel>
+                    <FormLabel>Payment Amount (¥)</FormLabel>
                     <FormControl>
                       <Input
                         type='number'
-                        step='0.01'
-                        min='0.01'
+                        step='1'
+                        min='1'
                         max={outstandingBalance}
                         placeholder={`Max: ${outstandingBalance.toLocaleString()}`}
                         {...field}

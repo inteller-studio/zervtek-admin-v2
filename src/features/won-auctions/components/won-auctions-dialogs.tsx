@@ -6,7 +6,7 @@ import { RecordPaymentDialog } from './dialogs/record-payment-dialog'
 import { DocumentUploadDialog } from './dialogs/document-upload-dialog'
 import { DocumentManagementDialog } from './dialogs/document-management-dialog'
 import { ShippingUpdateDialog } from './dialogs/shipping-update-dialog'
-import { AuctionDetailDialog } from './dialogs/auction-detail-dialog'
+import { PurchaseDetailModal } from './dialogs/purchase-detail-modal'
 import { InvoiceDialog } from './dialogs/invoice-dialog'
 
 interface WonAuctionsDialogsProps {
@@ -26,10 +26,14 @@ export function WonAuctionsDialogs({
 
   return (
     <>
-      <AuctionDetailDialog
+      <PurchaseDetailModal
         open={open === 'detail'}
-        onOpenChange={() => setOpen(open === 'detail' ? null : 'detail')}
+        onClose={() => setOpen(null)}
         auction={currentRow}
+        onRecordPayment={() => setOpen('payment')}
+        onUploadDocuments={() => setOpen('document-upload')}
+        onUpdateShipping={() => setOpen('shipping')}
+        onGenerateInvoice={() => setOpen('invoice')}
       />
 
       <RecordPaymentDialog

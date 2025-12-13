@@ -98,7 +98,7 @@ export function PaymentsTable({ data }: PaymentsTableProps) {
               <TableCell>{getTypeBadge(payment.type)}</TableCell>
               <TableCell>{getMethodLabel(payment.paymentMethod)}</TableCell>
               <TableCell className={payment.amount < 0 ? 'text-red-600' : 'font-medium'}>
-                {payment.amount < 0 ? '-' : ''}${Math.abs(payment.amount).toLocaleString()}
+                {payment.amount < 0 ? '-' : ''}¥{Math.abs(payment.amount).toLocaleString()}
               </TableCell>
               <TableCell>{getStatusBadge(payment.status)}</TableCell>
               <TableCell>{format(payment.createdAt, 'MMM dd, yyyy')}</TableCell>

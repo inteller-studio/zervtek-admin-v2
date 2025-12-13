@@ -82,7 +82,7 @@ export const invoices: Invoice[] = Array.from({ length: 100 }, (_, index) => {
     tax,
     taxRate,
     total,
-    currency: 'USD',
+    currency: 'JPY',
     dueDate: faker.date.future({ years: 0.1 }),
     paidAt: faker.helpers.maybe(() => faker.date.past()),
     notes: faker.helpers.maybe(() => faker.lorem.sentence()),

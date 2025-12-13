@@ -69,8 +69,8 @@ export function AuctionsTable({ data }: AuctionsTableProps) {
                   <p className='text-sm text-muted-foreground'>{auction.vehicleInfo.color}</p>
                 </div>
               </TableCell>
-              <TableCell>${auction.startingBid.toLocaleString()}</TableCell>
-              <TableCell className='font-medium'>${auction.currentBid.toLocaleString()}</TableCell>
+              <TableCell>¥{auction.startingBid.toLocaleString()}</TableCell>
+              <TableCell className='font-medium'>¥{auction.currentBid.toLocaleString()}</TableCell>
               <TableCell>
                 <div className='flex items-center gap-1'>
                   <Gavel className='h-3 w-3 text-muted-foreground' />

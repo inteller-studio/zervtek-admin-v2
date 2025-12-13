@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import Link from 'next/link'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -22,6 +21,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import { Calendar } from '@/components/ui/calendar'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -42,36 +51,48 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
-  Calendar,
-  Car,
+  Ban,
+  Calendar as CalendarIcon,
+  Check,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
+  CircleSlash,
   Clock,
-  DollarSign,
   Eye,
+  FileQuestion,
+  FileText,
   Filter,
-  Hand,
+  Gavel,
+  Handshake,
   Hash,
+  HelpCircle,
   LayoutGrid,
   LayoutList,
-  Plus,
+  MessageSquare,
+  MoreHorizontal,
   RotateCcw,
   Search as SearchIcon,
+  Trophy,
   TrendingDown,
   TrendingUp,
-  Trophy,
   User,
   UserCog,
+  Users,
+  XCircle,
 } from 'lucide-react'
-import { format, differenceInHours, differenceInMinutes } from 'date-fns'
+import { format, differenceInHours, differenceInMinutes, subDays, startOfDay } from 'date-fns'
+import { toast } from 'sonner'
 import { bids as initialBids, type Bid } from './data/bids'
+import { CreateInvoiceDrawer } from './components/create-invoice-drawer'
+import { BidDetailModal } from './components/bid-detail-modal'
 
 export function Bids() {
   const [bids] = useState(initialBids)
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table')
-  const [activeTab, setActiveTab] = useState('all')
+  const [activeTab, setActiveTab] = useState('pending')
   const [searchQuery, setSearchQuery] = useState('')
-  const [sortBy, setSortBy] = useState('recent')
+  const [sortBy, setSortBy] = useState('ending-soon')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   // Pagination states
@@ -83,21 +104,43 @@ export function Bids() {
   const [selectedTypes, setSelectedTypes] = useState<string[]>([])
   const [selectedBidderTypes, setSelectedBidderTypes] = useState<string[]>([])
   const [selectedAuctionStatuses, setSelectedAuctionStatuses] = useState<string[]>([])
-  const [amountRange, setAmountRange] = useState([0, 100000])
+  const [amountRange, setAmountRange] = useState([0, 30000000])
   const [onlyWinning, setOnlyWinning] = useState(false)
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date())
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
 
   // Modal states
   const [isViewBidModalOpen, setIsViewBidModalOpen] = useState(false)
   const [selectedBid, setSelectedBid] = useState<Bid | null>(null)
+  const [isCreateInvoiceOpen, setIsCreateInvoiceOpen] = useState(false)
+  const [isUnsoldDialogOpen, setIsUnsoldDialogOpen] = useState(false)
+  const [unsoldBid, setUnsoldBid] = useState<Bid | null>(null)
+  const [unsoldPrice, setUnsoldPrice] = useState('')
+  const [negoStartPrice, setNegoStartPrice] = useState('')
+
+  // Sold to others dialog
+  const [isSoldToOthersDialogOpen, setIsSoldToOthersDialogOpen] = useState(false)
+  const [soldToOthersBid, setSoldToOthersBid] = useState<Bid | null>(null)
+  const [soldToOthersPrice, setSoldToOthersPrice] = useState('')
+
+  // Won dialog (Bid Accepted, Contract, Contract by Nego)
+  const [isWonDialogOpen, setIsWonDialogOpen] = useState(false)
+  const [wonBid, setWonBid] = useState<Bid | null>(null)
+  const [wonPrice, setWonPrice] = useState('')
+  const [wonType, setWonType] = useState<'bid_accepted' | 'contract' | 'contract_nego'>('bid_accepted')
 
   // Get unique values for filters
-  const uniqueStatuses: Bid['status'][] = ['active', 'outbid', 'winning', 'won', 'lost', 'retracted', 'expired']
-  const uniqueTypes: Bid['type'][] = ['manual', 'assisted', 'buy_now']
+  const uniqueStatuses: Bid['status'][] = ['pending_approval', 'active', 'outbid', 'winning', 'won', 'lost', 'retracted', 'expired', 'declined']
+  const uniqueTypes: Bid['type'][] = ['manual', 'assisted']
   const uniqueBidderTypes: Bid['bidder']['type'][] = ['individual', 'dealer', 'corporate']
   const uniqueAuctionStatuses: Bid['auctionStatus'][] = ['live', 'upcoming', 'ended']
 
   // Filter logic
   const filteredBids = useMemo(() => {
+    // Calculate date range based on selected date
+    const filterDateStart = selectedDate ? startOfDay(selectedDate) : null
+    const filterDateEnd = selectedDate ? new Date(startOfDay(selectedDate).getTime() + 86400000 - 1) : null
+
     let filtered = bids.filter((bid) => {
       const matchesSearch =
         bid.bidNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,12 +151,14 @@ export function Bids() {
 
       const matchesTab =
         activeTab === 'all' ||
-        (activeTab === 'active' && bid.status === 'active') ||
-        (activeTab === 'winning' && bid.status === 'winning') ||
+        (activeTab === 'pending' && bid.status === 'pending_approval') ||
+        (activeTab === 'active' && (bid.status === 'active' || bid.status === 'winning')) ||
         (activeTab === 'outbid' && bid.status === 'outbid') ||
         (activeTab === 'won' && bid.status === 'won') ||
-        (activeTab === 'lost' && bid.status === 'lost')
+        (activeTab === 'lost' && bid.status === 'lost') ||
+        (activeTab === 'declined' && bid.status === 'declined')
 
+      const matchesDate = !filterDateStart || !filterDateEnd || (bid.timestamp >= filterDateStart && bid.timestamp <= filterDateEnd)
       const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(bid.status)
       const matchesType = selectedTypes.length === 0 || selectedTypes.includes(bid.type)
       const matchesBidderType = selectedBidderTypes.length === 0 || selectedBidderTypes.includes(bid.bidder.type)
@@ -121,7 +166,7 @@ export function Bids() {
       const matchesAmount = bid.amount >= amountRange[0] && bid.amount <= amountRange[1]
       const matchesWinning = !onlyWinning || bid.status === 'winning' || bid.status === 'won'
 
-      return matchesSearch && matchesTab && matchesStatus && matchesType &&
+      return matchesSearch && matchesTab && matchesDate && matchesStatus && matchesType &&
         matchesBidderType && matchesAuctionStatus && matchesAmount &&
         matchesWinning
     })
@@ -148,7 +193,7 @@ export function Bids() {
     })
 
     return filtered
-  }, [bids, searchQuery, activeTab, selectedStatuses, selectedTypes, selectedBidderTypes,
+  }, [bids, searchQuery, activeTab, selectedDate, selectedStatuses, selectedTypes, selectedBidderTypes,
     selectedAuctionStatuses, amountRange, onlyWinning, sortBy])
 
   // Pagination logic
@@ -168,8 +213,9 @@ export function Bids() {
     setSelectedTypes([])
     setSelectedBidderTypes([])
     setSelectedAuctionStatuses([])
-    setAmountRange([0, 100000])
+    setAmountRange([0, 30000000])
     setOnlyWinning(false)
+    setSelectedDate(undefined)
     setActiveTab('all')
     setSortBy('recent')
     resetPagination()
@@ -177,6 +223,8 @@ export function Bids() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'pending_approval':
+        return 'bg-amber-100 text-amber-800'
       case 'active':
         return 'bg-blue-100 text-blue-800'
       case 'winning':
@@ -191,8 +239,21 @@ export function Bids() {
         return 'bg-red-100 text-red-800'
       case 'expired':
         return 'bg-slate-100 text-slate-800'
+      case 'declined':
+        return 'bg-rose-100 text-rose-800'
       default:
         return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending_approval':
+        return 'Pending'
+      case 'declined':
+        return 'Declined'
+      default:
+        return status
     }
   }
 
@@ -202,8 +263,6 @@ export function Bids() {
         return <User className='h-3 w-3' />
       case 'assisted':
         return <UserCog className='h-3 w-3' />
-      case 'buy_now':
-        return <DollarSign className='h-3 w-3' />
       default:
         return null
     }
@@ -226,23 +285,93 @@ export function Bids() {
     }
   }
 
+  // Filter for today's bids
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const todayBids = bids.filter((b) => {
+    const bidDate = new Date(b.timestamp)
+    bidDate.setHours(0, 0, 0, 0)
+    return bidDate.getTime() === today.getTime()
+  })
+
   const stats = {
-    total: bids.length,
-    active: bids.filter((b) => b.status === 'active').length,
-    winning: bids.filter((b) => b.status === 'winning').length,
-    won: bids.filter((b) => b.status === 'won').length,
-    totalValue: bids.reduce((sum, b) => sum + b.amount, 0),
-    avgBid: Math.round(bids.reduce((sum, b) => sum + b.amount, 0) / bids.length),
+    total: todayBids.length,
+    pending: todayBids.filter((b) => b.status === 'pending_approval').length,
+    active: todayBids.filter((b) => b.status === 'active').length,
+    won: todayBids.filter((b) => b.status === 'won').length,
+    upcoming: todayBids.filter((b) => b.auctionStatus === 'upcoming').length,
+    lost: todayBids.filter((b) => b.status === 'lost').length,
   }
 
   const hasActiveFilters = selectedStatuses.length > 0 || selectedTypes.length > 0 ||
     selectedBidderTypes.length > 0 || selectedAuctionStatuses.length > 0 ||
-    amountRange[0] !== 0 || amountRange[1] !== 100000 ||
-    onlyWinning
+    amountRange[0] !== 0 || amountRange[1] !== 30000000 || onlyWinning
 
   const handleViewBid = (bid: Bid) => {
     setSelectedBid(bid)
     setIsViewBidModalOpen(true)
+  }
+
+  const handleMarkUnsold = (bid: Bid) => {
+    setUnsoldBid(bid)
+    setUnsoldPrice('')
+    setNegoStartPrice('')
+    setIsUnsoldDialogOpen(true)
+  }
+
+  const confirmUnsold = () => {
+    if (unsoldBid) {
+      const priceText = unsoldPrice ? ` at ¥${Number(unsoldPrice).toLocaleString()}` : ''
+      const negoText = negoStartPrice ? ` (Nego starts: ¥${Number(negoStartPrice).toLocaleString()})` : ''
+      toast.success(`Bid ${unsoldBid.bidNumber}: Unsold${priceText}${negoText}`)
+      setIsUnsoldDialogOpen(false)
+      setIsViewBidModalOpen(false)
+      setUnsoldBid(null)
+      setUnsoldPrice('')
+      setNegoStartPrice('')
+    }
+  }
+
+  // Sold to others handlers
+  const handleSoldToOthers = (bid: Bid) => {
+    setSoldToOthersBid(bid)
+    setSoldToOthersPrice('')
+    setIsSoldToOthersDialogOpen(true)
+  }
+
+  const confirmSoldToOthers = () => {
+    if (soldToOthersBid) {
+      const priceText = soldToOthersPrice ? ` at ¥${Number(soldToOthersPrice).toLocaleString()}` : ''
+      toast.success(`Bid ${soldToOthersBid.bidNumber}: Sold to Others${priceText}`)
+      setIsSoldToOthersDialogOpen(false)
+      setIsViewBidModalOpen(false)
+      setSoldToOthersBid(null)
+      setSoldToOthersPrice('')
+    }
+  }
+
+  // Won handlers
+  const handleMarkWon = (bid: Bid, type: 'bid_accepted' | 'contract' | 'contract_nego') => {
+    setWonBid(bid)
+    setWonPrice(bid.amount.toString())
+    setWonType(type)
+    setIsWonDialogOpen(true)
+  }
+
+  const confirmWon = () => {
+    if (wonBid) {
+      const typeLabels = {
+        bid_accepted: 'Bid Accepted',
+        contract: 'Contract',
+        contract_nego: 'Contract by Nego'
+      }
+      const priceText = wonPrice ? ` at ¥${Number(wonPrice).toLocaleString()}` : ''
+      toast.success(`Bid ${wonBid.bidNumber}: ${typeLabels[wonType]}${priceText}`)
+      setIsWonDialogOpen(false)
+      setIsViewBidModalOpen(false)
+      setWonBid(null)
+      setWonPrice('')
+    }
   }
 
   return (
@@ -262,17 +391,6 @@ export function Bids() {
             <h2 className='text-2xl font-bold tracking-tight'>Bids Management</h2>
             <p className='text-muted-foreground'>Track and manage all bidding activities</p>
           </div>
-          <div className='flex items-center gap-3'>
-            <Badge variant='outline' className='px-3 py-1'>
-              {filteredBids.length} Bids
-            </Badge>
-            <Button asChild>
-              <Link href='/bids/place-bid'>
-                <Plus className='mr-2 h-4 w-4' />
-                Assist Customer Bid
-              </Link>
-            </Button>
-          </div>
         </div>
 
         {/* Stats Cards */}
@@ -280,40 +398,32 @@ export function Bids() {
           <StatsCard
             title='Total Bids'
             value={stats.total}
-            change={18}
-            description='vs last month'
+            description='today'
+          />
+          <StatsCard
+            title='Pending'
+            value={stats.pending}
+            description='today'
           />
           <StatsCard
             title='Active'
             value={stats.active}
-            change={5}
-            description='vs last month'
-          />
-          <StatsCard
-            title='Winning'
-            value={stats.winning}
-            change={12}
-            description='vs last month'
+            description='today'
           />
           <StatsCard
             title='Won'
             value={stats.won}
-            change={8}
-            description='vs last month'
+            description='today'
           />
           <StatsCard
-            title='Total Value'
-            value={stats.totalValue}
-            change={22}
-            prefix='$'
-            description='vs last month'
+            title='Upcoming'
+            value={stats.upcoming}
+            description='today'
           />
           <StatsCard
-            title='Avg Bid'
-            value={Math.round(stats.avgBid)}
-            change={-3}
-            prefix='$'
-            description='vs last month'
+            title='Lost'
+            value={stats.lost}
+            description='today'
           />
         </div>
 
@@ -333,6 +443,53 @@ export function Bids() {
               />
             </div>
             <div className='flex gap-2'>
+              <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant='outline'
+                    className='w-[180px] justify-start text-left font-normal'
+                  >
+                    <CalendarIcon className='mr-2 h-4 w-4' />
+                    {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'All dates'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className='w-auto p-0' align='start'>
+                  <div className='p-3 border-b'>
+                    <div className='flex gap-2'>
+                      <Button
+                        variant={selectedDate && startOfDay(selectedDate).getTime() === startOfDay(new Date()).getTime() ? 'default' : 'outline'}
+                        size='sm'
+                        onClick={() => {
+                          setSelectedDate(new Date())
+                          resetPagination()
+                        }}
+                      >
+                        Today
+                      </Button>
+                      <Button
+                        variant={!selectedDate ? 'default' : 'outline'}
+                        size='sm'
+                        onClick={() => {
+                          setSelectedDate(undefined)
+                          resetPagination()
+                        }}
+                      >
+                        All dates
+                      </Button>
+                    </div>
+                  </div>
+                  <Calendar
+                    mode='single'
+                    selected={selectedDate}
+                    onSelect={(date) => {
+                      setSelectedDate(date)
+                      setIsCalendarOpen(false)
+                      resetPagination()
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
               <Select value={sortBy} onValueChange={(value) => {
                 setSortBy(value)
                 resetPagination()
@@ -435,7 +592,7 @@ export function Bids() {
                               }}
                             />
                             <Label className='cursor-pointer text-sm font-normal capitalize'>
-                              {type === 'buy_now' ? 'Buy Now' : type === 'assisted' ? 'Assisted' : type}
+                              {type === 'assisted' ? 'Assisted' : 'Manual'}
                             </Label>
                           </div>
                         ))}
@@ -495,7 +652,7 @@ export function Bids() {
                     {/* Amount Range */}
                     <div className='space-y-3'>
                       <Label>
-                        Bid Amount: ${amountRange[0].toLocaleString()} - ${amountRange[1].toLocaleString()}
+                        Bid Amount: ¥{amountRange[0].toLocaleString()} - ¥{amountRange[1].toLocaleString()}
                       </Label>
                       <Slider
                         value={amountRange}
@@ -504,8 +661,8 @@ export function Bids() {
                           resetPagination()
                         }}
                         min={0}
-                        max={100000}
-                        step={1000}
+                        max={30000000}
+                        step={100000}
                         className='w-full'
                       />
                       <div className='flex items-center space-x-2 pt-2'>
@@ -533,11 +690,19 @@ export function Bids() {
           }}>
             <TabsList>
               <TabsTrigger value='all'>All Bids</TabsTrigger>
+              <TabsTrigger value='pending' className='gap-1.5'>
+                Pending Approval
+                {stats.pending > 0 && (
+                  <Badge variant='secondary' className='ml-1 h-5 px-1.5 text-xs'>
+                    {stats.pending}
+                  </Badge>
+                )}
+              </TabsTrigger>
               <TabsTrigger value='active'>Active</TabsTrigger>
-              <TabsTrigger value='winning'>Winning</TabsTrigger>
               <TabsTrigger value='outbid'>Outbid</TabsTrigger>
               <TabsTrigger value='won'>Won</TabsTrigger>
               <TabsTrigger value='lost'>Lost</TabsTrigger>
+              <TabsTrigger value='declined'>Declined</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -573,30 +738,34 @@ export function Bids() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Bid #</TableHead>
-                    <TableHead>Auction / Vehicle</TableHead>
+                    <TableHead>Date / Auction</TableHead>
+                    <TableHead>Vehicle</TableHead>
                     <TableHead>Bidder</TableHead>
                     <TableHead>Amount</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Type</TableHead>
-                    <TableHead>Time</TableHead>
                     <TableHead>Auction Status</TableHead>
                     <TableHead className='text-right'>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {paginatedBids.map((bid) => (
-                    <TableRow key={bid.id}>
-                      <TableCell className='font-mono text-sm'>
-                        {bid.bidNumber}
-                      </TableCell>
+                    <TableRow
+                      key={bid.id}
+                      className='cursor-pointer'
+                      onClick={() => handleViewBid(bid)}
+                    >
                       <TableCell>
                         <div>
-                          <p className='line-clamp-1 font-medium'>{bid.auctionTitle}</p>
-                          <p className='text-sm text-muted-foreground'>
-                            {bid.vehicle.year} • {bid.vehicle.mileage.toLocaleString()} mi
+                          <p className='font-medium'>{format(bid.timestamp, 'MMM dd, yyyy')}</p>
+                          <p className='text-xs text-muted-foreground'>{format(bid.timestamp, 'h:mm a')}</p>
+                          <p className='mt-1 text-xs text-muted-foreground'>
+                            {bid.auctionHouse} • Lot #{bid.lotNumber}
                           </p>
                         </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className='line-clamp-1 font-medium'>{bid.auctionTitle}</p>
                       </TableCell>
                       <TableCell>
                         <div>
@@ -605,41 +774,29 @@ export function Bids() {
                             {bid.bidder.type} • {bid.bidder.location}
                           </p>
                           {bid.type === 'assisted' && (
-                            <Badge variant='outline' className='mt-1 text-xs'>
-                              Assisted
-                            </Badge>
+                            <div className='mt-1 flex items-center gap-1'>
+                              <Badge variant='outline' className='text-xs'>
+                                Assisted
+                              </Badge>
+                              <span className='text-xs text-muted-foreground'>by {bid.assistedBy}</span>
+                            </div>
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div>
-                          <p className='font-semibold'>${bid.amount.toLocaleString()}</p>
-                          {bid.maxBid && (
-                            <p className='text-xs text-muted-foreground'>
-                              Max: ${bid.maxBid.toLocaleString()}
-                            </p>
-                          )}
-                        </div>
+                        <p className='font-semibold'>¥{bid.amount.toLocaleString()}</p>
                       </TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(bid.status)}>
-                          {bid.status}
+                          {getStatusLabel(bid.status)}
                         </Badge>
                       </TableCell>
                       <TableCell>
                         <div className='flex items-center gap-1'>
                           {getTypeIcon(bid.type)}
                           <span className='text-sm capitalize'>
-                            {bid.type === 'buy_now' ? 'Buy Now' : bid.type === 'assisted' ? 'Assisted' : bid.type}
+                            {bid.type === 'assisted' ? 'Assisted' : 'Manual'}
                           </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className='text-sm'>{format(bid.timestamp, 'MMM dd')}</p>
-                          <p className='text-xs text-muted-foreground'>
-                            {format(bid.timestamp, 'h:mm a')}
-                          </p>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -656,9 +813,154 @@ export function Bids() {
                         </div>
                       </TableCell>
                       <TableCell className='text-right'>
-                        <Button variant='ghost' size='sm' onClick={() => handleViewBid(bid)}>
-                          <Eye className='h-4 w-4' />
-                        </Button>
+                        {bid.status === 'pending_approval' ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant='ghost' size='icon' className='h-7 w-7'>
+                                <MoreHorizontal className='h-4 w-4' />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                              <DropdownMenuItem
+                                className='text-green-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber} approved`)
+                                }}
+                              >
+                                <Check className='mr-2 h-4 w-4' />
+                                Approve
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-red-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber} declined`)
+                                }}
+                              >
+                                <XCircle className='mr-2 h-4 w-4' />
+                                Decline
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (bid.status === 'active' || bid.status === 'winning') ? (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant='ghost' size='icon' className='h-7 w-7'>
+                                <MoreHorizontal className='h-4 w-4' />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end' className='w-48'>
+                              <DropdownMenuLabel className='text-xs'>Won Results</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                className='text-green-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleMarkWon(bid, 'bid_accepted')
+                                }}
+                              >
+                                <Trophy className='mr-2 h-4 w-4' />
+                                Bid Accepted
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-green-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleMarkWon(bid, 'contract')
+                                }}
+                              >
+                                <Handshake className='mr-2 h-4 w-4' />
+                                Contract
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-green-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleMarkWon(bid, 'contract_nego')
+                                }}
+                              >
+                                <MessageSquare className='mr-2 h-4 w-4' />
+                                Contract by Nego
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel className='text-xs'>Lost Results</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                className='text-red-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleSoldToOthers(bid)
+                                }}
+                              >
+                                <Users className='mr-2 h-4 w-4' />
+                                Sold to Others
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-orange-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleMarkUnsold(bid)
+                                }}
+                              >
+                                <CircleSlash className='mr-2 h-4 w-4' />
+                                Unsold
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuLabel className='text-xs'>Other</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                className='text-slate-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber}: Bid Canceled`)
+                                }}
+                              >
+                                <XCircle className='mr-2 h-4 w-4' />
+                                Bid Canceled
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-slate-600'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber}: Auction Cancelled`)
+                                }}
+                              >
+                                <Ban className='mr-2 h-4 w-4' />
+                                Auction Cancelled
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-slate-500'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber}: Result`)
+                                }}
+                              >
+                                <FileQuestion className='mr-2 h-4 w-4' />
+                                Result
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className='text-slate-500'
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toast.success(`Bid ${bid.bidNumber}: Unknown`)
+                                }}
+                              >
+                                <HelpCircle className='mr-2 h-4 w-4' />
+                                Unknown
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        ) : (
+                          <Button
+                            variant='ghost'
+                            size='sm'
+                            className='h-7 w-7 p-0'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleViewBid(bid)
+                            }}
+                          >
+                            <Eye className='h-4 w-4' />
+                          </Button>
+                        )}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -682,7 +984,7 @@ export function Bids() {
                       </CardDescription>
                     </div>
                     <Badge className={getStatusColor(bid.status)}>
-                      {bid.status}
+                      {getStatusLabel(bid.status)}
                     </Badge>
                   </div>
                 </CardHeader>
@@ -691,7 +993,7 @@ export function Bids() {
                   <div>
                     <p className='line-clamp-1 text-sm font-semibold'>{bid.auctionTitle}</p>
                     <p className='text-sm text-muted-foreground'>
-                      {bid.vehicle.year} • {bid.vehicle.mileage.toLocaleString()} mi • {bid.vehicle.vin}
+                      {bid.auctionHouse} • Lot #{bid.lotNumber}
                     </p>
                   </div>
 
@@ -699,19 +1001,14 @@ export function Bids() {
                   <div className='flex items-center justify-between'>
                     <div>
                       <p className='text-2xl font-bold text-primary'>
-                        ${bid.amount.toLocaleString()}
+                        ¥{bid.amount.toLocaleString()}
                       </p>
-                      {bid.maxBid && (
-                        <p className='text-xs text-muted-foreground'>
-                          Max bid: ${bid.maxBid.toLocaleString()}
-                        </p>
-                      )}
                     </div>
                     <div className='text-right'>
                       <div className='flex items-center gap-1 text-sm'>
                         {getTypeIcon(bid.type)}
                         <span className='capitalize'>
-                          {bid.type === 'buy_now' ? 'Buy Now' : bid.type === 'assisted' ? 'Assisted' : bid.type}
+                          {bid.type === 'assisted' ? 'Assisted' : 'Manual'}
                         </span>
                       </div>
                       {bid.status === 'winning' && (
@@ -735,18 +1032,33 @@ export function Bids() {
                       <div>
                         <p className='font-medium'>{bid.bidder.name}</p>
                         <p className='text-xs text-muted-foreground'>
-                          {bid.bidder.type} • {bid.bidder.totalBids} total bids
+                          {bid.bidder.type} • {bid.bidder.location}
                         </p>
                         {bid.type === 'assisted' && (
-                          <Badge variant='outline' className='mt-1 text-xs'>
-                            Assisted
-                          </Badge>
+                          <div className='mt-1 flex items-center gap-1'>
+                            <Badge variant='outline' className='text-xs'>
+                              Assisted
+                            </Badge>
+                            <span className='text-xs text-muted-foreground'>by {bid.assistedBy}</span>
+                          </div>
                         )}
                       </div>
-                      <div className='text-right'>
-                        <p className='text-xs text-muted-foreground'>Win Rate</p>
-                        <p className='font-medium'>{bid.bidder.winRate}%</p>
-                      </div>
+                      <Badge
+                        variant='outline'
+                        className={
+                          bid.bidder.level === 'business_premium'
+                            ? 'border-purple-500 bg-purple-50 text-purple-700'
+                            : bid.bidder.level === 'business'
+                              ? 'border-blue-500 bg-blue-50 text-blue-700'
+                              : bid.bidder.level === 'premium'
+                                ? 'border-amber-500 bg-amber-50 text-amber-700'
+                                : bid.bidder.level === 'verified'
+                                  ? 'border-green-500 bg-green-50 text-green-700'
+                                  : 'border-slate-400 bg-slate-50 text-slate-600'
+                        }
+                      >
+                        {bid.bidder.level === 'business_premium' ? 'Business Premium' : bid.bidder.level.charAt(0).toUpperCase() + bid.bidder.level.slice(1)}
+                      </Badge>
                     </div>
                   </div>
 
@@ -769,21 +1081,6 @@ export function Bids() {
                     </Button>
                   </div>
 
-                  {/* Progress to Reserve */}
-                  {bid.auctionStatus === 'live' && (
-                    <div className='space-y-1'>
-                      <div className='flex justify-between text-xs text-muted-foreground'>
-                        <span>Current: ${bid.currentHighBid.toLocaleString()}</span>
-                        <span>Reserve: ${bid.reservePrice.toLocaleString()}</span>
-                      </div>
-                      <div className='h-2 overflow-hidden rounded-full bg-secondary'>
-                        <div
-                          className='h-full bg-primary transition-all'
-                          style={{ width: `${Math.min((bid.currentHighBid / bid.reservePrice) * 100, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             ))}
@@ -832,164 +1129,213 @@ export function Bids() {
         )}
       </Main>
 
-      {/* View Bid Modal */}
-      <Dialog open={isViewBidModalOpen} onOpenChange={setIsViewBidModalOpen}>
-        <DialogContent className='max-w-3xl'>
+      {/* View Bid Modal - Improved */}
+      <BidDetailModal
+        bid={selectedBid}
+        open={isViewBidModalOpen}
+        onClose={() => setIsViewBidModalOpen(false)}
+        onApprove={(bid) => {
+          toast.success(`Bid ${bid.bidNumber} approved`)
+          setIsViewBidModalOpen(false)
+        }}
+        onDecline={(bid) => {
+          toast.success(`Bid ${bid.bidNumber} declined`)
+          setIsViewBidModalOpen(false)
+        }}
+        onMarkWon={handleMarkWon}
+        onSoldToOthers={handleSoldToOthers}
+        onMarkUnsold={handleMarkUnsold}
+        onCancelBid={(bid) => {
+          toast.success(`Bid ${bid.bidNumber}: Bid Canceled`)
+          setIsViewBidModalOpen(false)
+        }}
+        onAuctionCancelled={(bid) => {
+          toast.success(`Bid ${bid.bidNumber}: Auction Cancelled`)
+          setIsViewBidModalOpen(false)
+        }}
+        onCreateInvoice={() => setIsCreateInvoiceOpen(true)}
+      />
+
+      {/* Create Invoice Drawer */}
+      <CreateInvoiceDrawer
+        open={isCreateInvoiceOpen}
+        onOpenChange={setIsCreateInvoiceOpen}
+        bid={selectedBid}
+        onSuccess={() => {
+          setIsCreateInvoiceOpen(false)
+          setIsViewBidModalOpen(false)
+        }}
+      />
+
+      {/* Unsold Price Dialog */}
+      <Dialog open={isUnsoldDialogOpen} onOpenChange={setIsUnsoldDialogOpen}>
+        <DialogContent className='sm:max-w-md'>
           <DialogHeader>
-            <DialogTitle>Bid Details</DialogTitle>
+            <DialogTitle className='flex items-center gap-2'>
+              <CircleSlash className='h-5 w-5 text-orange-500' />
+              Mark as Unsold
+            </DialogTitle>
             <DialogDescription>
-              Complete information about bid #{selectedBid?.bidNumber}
+              {unsoldBid && (
+                <>
+                  Enter the final unsold price for <span className='font-medium'>{unsoldBid.bidNumber}</span>
+                </>
+              )}
             </DialogDescription>
           </DialogHeader>
-
-          {selectedBid && (
-            <div className='space-y-6 py-4'>
-              {/* Bid Status and Type */}
-              <div className='flex items-center justify-between'>
-                <Badge className={getStatusColor(selectedBid.status)} variant='outline'>
-                  {selectedBid.status.toUpperCase()}
-                </Badge>
-                <div className='flex items-center gap-2'>
-                  {getTypeIcon(selectedBid.type)}
-                  <span className='font-medium'>
-                    {selectedBid.type === 'buy_now' ? 'Buy Now' :
-                      selectedBid.type === 'assisted' ? 'Assisted Bid' : 'Manual Bid'}
-                  </span>
-                  {selectedBid.type === 'assisted' && (
-                    <Badge variant='secondary'>Admin Placed</Badge>
-                  )}
-                </div>
+          <div className='space-y-4 py-4'>
+            {unsoldBid && (
+              <div className='rounded-lg border bg-muted/30 p-3'>
+                <p className='font-medium'>{unsoldBid.auctionTitle}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {unsoldBid.auctionHouse} • Lot #{unsoldBid.lotNumber}
+                </p>
+                <p className='mt-2 text-sm'>
+                  Original Bid: <span className='font-semibold'>¥{unsoldBid.amount.toLocaleString()}</span>
+                </p>
               </div>
-
-              {/* Vehicle Information */}
-              <div className='space-y-2'>
-                <h3 className='flex items-center gap-2 font-semibold'>
-                  <Car className='h-4 w-4' />
-                  Vehicle Information
-                </h3>
-                <div className='rounded-lg bg-muted p-4'>
-                  <p className='font-medium'>{selectedBid.auctionTitle}</p>
-                  <p className='mt-1 text-sm text-muted-foreground'>
-                    {selectedBid.vehicle.year} • {selectedBid.vehicle.make} {selectedBid.vehicle.model}
-                  </p>
-                  <p className='text-sm text-muted-foreground'>
-                    VIN: {selectedBid.vehicle.vin} • Mileage: {selectedBid.vehicle.mileage.toLocaleString()} mi
-                  </p>
-                </div>
-              </div>
-
-              {/* Bidder Information */}
-              <div className='space-y-2'>
-                <h3 className='flex items-center gap-2 font-semibold'>
-                  <User className='h-4 w-4' />
-                  Bidder Information
-                </h3>
-                <div className='rounded-lg bg-muted p-4'>
-                  <p className='font-medium'>{selectedBid.bidder.name}</p>
-                  <p className='text-sm text-muted-foreground'>
-                    {selectedBid.bidder.email}
-                  </p>
-                  <p className='text-sm text-muted-foreground'>
-                    Type: {selectedBid.bidder.type} • Location: {selectedBid.bidder.location}
-                  </p>
-                  <div className='mt-2 flex gap-4'>
-                    <span className='text-sm'>
-                      <strong>Total Bids:</strong> {selectedBid.bidder.totalBids}
-                    </span>
-                    <span className='text-sm'>
-                      <strong>Win Rate:</strong> {selectedBid.bidder.winRate}%
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bid Information */}
-              <div className='space-y-2'>
-                <h3 className='flex items-center gap-2 font-semibold'>
-                  <DollarSign className='h-4 w-4' />
-                  Bid Information
-                </h3>
-                <div className='rounded-lg bg-muted p-4'>
-                  <div className='grid grid-cols-2 gap-4'>
-                    <div>
-                      <p className='text-sm text-muted-foreground'>Bid Amount</p>
-                      <p className='text-xl font-bold'>${selectedBid.amount.toLocaleString()}</p>
-                    </div>
-                    {selectedBid.maxBid && (
-                      <div>
-                        <p className='text-sm text-muted-foreground'>Max Bid</p>
-                        <p className='text-xl font-bold'>${selectedBid.maxBid.toLocaleString()}</p>
-                      </div>
-                    )}
-                    <div>
-                      <p className='text-sm text-muted-foreground'>Current High Bid</p>
-                      <p className='text-lg font-semibold'>${selectedBid.currentHighBid.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className='text-sm text-muted-foreground'>Reserve Price</p>
-                      <p className='text-lg font-semibold'>${selectedBid.reservePrice.toLocaleString()}</p>
-                    </div>
-                  </div>
-                  {selectedBid.previousBid && (
-                    <div className='mt-3 border-t pt-3'>
-                      <p className='text-sm text-muted-foreground'>
-                        Previous Bid: ${selectedBid.previousBid.toLocaleString()}
-                        • Increment: ${selectedBid.bidIncrement.toLocaleString()}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Auction Status */}
-              <div className='space-y-2'>
-                <h3 className='flex items-center gap-2 font-semibold'>
-                  <Calendar className='h-4 w-4' />
-                  Auction Details
-                </h3>
-                <div className='rounded-lg bg-muted p-4'>
-                  <div className='flex items-center justify-between'>
-                    <div>
-                      <p className='text-sm text-muted-foreground'>Auction Status</p>
-                      <Badge variant='outline' className='mt-1'>
-                        {selectedBid.auctionStatus.toUpperCase()}
-                      </Badge>
-                    </div>
-                    <div>
-                      <p className='text-sm text-muted-foreground'>Placed On</p>
-                      <p className='font-medium'>{format(selectedBid.timestamp, 'PPpp')}</p>
-                    </div>
-                    {selectedBid.timeRemaining && selectedBid.auctionStatus === 'live' && (
-                      <div>
-                        <p className='text-sm text-muted-foreground'>Time Remaining</p>
-                        <p className='font-medium text-slate-700'>
-                          {getTimeRemaining(selectedBid.timeRemaining)}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  <div className='mt-3'>
-                    <p className='text-sm text-muted-foreground'>Total Bids on Auction</p>
-                    <p className='font-medium'>{selectedBid.totalBids} bids</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Notes */}
-              {selectedBid.notes && (
-                <div className='space-y-2'>
-                  <h3 className='font-semibold'>Notes</h3>
-                  <div className='rounded-lg bg-muted p-4'>
-                    <p className='text-sm'>{selectedBid.notes}</p>
-                  </div>
-                </div>
-              )}
+            )}
+            <div className='space-y-2'>
+              <Label htmlFor='unsoldPrice'>Unsold Price (¥)</Label>
+              <Input
+                id='unsoldPrice'
+                type='number'
+                placeholder='Enter final price'
+                value={unsoldPrice}
+                onChange={(e) => setUnsoldPrice(e.target.value)}
+              />
+              <p className='text-xs text-muted-foreground'>
+                The price at which the vehicle remained unsold (reserve not met)
+              </p>
             </div>
-          )}
+            <div className='space-y-2'>
+              <Label htmlFor='negoStartPrice'>Starting Negotiating Price (¥)</Label>
+              <Input
+                id='negoStartPrice'
+                type='number'
+                placeholder='Enter starting nego price'
+                value={negoStartPrice}
+                onChange={(e) => setNegoStartPrice(e.target.value)}
+              />
+              <p className='text-xs text-muted-foreground'>
+                The price at which post-auction negotiation can begin
+              </p>
+            </div>
+          </div>
+          <DialogFooter className='gap-2 sm:gap-0'>
+            <Button variant='outline' onClick={() => setIsUnsoldDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmUnsold} className='bg-orange-600 hover:bg-orange-700'>
+              Confirm Unsold
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setIsViewBidModalOpen(false)}>
-              Close
+      {/* Sold to Others Price Dialog */}
+      <Dialog open={isSoldToOthersDialogOpen} onOpenChange={setIsSoldToOthersDialogOpen}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <Users className='h-5 w-5 text-red-500' />
+              Sold to Others
+            </DialogTitle>
+            <DialogDescription>
+              {soldToOthersBid && (
+                <>
+                  Enter the sold price for <span className='font-medium'>{soldToOthersBid.bidNumber}</span>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 py-4'>
+            {soldToOthersBid && (
+              <div className='rounded-lg border bg-muted/30 p-3'>
+                <p className='font-medium'>{soldToOthersBid.auctionTitle}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {soldToOthersBid.auctionHouse} • Lot #{soldToOthersBid.lotNumber}
+                </p>
+                <p className='mt-2 text-sm'>
+                  Our Bid: <span className='font-semibold'>¥{soldToOthersBid.amount.toLocaleString()}</span>
+                </p>
+              </div>
+            )}
+            <div className='space-y-2'>
+              <Label htmlFor='soldToOthersPrice'>Sold Price (¥)</Label>
+              <Input
+                id='soldToOthersPrice'
+                type='number'
+                placeholder='Enter the price it sold for'
+                value={soldToOthersPrice}
+                onChange={(e) => setSoldToOthersPrice(e.target.value)}
+              />
+              <p className='text-xs text-muted-foreground'>
+                The price at which the vehicle was sold to another bidder
+              </p>
+            </div>
+          </div>
+          <DialogFooter className='gap-2 sm:gap-0'>
+            <Button variant='outline' onClick={() => setIsSoldToOthersDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmSoldToOthers} variant='destructive'>
+              Confirm Sold to Others
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Won Price Dialog */}
+      <Dialog open={isWonDialogOpen} onOpenChange={setIsWonDialogOpen}>
+        <DialogContent className='sm:max-w-md'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <Trophy className='h-5 w-5 text-green-500' />
+              {wonType === 'bid_accepted' ? 'Bid Accepted' : wonType === 'contract' ? 'Contract' : 'Contract by Nego'}
+            </DialogTitle>
+            <DialogDescription>
+              {wonBid && (
+                <>
+                  Enter the final winning price for <span className='font-medium'>{wonBid.bidNumber}</span>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <div className='space-y-4 py-4'>
+            {wonBid && (
+              <div className='rounded-lg border bg-green-50 p-3 dark:bg-green-950'>
+                <p className='font-medium'>{wonBid.auctionTitle}</p>
+                <p className='text-sm text-muted-foreground'>
+                  {wonBid.auctionHouse} • Lot #{wonBid.lotNumber}
+                </p>
+                <p className='mt-2 text-sm'>
+                  Our Bid: <span className='font-semibold'>¥{wonBid.amount.toLocaleString()}</span>
+                </p>
+              </div>
+            )}
+            <div className='space-y-2'>
+              <Label htmlFor='wonPrice'>Winning Price (¥)</Label>
+              <Input
+                id='wonPrice'
+                type='number'
+                placeholder='Enter the winning price'
+                value={wonPrice}
+                onChange={(e) => setWonPrice(e.target.value)}
+              />
+              <p className='text-xs text-muted-foreground'>
+                {wonType === 'contract_nego'
+                  ? 'The final negotiated price we got the vehicle for'
+                  : 'The price at which we won the vehicle'}
+              </p>
+            </div>
+          </div>
+          <DialogFooter className='gap-2 sm:gap-0'>
+            <Button variant='outline' onClick={() => setIsWonDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmWon} className='bg-green-600 hover:bg-green-700'>
+              Confirm Won
             </Button>
           </DialogFooter>
         </DialogContent>

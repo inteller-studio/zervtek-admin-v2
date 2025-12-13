@@ -193,36 +193,36 @@ export function AuctionDetailDialog({
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Winning Bid</span>
                   <span className='font-medium'>
-                    ${auction.winningBid.toLocaleString()}
+                    ¥{auction.winningBid.toLocaleString()}
                   </span>
                 </div>
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Shipping Cost</span>
                   <span className='font-medium'>
-                    ${auction.shippingCost.toLocaleString()}
+                    ¥{auction.shippingCost.toLocaleString()}
                   </span>
                 </div>
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Customs Fee</span>
                   <span className='font-medium'>
-                    ${auction.customsFee.toLocaleString()}
+                    ¥{auction.customsFee.toLocaleString()}
                   </span>
                 </div>
                 <div className='flex justify-between border-t pt-2'>
                   <span className='font-medium'>Total Amount</span>
-                  <span className='font-bold'>${auction.totalAmount.toLocaleString()}</span>
+                  <span className='font-bold'>¥{auction.totalAmount.toLocaleString()}</span>
                 </div>
                 <div className='flex justify-between'>
                   <span className='text-muted-foreground'>Paid Amount</span>
                   <span className='font-medium text-green-600'>
-                    ${auction.paidAmount.toLocaleString()}
+                    ¥{auction.paidAmount.toLocaleString()}
                   </span>
                 </div>
                 {auction.totalAmount - auction.paidAmount > 0 && (
                   <div className='flex justify-between'>
                     <span className='text-muted-foreground'>Outstanding</span>
                     <span className='font-medium text-orange-600'>
-                      ${(auction.totalAmount - auction.paidAmount).toLocaleString()}
+                      ¥{(auction.totalAmount - auction.paidAmount).toLocaleString()}
                     </span>
                   </div>
                 )}

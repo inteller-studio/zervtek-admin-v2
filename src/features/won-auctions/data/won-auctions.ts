@@ -1,4 +1,5 @@
 import { faker } from '@faker-js/faker'
+import { stockVehiclesFromSQL } from './vehicles-from-sql'
 
 faker.seed(67890)
 
@@ -232,15 +233,15 @@ const generateShipment = (status: WonAuction['status']): ShipmentTracking | unde
   }
 }
 
-export const wonAuctions: WonAuction[] = Array.from({ length: 80 }, (_, index) => {
-  const make = faker.helpers.arrayElement(makes)
-  const model = faker.helpers.arrayElement(models[make] || ['Model'])
-  const year = faker.number.int({ min: 2018, max: 2024 })
+// Use real vehicle data from SQL
+const realVehicles = stockVehiclesFromSQL.slice(0, 80)
+
+export const wonAuctions: WonAuction[] = realVehicles.map((vehicle, index) => {
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
-  const winningBid = faker.number.int({ min: 15000, max: 120000 })
-  const shippingCost = faker.number.int({ min: 2000, max: 8000 })
-  const customsFee = faker.number.int({ min: 1000, max: 5000 })
+  const winningBid = vehicle.stockPrice || faker.number.int({ min: 1500000, max: 12000000 })
+  const shippingCost = faker.number.int({ min: 200000, max: 800000 })
+  const customsFee = faker.number.int({ min: 100000, max: 500000 })
   const totalAmount = winningBid + shippingCost + customsFee
   const paymentStatus = faker.helpers.arrayElement(['pending', 'partial', 'completed'] as const)
   const paidAmount = paymentStatus === 'completed' ? totalAmount : paymentStatus === 'partial' ? Math.floor(totalAmount * 0.5) : 0
@@ -267,13 +268,13 @@ export const wonAuctions: WonAuction[] = Array.from({ length: 80 }, (_, index) =
     id: faker.string.uuid(),
     auctionId,
     vehicleInfo: {
-      make,
-      model,
-      year,
+      make: vehicle.makeEn || vehicle.make,
+      model: vehicle.modelEn || vehicle.model,
+      year: vehicle.year,
       vin: faker.vehicle.vin(),
-      mileage: faker.number.int({ min: 10000, max: 150000 }),
-      color: faker.helpers.arrayElement(colors),
-      images: ['#'],
+      mileage: vehicle.mileageKm || faker.number.int({ min: 10000, max: 150000 }),
+      color: (vehicle.colorEn || vehicle.color || 'Unknown').trim(),
+      images: vehicle.imageUrl || ['#'],
     },
     winnerId: faker.string.uuid(),
     winnerName: `${firstName} ${lastName}`,
@@ -284,7 +285,7 @@ export const wonAuctions: WonAuction[] = Array.from({ length: 80 }, (_, index) =
     totalAmount,
     shippingCost,
     customsFee,
-    currency: 'USD',
+    currency: 'JPY',
     status,
     paymentStatus,
     paidAmount,

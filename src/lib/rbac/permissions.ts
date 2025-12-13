@@ -38,7 +38,6 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // System section - All roles
   { path: '/settings', roles: ALL_ROLES },
   { path: '/security', roles: ALL_ROLES },
-  { path: '/help-center', roles: ALL_ROLES },
 
   // Forbidden page - All roles (must be accessible to show error)
   { path: '/forbidden', roles: ALL_ROLES },

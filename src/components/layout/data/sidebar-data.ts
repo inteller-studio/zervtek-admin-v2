@@ -7,18 +7,25 @@ import {
   Hand,
   ShoppingCart,
   Car,
-  MessageSquare,
+  Languages,
   Tv,
   Globe,
   Database,
   Tag,
   Shield,
   Settings,
-  HelpCircle,
   Command,
+  ClipboardCheck,
 } from 'lucide-react'
 import { type NavGroup, type User, type Team } from '../types'
 import { ROLES } from '@/lib/rbac/types'
+import { bids } from '@/features/bids/data/bids'
+import { requests } from '@/features/requests/data/requests'
+
+// Calculate pending approval count
+const pendingBidsCount = bids.filter((b) => b.status === 'pending_approval').length
+const pendingTranslationsCount = requests.filter((r) => r.type === 'translation' && r.status === 'pending').length
+const pendingInspectionsCount = requests.filter((r) => r.type === 'inspection' && r.status === 'pending').length
 
 // Role group shortcuts
 const SALES_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.SALES_STAFF] as const
@@ -58,7 +65,12 @@ export const sidebarNavGroups: NavGroup[] = [
     items: [
       { title: 'Auctions', url: '/auctions', icon: Gavel },
       { title: 'Purchases', url: '/purchases', icon: ShoppingCart },
-      { title: 'Bids', url: '/bids', icon: Hand },
+      {
+        title: 'Bids',
+        url: '/bids',
+        icon: Hand,
+        badge: pendingBidsCount > 0 ? String(pendingBidsCount) : undefined,
+      },
       { title: 'Stock Vehicles', url: '/stock-vehicles', icon: Car },
     ],
   },
@@ -66,9 +78,26 @@ export const sidebarNavGroups: NavGroup[] = [
     title: 'Services',
     roles: [...FINANCE_ROLES],
     items: [
-      { title: 'Invoice Generator', url: '/invoices', icon: FileText },
-      { title: 'Requests', url: '/requests', icon: MessageSquare },
+      {
+        title: 'Translations',
+        url: '/translations',
+        icon: Languages,
+        badge: pendingTranslationsCount > 0 ? String(pendingTranslationsCount) : undefined,
+      },
+      {
+        title: 'Inspections',
+        url: '/inspections',
+        icon: ClipboardCheck,
+        badge: pendingInspectionsCount > 0 ? String(pendingInspectionsCount) : undefined,
+      },
       { title: 'TV Display', url: '/tv-display', icon: Tv },
+    ],
+  },
+  {
+    title: 'Payments',
+    roles: [...FINANCE_ROLES],
+    items: [
+      { title: 'Invoices', url: '/invoices', icon: FileText },
       { title: 'Payments', url: '/payments', icon: CreditCard },
     ],
   },
@@ -114,7 +143,6 @@ export const sidebarNavGroups: NavGroup[] = [
         ],
       },
       { title: 'Security', url: '/security', icon: Shield },
-      { title: 'Help Center', url: '/help-center', icon: HelpCircle },
     ],
   },
 ]

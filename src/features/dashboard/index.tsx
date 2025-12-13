@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
-import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useDashboardStats, useChartData, useRecentActivity } from '@/hooks/use-dashboard-data'
 import { useDashboardStore } from '@/stores/dashboard-store'
@@ -74,7 +73,6 @@ export function Dashboard() {
   return (
     <>
       <Header fixed>
-        <Search className='md:w-auto flex-1' />
         <div className='ms-auto flex items-center space-x-4'>
           <ThemeSwitch />
           <ProfileDropdown />

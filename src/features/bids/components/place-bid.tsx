@@ -297,7 +297,7 @@ export function PlaceBid() {
       return
     }
 
-    toast.success(`Bid of $${amount.toLocaleString()} placed successfully`)
+    toast.success(`Bid of ¥${amount.toLocaleString()} placed successfully`)
 
     setBidAmount('')
     setMaxBidAmount('')
@@ -410,17 +410,17 @@ export function PlaceBid() {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Customer&apos;s Last Bid</span>
-                          <span className="font-semibold">${bid.customerLastBid.toLocaleString()}</span>
+                          <span className="font-semibold">¥{bid.customerLastBid.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Current Highest</span>
                           <span className="text-lg font-bold text-primary">
-                            ${bid.highestBid.toLocaleString()}
+                            ¥{bid.highestBid.toLocaleString()}
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-sm text-muted-foreground">Reserve Price</span>
-                          <span className="text-sm">${bid.reservePrice.toLocaleString()}</span>
+                          <span className="text-sm">¥{bid.reservePrice.toLocaleString()}</span>
                         </div>
                       </div>
 
@@ -477,7 +477,7 @@ export function PlaceBid() {
                                   </>
                                 )}
                               </div>
-                              <span className="font-medium">${history.amount.toLocaleString()}</span>
+                              <span className="font-medium">¥{history.amount.toLocaleString()}</span>
                             </div>
                           ))}
                         </div>
@@ -538,11 +538,11 @@ export function PlaceBid() {
                   <div className="bg-muted rounded-lg p-4 space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Current Highest Bid</span>
-                      <span className="text-xl font-bold">${selectedBid.highestBid.toLocaleString()}</span>
+                      <span className="text-xl font-bold">¥{selectedBid.highestBid.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Customer&apos;s Last Bid</span>
-                      <span className="font-semibold">${selectedBid.customerLastBid.toLocaleString()}</span>
+                      <span className="font-semibold">¥{selectedBid.customerLastBid.toLocaleString()}</span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">Time Remaining</span>
@@ -554,7 +554,7 @@ export function PlaceBid() {
 
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="bidAmount">Bid Amount ($)</Label>
+                      <Label htmlFor="bidAmount">Bid Amount (¥)</Label>
                       <Input
                         id="bidAmount"
                         type="number"
@@ -564,7 +564,7 @@ export function PlaceBid() {
                         min={selectedBid.highestBid + 100}
                       />
                       <p className="text-xs text-muted-foreground">
-                        Minimum bid: ${(selectedBid.highestBid + 100).toLocaleString()}
+                        Minimum bid: ¥{(selectedBid.highestBid + 100).toLocaleString()}
                       </p>
                     </div>
 

@@ -108,20 +108,20 @@ export function InvoiceDialog({
           <div className='space-y-3'>
             <div className='flex justify-between'>
               <span className='text-sm'>Vehicle Price</span>
-              <span className='font-medium'>${auction.winningBid.toLocaleString()}</span>
+              <span className='font-medium'>¥{auction.winningBid.toLocaleString()}</span>
             </div>
 
             {includeShipping && (
               <div className='flex justify-between text-sm text-muted-foreground'>
                 <span>Shipping ({auction.destinationPort || 'TBD'})</span>
-                <span>${auction.shippingCost.toLocaleString()}</span>
+                <span>¥{auction.shippingCost.toLocaleString()}</span>
               </div>
             )}
 
             {includeCustoms && (
               <div className='flex justify-between text-sm text-muted-foreground'>
                 <span>Customs & Duties</span>
-                <span>${auction.customsFee.toLocaleString()}</span>
+                <span>¥{auction.customsFee.toLocaleString()}</span>
               </div>
             )}
 
@@ -129,20 +129,20 @@ export function InvoiceDialog({
 
             <div className='flex justify-between font-medium'>
               <span>Total</span>
-              <span>${total.toLocaleString()}</span>
+              <span>¥{total.toLocaleString()}</span>
             </div>
 
             {auction.paidAmount > 0 && (
               <div className='flex justify-between text-sm text-green-600'>
                 <span>Amount Paid</span>
-                <span>-${auction.paidAmount.toLocaleString()}</span>
+                <span>-¥{auction.paidAmount.toLocaleString()}</span>
               </div>
             )}
 
             <div className='flex justify-between text-lg font-bold'>
               <span>Balance Due</span>
               <span className={balanceDue <= 0 ? 'text-green-600' : 'text-orange-600'}>
-                ${Math.max(0, balanceDue).toLocaleString()}
+                ¥{Math.max(0, balanceDue).toLocaleString()}
               </span>
             </div>
           </div>
