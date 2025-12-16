@@ -11,7 +11,6 @@ import { ThemeSwitch } from '@/components/theme-switch'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { StatsCard } from '@/features/dashboard/components/stats-card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
@@ -224,13 +223,6 @@ export function StockVehicles() {
     }
   }
 
-  const stats = {
-    total: vehicles.length,
-    available: vehicles.filter((v) => v.status === 'available').length,
-    sold: vehicles.filter((v) => v.status === 'sold').length,
-    reserved: vehicles.filter((v) => v.status === 'reserved').length,
-  }
-
   const hasActiveFilters =
     selectedMakes.length > 0 ||
     selectedTransmissions.length > 0 ||
@@ -309,34 +301,6 @@ export function StockVehicles() {
               Add Vehicle
             </Button>
           </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className='grid gap-4 md:grid-cols-4'>
-          <StatsCard
-            title='Total Vehicles'
-            value={stats.total}
-            change={8}
-            description='vs last month'
-          />
-          <StatsCard
-            title='Available'
-            value={stats.available}
-            change={12}
-            description='vs last month'
-          />
-          <StatsCard
-            title='Sold'
-            value={stats.sold}
-            change={5}
-            description='vs last month'
-          />
-          <StatsCard
-            title='Reserved'
-            value={stats.reserved}
-            change={-3}
-            description='vs last month'
-          />
         </div>
 
         {/* Search and Filter Bar */}
@@ -604,75 +568,79 @@ export function StockVehicles() {
 
         {/* Vehicle Grid / List View */}
         {viewMode === 'grid' ? (
-          <div className='grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'>
+          <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
             {paginatedVehicles.map((vehicle) => (
               <Card
                 key={vehicle.id}
-                className='group cursor-pointer overflow-hidden rounded-xl border border-border/50 shadow-none transition-all duration-300 hover:-translate-y-1 hover:border-border hover:shadow-lg'
+                className='group cursor-pointer overflow-hidden transition-all hover:shadow-md !py-0 !gap-0'
                 onClick={() => {
                   setSelectedVehicle(vehicle)
                   setIsViewModalOpen(true)
                 }}
               >
-                {/* Image Section */}
-                <div className='relative aspect-[4/3] bg-gradient-to-br from-muted to-muted/50 overflow-hidden'>
-                  {vehicle.images && vehicle.images.length > 0 ? (
-                    <Image
-                      src={vehicle.images[1] || vehicle.images[0]}
-                      alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                      fill
-                      sizes='(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw'
-                      className='object-cover transition-transform duration-500 group-hover:scale-105'
-                    />
-                  ) : (
-                    <div className='absolute inset-0 flex items-center justify-center'>
-                      <Car className='h-12 w-12 text-muted-foreground/20 transition-transform duration-500 group-hover:scale-110' />
+                <CardContent className='p-0'>
+                  {/* Image Section */}
+                  <div className='relative h-44 w-full overflow-hidden bg-muted'>
+                    {vehicle.images && vehicle.images.length > 0 ? (
+                      <Image
+                        src={vehicle.images[1] || vehicle.images[0]}
+                        alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                        fill
+                        sizes='(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 20vw'
+                        className='object-cover transition-transform group-hover:scale-105'
+                      />
+                    ) : (
+                      <div className='flex h-full w-full items-center justify-center bg-muted'>
+                        <Car className='h-12 w-12 text-muted-foreground/20' />
+                      </div>
+                    )}
+                    {/* Score Badge */}
+                    {vehicle.score && (
+                      <div className='absolute right-2 top-2'>
+                        <Badge variant='secondary' className='bg-black/70 text-white text-[10px] px-1.5 py-0.5'>
+                          {vehicle.score}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Content Section */}
+                  <div className='p-4'>
+                    {/* Title */}
+                    <div>
+                      <h3 className='truncate text-sm font-semibold'>
+                        {vehicle.year} {vehicle.make} {vehicle.model}
+                      </h3>
+                      <p className='truncate text-xs text-muted-foreground'>
+                        {vehicle.grade || vehicle.stockNumber}
+                      </p>
                     </div>
-                  )}
-                  {/* Status Badge */}
-                  <div className='absolute left-2 top-2 z-10'>
-                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusColor(vehicle.status)}`}>
-                      {vehicle.status}
-                    </span>
-                  </div>
-                  {/* Score Badge */}
-                  {vehicle.score && (
-                    <div className='absolute right-2 top-2 z-10'>
-                      <span className='inline-flex items-center rounded-full bg-background/90 px-1.5 py-0.5 text-[10px] font-bold backdrop-blur-sm'>
-                        {vehicle.score}
-                      </span>
+
+                    {/* Vehicle Info */}
+                    <div className='mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground'>
+                      <span>{vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`}</span>
+                      <span className='text-muted-foreground/50'>•</span>
+                      <span>{vehicle.transmission}</span>
+                      <span className='text-muted-foreground/50'>•</span>
+                      <span>{vehicle.exteriorColor}</span>
                     </div>
-                  )}
-                </div>
 
-                {/* Content Section */}
-                <CardContent className='p-2 md:p-3'>
-                  {/* Title */}
-                  <h3 className='mb-1 truncate text-xs font-bold text-foreground md:text-sm'>
-                    {vehicle.year} {vehicle.make} {vehicle.model}
-                  </h3>
-
-                  {/* Specs Row */}
-                  <div className='mb-2 flex items-center gap-1 border-b border-border/50 pb-2 text-[10px] text-muted-foreground md:gap-2 md:text-xs'>
-                    <span className='font-medium'>{vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`}</span>
-                    <span className='text-muted-foreground/50'>•</span>
-                    <span className='truncate'>{vehicle.transmission}</span>
-                  </div>
-
-                  {/* Price Section */}
-                  <div className='rounded-md bg-muted/50 p-2'>
-                    <p className='text-[9px] text-muted-foreground md:text-[10px]'>Price</p>
-                    <p className='text-sm font-bold text-foreground md:text-base'>
-                      {vehicle.priceDisplay || `¥${vehicle.price.toLocaleString()}`}
-                    </p>
-                  </div>
-
-                  {/* Grade & Location */}
-                  <div className='mt-2 flex items-center justify-between text-[9px] text-muted-foreground md:text-[10px]'>
-                    <span className='truncate max-w-[60%]' title={vehicle.grade}>{vehicle.grade}</span>
-                    <div className='flex items-center gap-0.5'>
-                      <MapPin className='h-2.5 w-2.5' />
-                      <span>{vehicle.location}</span>
+                    {/* Price & Stock Info */}
+                    <div className='mt-3 border-t pt-3'>
+                      <div className='flex items-start justify-between'>
+                        <div>
+                          <p className='text-xs text-muted-foreground'>Price</p>
+                          <p className='text-lg font-bold'>
+                            {vehicle.priceDisplay || `¥${vehicle.price.toLocaleString()}`}
+                          </p>
+                        </div>
+                        <div className='text-right text-xs'>
+                          <p>
+                            <span className='text-muted-foreground'>ID:</span>{' '}
+                            <span className='font-medium'>{vehicle.stockNumber}</span>
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </CardContent>

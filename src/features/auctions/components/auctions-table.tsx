@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, Gavel } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react'
 import { type Auction } from '../data/auctions'
 import { format } from 'date-fns'
 
@@ -50,8 +50,6 @@ export function AuctionsTable({ data }: AuctionsTableProps) {
             <TableHead>Auction ID</TableHead>
             <TableHead>Vehicle</TableHead>
             <TableHead>Starting Bid</TableHead>
-            <TableHead>Current Bid</TableHead>
-            <TableHead>Bids</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>End Time</TableHead>
             <TableHead className='text-right'>Actions</TableHead>
@@ -70,13 +68,6 @@ export function AuctionsTable({ data }: AuctionsTableProps) {
                 </div>
               </TableCell>
               <TableCell>¥{auction.startingBid.toLocaleString()}</TableCell>
-              <TableCell className='font-medium'>¥{auction.currentBid.toLocaleString()}</TableCell>
-              <TableCell>
-                <div className='flex items-center gap-1'>
-                  <Gavel className='h-3 w-3 text-muted-foreground' />
-                  {auction.totalBids}
-                </div>
-              </TableCell>
               <TableCell>{getStatusBadge(auction.status)}</TableCell>
               <TableCell>{format(auction.endTime, 'MMM dd, yyyy HH:mm')}</TableCell>
               <TableCell className='text-right'>

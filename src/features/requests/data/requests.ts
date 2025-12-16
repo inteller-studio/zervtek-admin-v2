@@ -76,7 +76,7 @@ const models: Record<string, string[]> = {
 const languages = ['Japanese', 'Korean', 'German', 'French', 'Spanish', 'Chinese', 'Arabic', 'Russian']
 const documentTypes = ['Auction Sheet', 'Service Records', 'Import Documents', 'Registration Papers', 'Inspection Report', 'Title Certificate']
 const inspectionTypes = ['Full Inspection', 'Pre-purchase Check', 'Performance Inspection', 'Condition Report', 'Detailed Report']
-const translationTypes = ['Auction Sheet Translation', 'Document Translation', 'Import Papers Translation', 'Service History Translation']
+const translationTypes = ['Auction Sheet Translation', 'Export Certificate Translation']
 
 const customerNames = [
   'John Smith', 'Sarah Wilson', 'Mike Davis', 'Emily Johnson', 'Robert Brown',

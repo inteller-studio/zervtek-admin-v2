@@ -305,7 +305,6 @@ export function Inspections() {
                             <div className='flex items-center gap-1'><User className='h-3 w-3' />{request.customerName}</div>
                             <div className='flex items-center gap-1'><Calendar className='h-3 w-3' />{format(new Date(request.createdAt), 'MMM dd, yyyy')}</div>
                             {request.assignedToName && <div className='flex items-center gap-1'><Users className='h-3 w-3' />{request.assignedToName}</div>}
-                            {request.price && <div className='font-medium text-foreground'>¥{request.price}</div>}
                           </div>
                           {request.vehicleInfo && (
                             <div className='mt-2 text-sm text-muted-foreground flex items-center gap-2'>
@@ -416,7 +415,7 @@ export function Inspections() {
                     <div><span className='text-muted-foreground'>Status:</span> <Badge className={getStatusColor(selectedRequest.status)}>{selectedRequest.status.replace('_', ' ')}</Badge></div>
                     <div><span className='text-muted-foreground'>Priority:</span> <Badge className={getPriorityColor(selectedRequest.priority)}>{selectedRequest.priority}</Badge></div>
                     <div><span className='text-muted-foreground'>Created:</span> {format(new Date(selectedRequest.createdAt), 'PPpp')}</div>
-                    <div><span className='text-muted-foreground'>Price:</span> ¥{selectedRequest.price || 'TBD'}</div>
+                    <div><span className='text-muted-foreground'>Customer:</span> {selectedRequest.customerName}</div>
                   </div>
                   {selectedRequest.vehicleInfo && (
                     <div className='pt-2 border-t'>

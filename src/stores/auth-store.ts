@@ -1,9 +1,9 @@
 import { create } from 'zustand'
 import { getCookie, setCookie, removeCookie } from '@/lib/cookies'
 import { type Role } from '@/lib/rbac/types'
+import { AUTH_CONSTANTS } from '@/lib/constants'
 
-const ACCESS_TOKEN = 'thisisjustarandomstring'
-const USER_DATA_COOKIE = 'user_data'
+const { ACCESS_TOKEN_COOKIE: ACCESS_TOKEN, USER_DATA_COOKIE } = AUTH_CONSTANTS
 
 export interface AuthUser {
   accountNo: string

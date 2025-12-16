@@ -79,10 +79,11 @@ export function getMockUser(userType: keyof typeof MOCK_USERS): MockUser {
 }
 
 export function getMockUserCredentials() {
+  const demoPassword = process.env.NEXT_PUBLIC_DEMO_PASSWORD || 'demo'
   return Object.entries(MOCK_USERS).map(([key, user]) => ({
     key,
     email: user.email,
-    password: 'password123',
+    password: demoPassword,
     role: user.role.join(', '),
     name: `${user.firstName} ${user.lastName}`,
   }))

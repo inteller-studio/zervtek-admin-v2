@@ -66,6 +66,15 @@ const MenuButton = ({
   </Button>
 )
 
+const isValidUrl = (urlString: string): boolean => {
+  try {
+    const url = new URL(urlString)
+    return ['http:', 'https:'].includes(url.protocol)
+  } catch {
+    return false
+  }
+}
+
 const MenuBar = ({ editor }: { editor: Editor | null }) => {
   const addLink = useCallback(() => {
     if (!editor) return
@@ -81,6 +90,11 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
       return
     }
 
+    if (!isValidUrl(url)) {
+      alert('Please enter a valid URL starting with http:// or https://')
+      return
+    }
+
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run()
   }, [editor])
 
@@ -89,6 +103,10 @@ const MenuBar = ({ editor }: { editor: Editor | null }) => {
     const url = window.prompt('Image URL')
 
     if (url) {
+      if (!isValidUrl(url)) {
+        alert('Please enter a valid image URL starting with http:// or https://')
+        return
+      }
       editor.chain().focus().setImage({ src: url }).run()
     }
   }, [editor])

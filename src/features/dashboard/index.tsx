@@ -1,19 +1,34 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Users, Gavel, DollarSign, Car, FileText, RefreshCw, Settings2 } from 'lucide-react'
+import {
+  Users,
+  Gavel,
+  DollarSign,
+  Car,
+  FileText,
+  RefreshCw,
+  Settings2,
+  LayoutDashboard,
+  User,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { ProfileDropdown } from '@/components/profile-dropdown'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { useDashboardStats, useChartData, useRecentActivity } from '@/hooks/use-dashboard-data'
 import { useDashboardStore } from '@/stores/dashboard-store'
+import { useAuthStore } from '@/stores/auth-store'
+import { hasRole, MANAGEMENT_ROLES } from '@/lib/rbac'
 import { StatsCard } from './components/stats-card'
 import { DraggableChartsContainer } from './components/draggable-charts'
+import { UserDashboard } from './components/user-dashboard'
 
 const statsConfig = [
   {
@@ -59,6 +74,13 @@ export function Dashboard() {
   const { data: chartData, isLoading: chartsLoading } = useChartData()
   const { data: activities, isLoading: activitiesLoading } = useRecentActivity()
   const { resetWidgetOrder } = useDashboardStore()
+  const user = useAuthStore((state) => state.auth.user)
+
+  // Check if user is admin/manager
+  const isAdmin = user?.role ? hasRole(user.role, MANAGEMENT_ROLES) : false
+
+  // View state - non-admins always see user view
+  const [viewMode, setViewMode] = useState<'admin' | 'user'>(isAdmin ? 'admin' : 'user')
 
   const formatTimeAgo = (date: Date) => {
     const seconds = Math.floor((new Date().getTime() - new Date(date).getTime()) / 1000)
@@ -83,93 +105,126 @@ export function Dashboard() {
         <div className='flex flex-wrap items-center justify-between gap-2'>
           <div>
             <h1 className='text-2xl font-bold tracking-tight sm:text-3xl'>Dashboard</h1>
-            <p className='text-muted-foreground'>Real-time overview of your auction platform</p>
+            <p className='text-muted-foreground'>
+              {viewMode === 'admin'
+                ? 'Real-time overview of your auction platform'
+                : 'Your personal auction activity overview'}
+            </p>
           </div>
-          <div className='flex gap-2'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={() => {
-                refetchStats()
-              }}
-            >
-              <RefreshCw className='mr-2 h-4 w-4' />
-              Refresh
-            </Button>
-            <Button variant='outline' size='sm' onClick={resetWidgetOrder}>
-              <Settings2 className='mr-2 h-4 w-4' />
-              Reset Layout
-            </Button>
-          </div>
-        </div>
-
-        {/* Stats Cards */}
-        <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
-          {statsConfig.map((config) => (
-            <StatsCard
-              key={config.key}
-              title={config.title}
-              value={stats?.[config.key as keyof typeof stats] || 0}
-              change={(stats?.[`${config.key}Change` as keyof typeof stats] as number) || 0}
-              loading={statsLoading}
-              prefix={config.prefix}
-            />
-          ))}
-        </div>
-
-        {/* Draggable Charts */}
-        <DraggableChartsContainer chartData={chartData} loading={chartsLoading} />
-
-        {/* Activity Feed */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-            <CardDescription>Latest updates from your system</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {activitiesLoading ? (
-              <div className='space-y-4'>
-                {[...Array(5)].map((_, i) => (
-                  <div key={i} className='flex items-center space-x-4'>
-                    <Skeleton className='h-2 w-2 rounded-full bg-muted-foreground/20' />
-                    <div className='flex-1 space-y-2'>
-                      <Skeleton className='h-4 w-3/4 bg-muted-foreground/20' />
-                      <Skeleton className='h-3 w-1/4 bg-muted-foreground/20' />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <AnimatePresence>
-                <div className='space-y-4'>
-                  {activities?.map((activity, index) => (
-                    <motion.div
-                      key={activity.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: 20 }}
-                      transition={{ delay: index * 0.1 }}
-                      className='flex items-center space-x-4'
-                    >
-                      <div className='bg-primary h-2 w-2 animate-pulse rounded-full' />
-                      <div className='flex-1 space-y-1'>
-                        <p className='text-sm'>
-                          <span className='font-medium'>{activity.user}</span> {activity.action}
-                          {activity.item && (
-                            <span className='text-muted-foreground'> on {activity.item}</span>
-                          )}
-                        </p>
-                        <p className='text-muted-foreground text-xs'>
-                          {formatTimeAgo(activity.timestamp)}
-                        </p>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              </AnimatePresence>
+          <div className='flex items-center gap-2'>
+            {/* View Toggle - Only visible for admins */}
+            {isAdmin && (
+              <Tabs
+                value={viewMode}
+                onValueChange={(value) => setViewMode(value as 'admin' | 'user')}
+              >
+                <TabsList>
+                  <TabsTrigger value='admin' className='gap-2'>
+                    <LayoutDashboard className='h-4 w-4' />
+                    Admin View
+                  </TabsTrigger>
+                  <TabsTrigger value='user' className='gap-2'>
+                    <User className='h-4 w-4' />
+                    User View
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
             )}
-          </CardContent>
-        </Card>
+            {viewMode === 'admin' && (
+              <>
+                <Button
+                  variant='outline'
+                  size='sm'
+                  onClick={() => {
+                    refetchStats()
+                  }}
+                >
+                  <RefreshCw className='mr-2 h-4 w-4' />
+                  Refresh
+                </Button>
+                <Button variant='outline' size='sm' onClick={resetWidgetOrder}>
+                  <Settings2 className='mr-2 h-4 w-4' />
+                  Reset Layout
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Conditional Dashboard Content */}
+        {viewMode === 'user' ? (
+          <UserDashboard />
+        ) : (
+          <>
+            {/* Stats Cards */}
+            <div className='grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5'>
+              {statsConfig.map((config) => (
+                <StatsCard
+                  key={config.key}
+                  title={config.title}
+                  value={stats?.[config.key as keyof typeof stats] || 0}
+                  change={(stats?.[`${config.key}Change` as keyof typeof stats] as number) || 0}
+                  loading={statsLoading}
+                  prefix={config.prefix}
+                />
+              ))}
+            </div>
+
+            {/* Draggable Charts */}
+            <DraggableChartsContainer chartData={chartData} loading={chartsLoading} />
+
+            {/* Activity Feed */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent Activity</CardTitle>
+                <CardDescription>Latest updates from your system</CardDescription>
+              </CardHeader>
+              <CardContent>
+                {activitiesLoading ? (
+                  <div className='space-y-4'>
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className='flex items-center space-x-4'>
+                        <Skeleton className='h-2 w-2 rounded-full bg-muted-foreground/20' />
+                        <div className='flex-1 space-y-2'>
+                          <Skeleton className='h-4 w-3/4 bg-muted-foreground/20' />
+                          <Skeleton className='h-3 w-1/4 bg-muted-foreground/20' />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <AnimatePresence>
+                    <div className='space-y-4'>
+                      {activities?.map((activity, index) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: 20 }}
+                          transition={{ delay: index * 0.1 }}
+                          className='flex items-center space-x-4'
+                        >
+                          <div className='bg-primary h-2 w-2 animate-pulse rounded-full' />
+                          <div className='flex-1 space-y-1'>
+                            <p className='text-sm'>
+                              <span className='font-medium'>{activity.user}</span> {activity.action}
+                              {activity.item && (
+                                <span className='text-muted-foreground'> on {activity.item}</span>
+                              )}
+                            </p>
+                            <p className='text-muted-foreground text-xs'>
+                              {formatTimeAgo(activity.timestamp)}
+                            </p>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </AnimatePresence>
+                )}
+              </CardContent>
+            </Card>
+          </>
+        )}
       </Main>
     </>
   )

@@ -16,6 +16,7 @@ import {
   Settings,
   Command,
   ClipboardCheck,
+  MessageCircle,
 } from 'lucide-react'
 import { type NavGroup, type User, type Team } from '../types'
 import { ROLES } from '@/lib/rbac/types'
@@ -114,6 +115,13 @@ export const sidebarNavGroups: NavGroup[] = [
           { title: 'Models SEO', url: '/admin/models', icon: Tag },
         ],
       },
+    ],
+  },
+  {
+    title: 'Communication',
+    roles: [...MANAGEMENT_ROLES],
+    items: [
+      { title: 'WhatsApp', url: '/whatsapp', icon: MessageCircle },
     ],
   },
   {

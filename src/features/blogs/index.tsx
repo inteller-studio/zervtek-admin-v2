@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import DOMPurify from 'dompurify'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -891,7 +892,7 @@ export function Blogs() {
                   <p className='text-muted-foreground italic'>{selectedPost.excerpt}</p>
                   <div
                     className='prose prose-sm max-w-none'
-                    dangerouslySetInnerHTML={{ __html: selectedPost.content }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(selectedPost.content) }}
                   />
                 </div>
 

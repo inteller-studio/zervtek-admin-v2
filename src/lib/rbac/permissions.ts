@@ -31,6 +31,9 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   { path: '/admin/makes', roles: CONTENT_ROLES },
   { path: '/admin/models', roles: CONTENT_ROLES },
 
+  // Communication section
+  { path: '/whatsapp', roles: MANAGEMENT_ROLES },
+
   // Users section
   { path: '/customers', roles: MANAGEMENT_ROLES },
   { path: '/users', roles: ADMIN_ONLY },

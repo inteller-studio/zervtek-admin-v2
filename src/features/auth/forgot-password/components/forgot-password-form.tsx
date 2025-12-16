@@ -39,9 +39,7 @@ export function ForgotPasswordForm({
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true)
-    // eslint-disable-next-line no-console
-    console.log(data)
-
+    // TODO: Implement actual password reset API call
     toast.promise(sleep(2000), {
       loading: 'Sending email...',
       success: () => {
