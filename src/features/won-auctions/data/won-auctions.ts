@@ -1,5 +1,6 @@
 import { faker } from '@faker-js/faker'
 import { stockVehiclesFromSQL } from './vehicles-from-sql'
+import { type PurchaseWorkflow } from '../types/workflow'
 
 faker.seed(67890)
 
@@ -60,7 +61,7 @@ export interface WonAuction {
   winningBid: number
   totalAmount: number
   shippingCost: number
-  customsFee: number
+  insuranceFee: number
   currency: string
   status: 'payment_pending' | 'processing' | 'documents_pending' | 'shipping' | 'delivered' | 'completed'
   paymentStatus: 'pending' | 'partial' | 'completed'
@@ -81,6 +82,8 @@ export interface WonAuction {
   auctionEndDate: Date
   createdAt: Date
   updatedAt: Date
+  // New workflow management field
+  workflow?: PurchaseWorkflow
 }
 
 const makes = ['Toyota', 'Honda', 'BMW', 'Mercedes-Benz', 'Audi', 'Nissan', 'Lexus', 'Porsche']
@@ -241,8 +244,8 @@ export const wonAuctions: WonAuction[] = realVehicles.map((vehicle, index) => {
   const lastName = faker.person.lastName()
   const winningBid = vehicle.stockPrice || faker.number.int({ min: 1500000, max: 12000000 })
   const shippingCost = faker.number.int({ min: 200000, max: 800000 })
-  const customsFee = faker.number.int({ min: 100000, max: 500000 })
-  const totalAmount = winningBid + shippingCost + customsFee
+  const insuranceFee = faker.number.int({ min: 100000, max: 500000 })
+  const totalAmount = winningBid + shippingCost + insuranceFee
   const paymentStatus = faker.helpers.arrayElement(['pending', 'partial', 'completed'] as const)
   const paidAmount = paymentStatus === 'completed' ? totalAmount : paymentStatus === 'partial' ? Math.floor(totalAmount * 0.5) : 0
   const status = faker.helpers.arrayElement(['payment_pending', 'processing', 'documents_pending', 'shipping', 'delivered', 'completed'] as const)
@@ -284,7 +287,7 @@ export const wonAuctions: WonAuction[] = realVehicles.map((vehicle, index) => {
     winningBid,
     totalAmount,
     shippingCost,
-    customsFee,
+    insuranceFee,
     currency: 'JPY',
     status,
     paymentStatus,

@@ -1,19 +1,23 @@
 'use client'
 
 import { type WonAuction, type Document, type ShipmentTracking, type Payment } from '../data/won-auctions'
+import { type PurchaseWorkflow } from '../types/workflow'
 import { useWonAuctions } from './won-auctions-provider'
 import { RecordPaymentDialog } from './dialogs/record-payment-dialog'
 import { DocumentUploadDialog } from './dialogs/document-upload-dialog'
 import { DocumentManagementDialog } from './dialogs/document-management-dialog'
 import { ShippingUpdateDialog } from './dialogs/shipping-update-dialog'
-import { PurchaseDetailModal } from './dialogs/purchase-detail-modal'
 import { InvoiceDialog } from './dialogs/invoice-dialog'
+import { UnifiedPurchaseModal } from './unified-modal/unified-purchase-modal'
 
 interface WonAuctionsDialogsProps {
   onRecordPayment: (auctionId: string, payment: Omit<Payment, 'id' | 'auctionId' | 'recordedBy' | 'recordedAt'>) => void
   onUploadDocuments: (auctionId: string, documents: Document[]) => void
   onUpdateShipping: (auctionId: string, shipment: ShipmentTracking) => void
   onDeleteDocument?: (auctionId: string, documentId: string) => void
+  onWorkflowUpdate?: (auctionId: string, workflow: PurchaseWorkflow) => void
+  onMarkDelivered?: (auction: WonAuction) => void
+  onMarkCompleted?: (auction: WonAuction) => void
 }
 
 export function WonAuctionsDialogs({
@@ -21,19 +25,28 @@ export function WonAuctionsDialogs({
   onUploadDocuments,
   onUpdateShipping,
   onDeleteDocument,
+  onWorkflowUpdate,
+  onMarkDelivered,
+  onMarkCompleted,
 }: WonAuctionsDialogsProps) {
-  const { open, setOpen, currentRow } = useWonAuctions()
+  const { open, setOpen, currentRow, initialMode } = useWonAuctions()
 
   return (
     <>
-      <PurchaseDetailModal
-        open={open === 'detail'}
+      {/* Unified Purchase Modal - Combined detail and workflow */}
+      <UnifiedPurchaseModal
+        open={open === 'purchase'}
         onClose={() => setOpen(null)}
         auction={currentRow}
+        initialMode={initialMode}
+        onWorkflowUpdate={onWorkflowUpdate || (() => {})}
+        onDocumentUpload={onUploadDocuments}
+        onDocumentDelete={onDeleteDocument}
         onRecordPayment={() => setOpen('payment')}
-        onUploadDocuments={() => setOpen('document-upload')}
         onUpdateShipping={() => setOpen('shipping')}
         onGenerateInvoice={() => setOpen('invoice')}
+        onMarkDelivered={onMarkDelivered}
+        onMarkCompleted={onMarkCompleted}
       />
 
       <RecordPaymentDialog

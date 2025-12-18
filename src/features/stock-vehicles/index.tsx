@@ -21,26 +21,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
 import { VehicleDetailModal } from './components/vehicle-detail-modal'
+import { AddVehicleDrawer } from './components/dialogs/add-vehicle-drawer'
 import { CreateInvoiceDrawer } from '@/features/invoices/components/create-invoice-drawer'
-import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 import { Slider } from '@/components/ui/slider'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
+  Building2,
   Car,
   ChevronLeft,
   ChevronRight,
   Eye,
   Filter,
   Gauge,
+  Gavel,
   LayoutGrid,
   LayoutList,
   MapPin,
@@ -49,53 +44,23 @@ import {
   Search as SearchIcon,
   Settings,
 } from 'lucide-react'
-import { vehicles as initialVehicles, type Vehicle } from './data/vehicles'
+import { vehicles as initialVehicles, vendorVehicles as initialVendorVehicles, vendorPartners, type Vehicle, type VehicleSource } from './data/vehicles'
 
-interface NewVehicleForm {
-  make: string
-  model: string
-  year: number
-  price: number
-  mileage: number
-  transmission: string
-  exteriorColor: string
-  interiorColor: string
-  fuelType: string
-  engineSize: string
-  stockNumber: string
-  location: string
-  grade: string
-  description: string
-  status: 'available' | 'reserved' | 'sold'
-}
-
-const emptyVehicle: NewVehicleForm = {
-  make: '',
-  model: '',
-  year: new Date().getFullYear(),
-  price: 0,
-  mileage: 0,
-  transmission: 'automatic',
-  exteriorColor: '',
-  interiorColor: '',
-  fuelType: 'gasoline',
-  engineSize: '',
-  stockNumber: '',
-  location: '',
-  grade: '',
-  description: '',
-  status: 'available',
-}
 
 export function StockVehicles() {
-  const [vehicles, setVehicles] = useState(initialVehicles)
+  const [auctionVehicles, setAuctionVehicles] = useState(initialVehicles)
+  const [vendorVehicles, setVendorVehicles] = useState(initialVendorVehicles)
+  const [mainTab, setMainTab] = useState<'auction' | 'vendor'>('auction')
+
+  // Combined vehicles for filtering
+  const vehicles = mainTab === 'auction' ? auctionVehicles : vendorVehicles
+  const setVehicles = mainTab === 'auction' ? setAuctionVehicles : setVendorVehicles
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [activeTab, setActiveTab] = useState('available')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [addDialogOpen, setAddDialogOpen] = useState(false)
-  const [newVehicle, setNewVehicle] = useState(emptyVehicle)
+  const [addDrawerOpen, setAddDrawerOpen] = useState(false)
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [isInvoiceDrawerOpen, setIsInvoiceDrawerOpen] = useState(false)
@@ -233,45 +198,19 @@ export function StockVehicles() {
     mileageRange[0] !== 0 ||
     mileageRange[1] !== 200000
 
-  const handleAddVehicle = () => {
-    if (!newVehicle.make || !newVehicle.model) {
-      toast.error('Please fill in required fields (Make and Model)')
-      return
-    }
-
+  const handleAddVehicle = (vehicleData: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>) => {
     const vehicle: Vehicle = {
+      ...vehicleData,
       id: String(Date.now()),
-      make: newVehicle.make,
-      model: newVehicle.model,
-      modelCode: '',
-      year: newVehicle.year,
-      price: newVehicle.price,
-      priceDisplay: `¥${newVehicle.price.toLocaleString()}`,
-      mileage: newVehicle.mileage,
-      mileageDisplay: `${newVehicle.mileage.toLocaleString()} km`,
-      transmission: newVehicle.transmission,
-      exteriorColor: newVehicle.exteriorColor,
-      exteriorGrade: '',
-      interiorGrade: newVehicle.interiorColor,
-      fuelType: newVehicle.fuelType,
-      displacement: newVehicle.engineSize,
-      stockNumber: newVehicle.stockNumber || `STK-${Date.now().toString().slice(-6)}`,
-      location: newVehicle.location || 'Tokyo',
-      grade: newVehicle.grade,
-      status: newVehicle.status,
-      images: [],
-      auctionHouse: 'Direct',
-      score: '',
-      history: '',
-      dateAvailable: new Date().toISOString().split('T')[0],
       createdAt: new Date(),
       updatedAt: new Date(),
     }
-
-    setVehicles([vehicle, ...vehicles])
-    setAddDialogOpen(false)
-    setNewVehicle(emptyVehicle)
-    toast.success('Vehicle added successfully')
+    // Add to the correct list based on vehicle source
+    if (vehicleData.source === 'vendor') {
+      setVendorVehicles([vehicle, ...vendorVehicles])
+    } else {
+      setAuctionVehicles([vehicle, ...auctionVehicles])
+    }
   }
 
   return (
@@ -294,13 +233,27 @@ export function StockVehicles() {
             <Badge variant='outline' className='px-3 py-1'>
               {filteredVehicles.length} Vehicles
             </Badge>
-            <Button onClick={() => setAddDialogOpen(true)}>
+            <Button onClick={() => setAddDrawerOpen(true)}>
               <Plus className='mr-2 h-4 w-4' />
               Add Vehicle
             </Button>
           </div>
         </div>
 
+        {/* Main Source Tabs */}
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'auction' | 'vendor')}>
+          <TabsList>
+            <TabsTrigger value='auction' className='gap-2'>
+              <Gavel className='h-4 w-4' />
+              Auction Stock
+            </TabsTrigger>
+            <TabsTrigger value='vendor' className='gap-2'>
+              <Building2 className='h-4 w-4' />
+              Vendor Stock
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value='auction' className='mt-4 space-y-4'>
         {/* Search and Filter Bar */}
         <div className='space-y-4'>
           <div className='flex flex-col gap-4 sm:flex-row'>
@@ -770,6 +723,126 @@ export function StockVehicles() {
             </Button>
           </div>
         )}
+          </TabsContent>
+
+          <TabsContent value='vendor' className='mt-4 space-y-4'>
+            {/* Vendor Stock Stats */}
+            <div className='flex items-center justify-between'>
+              <p className='text-sm text-muted-foreground'>
+                {vendorVehicles.length} vehicles from {vendorPartners.length} vendor partners
+              </p>
+              <Button onClick={() => setAddDrawerOpen(true)}>
+                <Plus className='mr-2 h-4 w-4' />
+                Add Vendor Vehicle
+              </Button>
+            </div>
+
+            {vendorVehicles.length === 0 ? (
+              /* Empty State */
+              <Card>
+                <CardContent className='flex flex-col items-center justify-center py-16'>
+                  <Building2 className='h-16 w-16 text-muted-foreground/30 mb-4' />
+                  <h3 className='text-lg font-semibold mb-2'>No Vendor Vehicles</h3>
+                  <p className='text-sm text-muted-foreground text-center max-w-md mb-6'>
+                    Add vehicles from your trusted vendor partners. These vehicles are manually entered and managed separately from auction stock.
+                  </p>
+                  <Button onClick={() => setAddDrawerOpen(true)}>
+                    <Plus className='mr-2 h-4 w-4' />
+                    Add First Vendor Vehicle
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              /* Vendor Vehicles Grid */
+              <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+                {vendorVehicles.map((vehicle) => (
+                  <Card
+                    key={vehicle.id}
+                    className='group cursor-pointer overflow-hidden transition-all hover:shadow-md'
+                    onClick={() => {
+                      setSelectedVehicle(vehicle)
+                      setIsViewModalOpen(true)
+                    }}
+                  >
+                    <div className='relative aspect-[4/3] overflow-hidden bg-muted'>
+                      {vehicle.images && vehicle.images.length > 0 ? (
+                        <Image
+                          src={vehicle.images[0]}
+                          alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
+                          fill
+                          className='object-cover transition-transform group-hover:scale-105'
+                        />
+                      ) : (
+                        <div className='flex h-full items-center justify-center'>
+                          <Car className='h-12 w-12 text-muted-foreground/30' />
+                        </div>
+                      )}
+                      <Badge
+                        className='absolute right-2 top-2'
+                        variant={
+                          vehicle.status === 'available'
+                            ? 'emerald'
+                            : vehicle.status === 'reserved'
+                              ? 'amber'
+                              : 'zinc'
+                        }
+                      >
+                        {vehicle.status}
+                      </Badge>
+                      <Badge className='absolute left-2 top-2' variant='violet'>
+                        Vendor
+                      </Badge>
+                    </div>
+                    <CardContent className='p-4'>
+                      <div className='mb-2'>
+                        <p className='font-semibold'>
+                          {vehicle.year} {vehicle.make} {vehicle.model}
+                        </p>
+                        {vehicle.grade && (
+                          <p className='text-sm text-muted-foreground'>{vehicle.grade}</p>
+                        )}
+                      </div>
+                      <div className='mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
+                        <span className='flex items-center gap-1'>
+                          <Gauge className='h-3 w-3' />
+                          {vehicle.mileageDisplay}
+                        </span>
+                        <span className='flex items-center gap-1'>
+                          <MapPin className='h-3 w-3' />
+                          {vehicle.location}
+                        </span>
+                      </div>
+                      <div className='flex items-center justify-between'>
+                        <p className='text-lg font-bold text-primary'>
+                          {vehicle.priceDisplay}
+                        </p>
+                        <Button
+                          size='sm'
+                          variant='ghost'
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setSelectedVehicle(vehicle)
+                            setIsViewModalOpen(true)
+                          }}
+                        >
+                          <Eye className='h-4 w-4' />
+                        </Button>
+                      </div>
+                      {vehicle.vendorName && (
+                        <div className='mt-2 pt-2 border-t'>
+                          <p className='text-xs text-muted-foreground flex items-center gap-1'>
+                            <Building2 className='h-3 w-3' />
+                            {vehicle.vendorName}
+                          </p>
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       </Main>
 
       {/* View Vehicle Modal */}
@@ -783,7 +856,11 @@ export function StockVehicles() {
           setIsInvoiceDrawerOpen(true)
         }}
         onDelete={(vehicle) => {
-          setVehicles(vehicles.filter(v => v.id !== vehicle.id))
+          if (vehicle.source === 'vendor') {
+            setVendorVehicles(vendorVehicles.filter(v => v.id !== vehicle.id))
+          } else {
+            setAuctionVehicles(auctionVehicles.filter(v => v.id !== vehicle.id))
+          }
           setIsViewModalOpen(false)
           toast.success('Vehicle deleted')
         }}
@@ -809,221 +886,13 @@ export function StockVehicles() {
         }}
       />
 
-      {/* Add Vehicle Dialog */}
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className='flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden sm:max-w-3xl'>
-          <DialogHeader>
-            <DialogTitle>Add New Vehicle</DialogTitle>
-            <DialogDescription>
-              Enter the vehicle details to add it to your inventory
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className='flex-1 overflow-y-auto'>
-            <div className='space-y-6 p-1'>
-              {/* Basic Information */}
-              <div className='space-y-4'>
-                <h3 className='font-semibold'>Basic Information</h3>
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div>
-                    <Label>Make *</Label>
-                    <Input
-                      placeholder='Toyota'
-                      value={newVehicle.make}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, make: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Model *</Label>
-                    <Input
-                      placeholder='Camry'
-                      value={newVehicle.model}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, model: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Year</Label>
-                    <Input
-                      type='number'
-                      min='1990'
-                      max={new Date().getFullYear() + 1}
-                      value={newVehicle.year}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, year: Number(e.target.value) })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Pricing & Mileage */}
-              <div className='space-y-4'>
-                <h3 className='font-semibold'>Pricing & Mileage</h3>
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div>
-                    <Label>Price (¥)</Label>
-                    <Input
-                      type='number'
-                      min='0'
-                      placeholder='2500000'
-                      value={newVehicle.price || ''}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, price: Number(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Mileage (km)</Label>
-                    <Input
-                      type='number'
-                      min='0'
-                      placeholder='50000'
-                      value={newVehicle.mileage || ''}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, mileage: Number(e.target.value) })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Status</Label>
-                    <Select
-                      value={newVehicle.status}
-                      onValueChange={(value: 'available' | 'reserved' | 'sold') =>
-                        setNewVehicle({ ...newVehicle, status: value })
-                      }
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='available'>Available</SelectItem>
-                        <SelectItem value='reserved'>Reserved</SelectItem>
-                        <SelectItem value='sold'>Sold</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vehicle Details */}
-              <div className='space-y-4'>
-                <h3 className='font-semibold'>Vehicle Details</h3>
-                <div className='grid gap-4 md:grid-cols-3'>
-                  <div>
-                    <Label>Transmission</Label>
-                    <Select
-                      value={newVehicle.transmission}
-                      onValueChange={(value) => setNewVehicle({ ...newVehicle, transmission: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='automatic'>Automatic</SelectItem>
-                        <SelectItem value='manual'>Manual</SelectItem>
-                        <SelectItem value='cvt'>CVT</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Fuel Type</Label>
-                    <Select
-                      value={newVehicle.fuelType}
-                      onValueChange={(value) => setNewVehicle({ ...newVehicle, fuelType: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value='gasoline'>Gasoline</SelectItem>
-                        <SelectItem value='diesel'>Diesel</SelectItem>
-                        <SelectItem value='hybrid'>Hybrid</SelectItem>
-                        <SelectItem value='electric'>Electric</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label>Engine Size</Label>
-                    <Input
-                      placeholder='2.5L'
-                      value={newVehicle.engineSize}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, engineSize: e.target.value })}
-                    />
-                  </div>
-                </div>
-                <div className='grid gap-4 md:grid-cols-2'>
-                  <div>
-                    <Label>Exterior Color</Label>
-                    <Input
-                      placeholder='White'
-                      value={newVehicle.exteriorColor}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, exteriorColor: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Interior Color</Label>
-                    <Input
-                      placeholder='Black'
-                      value={newVehicle.interiorColor}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, interiorColor: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Identification */}
-              <div className='space-y-4'>
-                <h3 className='font-semibold'>Identification</h3>
-                <div className='grid gap-4 md:grid-cols-2'>
-                  <div>
-                    <Label>Stock Number</Label>
-                    <Input
-                      placeholder='STK-001'
-                      value={newVehicle.stockNumber}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, stockNumber: e.target.value })}
-                    />
-                  </div>
-                  <div>
-                    <Label>Location</Label>
-                    <Input
-                      placeholder='Tokyo'
-                      value={newVehicle.location}
-                      onChange={(e) => setNewVehicle({ ...newVehicle, location: e.target.value })}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Additional Info */}
-              <div className='space-y-4'>
-                <h3 className='font-semibold'>Additional Information</h3>
-                <div>
-                  <Label>Grade</Label>
-                  <Input
-                    placeholder='Grade information'
-                    value={newVehicle.grade}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, grade: e.target.value })}
-                  />
-                </div>
-                <div>
-                  <Label>Description</Label>
-                  <Textarea
-                    placeholder='Vehicle description, features, condition notes...'
-                    value={newVehicle.description}
-                    onChange={(e) => setNewVehicle({ ...newVehicle, description: e.target.value })}
-                    rows={3}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer Buttons */}
-          <div className='flex justify-end gap-2 border-t pt-4'>
-            <Button variant='outline' onClick={() => setAddDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddVehicle}>
-              <Plus className='mr-2 h-4 w-4' />
-              Add Vehicle
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Add Vehicle Drawer */}
+      <AddVehicleDrawer
+        open={addDrawerOpen}
+        onOpenChange={setAddDrawerOpen}
+        onAddVehicle={handleAddVehicle}
+        defaultSource={mainTab}
+      />
     </>
   )
 }

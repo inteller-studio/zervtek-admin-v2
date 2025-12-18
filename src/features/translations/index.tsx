@@ -74,7 +74,7 @@ const canAssignOthers = ['superadmin', 'admin', 'manager'].includes(CURRENT_USER
 // Filter to only translation requests
 const initialRequests = allRequests.filter(r => r.type === 'translation')
 
-type TranslationType = 'all' | 'auction_sheet' | 'export_certificate'
+type TranslationType = 'all' | 'auction_sheet' | 'export_certificate' | 'my_tasks'
 
 export function Translations() {
   const [requests, setRequests] = useState<ServiceRequest[]>(initialRequests)
@@ -82,7 +82,6 @@ export function Translations() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [translationType, setTranslationType] = useState<TranslationType>('all')
-  const [showMyTasks, setShowMyTasks] = useState(false)
 
   // Translation editor state
   const [translationText, setTranslationText] = useState('')
@@ -117,14 +116,15 @@ export function Translations() {
       const matchesStatus = statusFilter === 'all' || request.status === statusFilter
 
       const matchesType = translationType === 'all' ||
+        translationType === 'my_tasks' ||
         (translationType === 'auction_sheet' && request.title.includes('Auction Sheet')) ||
         (translationType === 'export_certificate' && request.title.includes('Export Certificate'))
 
-      const matchesMyTasks = !showMyTasks || request.assignedTo === CURRENT_USER_ID
+      const matchesMyTasks = translationType !== 'my_tasks' || request.assignedTo === CURRENT_USER_ID
 
       return matchesSearch && matchesStatus && matchesType && matchesMyTasks
     })
-  }, [requests, searchQuery, statusFilter, translationType, showMyTasks])
+  }, [requests, searchQuery, statusFilter, translationType])
 
   // Pagination logic
   const totalPages = Math.ceil(filteredRequests.length / ITEMS_PER_PAGE)
@@ -138,7 +138,7 @@ export function Translations() {
   // Reset page when filters change
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, statusFilter, translationType, showMyTasks])
+  }, [searchQuery, statusFilter, translationType])
 
   const handleSelectRequest = (request: ServiceRequest) => {
     setSelectedRequest(request)
@@ -214,25 +214,25 @@ export function Translations() {
     return colors[priority]
   }
 
-  const getPriorityBadge = (priority: ServiceRequest['priority']) => {
-    const colors = {
-      urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
-      high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      low: 'bg-muted text-muted-foreground border-transparent',
+  const getPriorityVariant = (priority: ServiceRequest['priority']) => {
+    const variants = {
+      urgent: 'red',
+      high: 'orange',
+      medium: 'amber',
+      low: 'zinc',
     }
-    return colors[priority]
+    return variants[priority]
   }
 
-  const getStatusBadge = (status: ServiceRequest['status']) => {
-    const colors = {
-      completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-      in_progress: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-      assigned: 'bg-violet-500/15 text-violet-400 border-violet-500/20',
-      pending: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-      cancelled: 'bg-muted text-muted-foreground border-transparent',
+  const getStatusVariant = (status: ServiceRequest['status']) => {
+    const variants = {
+      completed: 'emerald',
+      in_progress: 'blue',
+      assigned: 'violet',
+      pending: 'amber',
+      cancelled: 'zinc',
     }
-    return colors[status]
+    return variants[status]
   }
 
   const getTypeIcon = (title: string) => {
@@ -303,25 +303,12 @@ export function Translations() {
               <TabsTrigger value='all'>All ({counts.all})</TabsTrigger>
               <TabsTrigger value='auction_sheet'>Auction Sheet ({counts.auctionSheet})</TabsTrigger>
               <TabsTrigger value='export_certificate'>Export Cert ({counts.exportCert})</TabsTrigger>
+              <TabsTrigger value='my_tasks' className='gap-1.5'>
+                <User className='h-4 w-4' />
+                My Tasks ({counts.myTasks})
+              </TabsTrigger>
             </TabsList>
           </Tabs>
-
-          <div className='flex flex-1 items-center gap-2 justify-end'>
-            <Button
-              variant={showMyTasks ? 'secondary' : 'outline'}
-              size='sm'
-              onClick={() => setShowMyTasks(!showMyTasks)}
-              className='gap-1.5'
-            >
-              <User className='h-4 w-4' />
-              My Tasks
-              {counts.myTasks > 0 && (
-                <Badge variant='secondary' className='ml-1 h-5 min-w-5 px-1.5 text-xs'>
-                  {counts.myTasks}
-                </Badge>
-              )}
-            </Button>
-          </div>
         </div>
 
         {/* Split Panel Layout */}
@@ -401,7 +388,7 @@ export function Translations() {
                             {request.customerName} • {getTypeLabel(request.title)}
                           </p>
                           <div className='flex items-center gap-2 mt-1.5'>
-                            <Badge className={cn('text-[10px] px-1.5 py-0 h-5 font-medium', getStatusBadge(request.status))}>
+                            <Badge variant={getStatusVariant(request.status) as any} className='text-[10px] px-1.5 h-5'>
                               {request.status.replace('_', ' ')}
                             </Badge>
                             {request.assignedToName && (
@@ -472,7 +459,7 @@ export function Translations() {
                       <div className='flex items-center gap-2'>
                         <Car className='h-5 w-5 text-muted-foreground' />
                         <h3 className='font-semibold'>{getVehicleName(selectedRequest)}</h3>
-                        <Badge className={cn('text-xs', getStatusBadge(selectedRequest.status))}>
+                        <Badge variant={getStatusVariant(selectedRequest.status) as any}>
                           {selectedRequest.status.replace('_', ' ')}
                         </Badge>
                       </div>
@@ -483,7 +470,7 @@ export function Translations() {
                         <span>•</span>
                         <span className='font-mono text-xs'>{selectedRequest.requestId}</span>
                         <span>•</span>
-                        <Badge className={cn('text-xs capitalize', getPriorityBadge(selectedRequest.priority))}>
+                        <Badge variant={getPriorityVariant(selectedRequest.priority) as any} className='capitalize'>
                           {selectedRequest.priority}
                         </Badge>
                       </div>

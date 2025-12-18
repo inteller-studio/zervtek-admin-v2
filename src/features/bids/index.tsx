@@ -241,28 +241,28 @@ export function Bids() {
     resetPagination()
   }
 
-  const getStatusColor = (status: string) => {
+  const getStatusVariant = (status: string) => {
     switch (status) {
       case 'pending_approval':
-        return 'bg-amber-100 text-amber-800'
+        return 'amber'
       case 'active':
-        return 'bg-blue-100 text-blue-800'
+        return 'blue'
       case 'winning':
-        return 'bg-green-100 text-green-800'
+        return 'green'
       case 'outbid':
-        return 'bg-orange-100 text-orange-800'
+        return 'orange'
       case 'won':
-        return 'bg-emerald-100 text-emerald-800'
+        return 'emerald'
       case 'lost':
-        return 'bg-gray-100 text-gray-800'
+        return 'zinc'
       case 'retracted':
-        return 'bg-red-100 text-red-800'
+        return 'red'
       case 'expired':
-        return 'bg-slate-100 text-slate-800'
+        return 'zinc'
       case 'declined':
-        return 'bg-rose-100 text-rose-800'
+        return 'rose'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'zinc'
     }
   }
 
@@ -837,7 +837,7 @@ export function Bids() {
                         <p className='font-semibold'>¥{bid.amount.toLocaleString()}</p>
                       </TableCell>
                       <TableCell>
-                        <Badge className={getStatusColor(bid.status)}>
+                        <Badge variant={getStatusVariant(bid.status) as any}>
                           {getStatusLabel(bid.status)}
                         </Badge>
                       </TableCell>
@@ -1035,7 +1035,7 @@ export function Bids() {
                         {format(bid.timestamp, 'MMM dd, yyyy h:mm a')}
                       </CardDescription>
                     </div>
-                    <Badge className={getStatusColor(bid.status)}>
+                    <Badge variant={getStatusVariant(bid.status) as any}>
                       {getStatusLabel(bid.status)}
                     </Badge>
                   </div>

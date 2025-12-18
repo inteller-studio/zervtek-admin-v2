@@ -24,11 +24,12 @@ import {
 import { type WonAuction } from '../data/won-auctions'
 import { VinCopyButton } from './vin-copy-button'
 import { DeliveryCountdown } from './delivery-countdown'
-import { type WonAuctionsDialogType } from '../types'
+import { type WonAuctionsDialogType, type PurchaseModalMode } from '../types'
 
 interface WonAuctionsTableViewProps {
   data: WonAuction[]
   onOpenDialog: (type: WonAuctionsDialogType, auction: WonAuction) => void
+  onOpenPurchaseModal: (auction: WonAuction, mode: PurchaseModalMode) => void
   onMarkDelivered: (auction: WonAuction) => void
   onMarkCompleted: (auction: WonAuction) => void
 }
@@ -57,6 +58,7 @@ const getPaymentStatusColor = (status: WonAuction['paymentStatus']) => {
 export function WonAuctionsTableView({
   data,
   onOpenDialog,
+  onOpenPurchaseModal,
   onMarkDelivered,
   onMarkCompleted,
 }: WonAuctionsTableViewProps) {
@@ -143,7 +145,7 @@ export function WonAuctionsTableView({
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onOpenDialog('detail', auction)}>
+                      <DropdownMenuItem onClick={() => onOpenPurchaseModal(auction, 'overview')}>
                         <Eye className='mr-2 h-4 w-4' />
                         View Details
                       </DropdownMenuItem>

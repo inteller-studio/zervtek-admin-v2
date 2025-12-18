@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef, useCallback } from 'react'
 import { format } from 'date-fns'
 import {
   ArrowLeft,
@@ -8,19 +8,21 @@ import {
   Car,
   Check,
   ChevronsUpDown,
-  Download,
+  FileText,
+  ImagePlus,
   Loader2,
   Plus,
-  Printer,
-  Save,
   Search,
-  Send,
+  Ship,
+  Trash2,
+  Upload,
   User,
   X,
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent } from '@/components/ui/card'
 import {
   Command,
   CommandEmpty,
@@ -49,11 +51,9 @@ import {
   Sheet,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet'
-import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -75,6 +75,9 @@ const makes = ['Toyota', 'Honda', 'BMW', 'Mercedes-Benz', 'Audi', 'Nissan', 'Lex
 const colors = ['Black', 'White', 'Silver', 'Red', 'Blue', 'Gray', 'Pearl White', 'Other']
 const ports = ['Los Angeles, USA', 'Hamburg, Germany', 'Dubai, UAE', 'Sydney, Australia', 'Singapore', 'London, UK', 'Tokyo, Japan']
 
+// Format price
+const formatPrice = (price: number) => `¥${price.toLocaleString()}`
+
 export function AddVehicleDrawer({
   open,
   onOpenChange,
@@ -82,6 +85,11 @@ export function AddVehicleDrawer({
 }: AddVehicleDrawerProps) {
   const [step, setStep] = useState<1 | 2>(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  // Photo Upload
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [vehicleImages, setVehicleImages] = useState<{ id: string; file: File; preview: string }[]>([])
+  const [isDragging, setIsDragging] = useState(false)
 
   // Vehicle Info
   const [make, setMake] = useState('')
@@ -110,6 +118,19 @@ export function AddVehicleDrawer({
   const [customerPhone, setCustomerPhone] = useState('')
   const [customerAddress, setCustomerAddress] = useState('')
 
+  // Other
+  const [destinationPort, setDestinationPort] = useState('')
+  const [notes, setNotes] = useState('')
+
+  // Invoice Options (Step 2)
+  const [invoiceType, setInvoiceType] = useState<'full' | 'deposit' | 'balance'>('full')
+  const [vehiclePrice, setVehiclePrice] = useState('')
+  const [shippingCost, setShippingCost] = useState('')
+  const [inspectionFee, setInspectionFee] = useState('')
+  const [documentFee, setDocumentFee] = useState('')
+  const [additionalFees, setAdditionalFees] = useState('')
+  const [discount, setDiscount] = useState('')
+
   // Filter customers based on search query
   const filteredCustomers = useMemo(() => {
     if (!customerSearchQuery) return customers.slice(0, 10)
@@ -124,21 +145,61 @@ export function AddVehicleDrawer({
       .slice(0, 10)
   }, [customerSearchQuery])
 
-  // Pricing
-  const [vehiclePrice, setVehiclePrice] = useState('')
-  const [shippingCost, setShippingCost] = useState('')
-  const [customsFee, setCustomsFee] = useState('')
+  // Photo upload handlers
+  const handleFileSelect = useCallback((files: FileList | null) => {
+    if (!files) return
 
-  // Other
-  const [destinationPort, setDestinationPort] = useState('')
-  const [notes, setNotes] = useState('')
+    const newImages = Array.from(files)
+      .filter(file => file.type.startsWith('image/'))
+      .slice(0, 10 - vehicleImages.length) // Max 10 images
+      .map(file => ({
+        id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        file,
+        preview: URL.createObjectURL(file),
+      }))
 
-  // Invoice Options (Step 2)
-  const [includeShipping, setIncludeShipping] = useState(true)
-  const [includeCustoms, setIncludeCustoms] = useState(true)
+    if (newImages.length > 0) {
+      setVehicleImages(prev => [...prev, ...newImages])
+    }
+
+    if (files.length > newImages.length) {
+      toast.info('Some files were skipped', {
+        description: 'Only image files are allowed, max 10 images',
+      })
+    }
+  }, [vehicleImages.length])
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }, [])
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }, [])
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    handleFileSelect(e.dataTransfer.files)
+  }, [handleFileSelect])
+
+  const handleRemoveImage = useCallback((id: string) => {
+    setVehicleImages(prev => {
+      const image = prev.find(img => img.id === id)
+      if (image) {
+        URL.revokeObjectURL(image.preview)
+      }
+      return prev.filter(img => img.id !== id)
+    })
+  }, [])
 
   const resetForm = () => {
     setStep(1)
+    // Clean up image previews
+    vehicleImages.forEach(img => URL.revokeObjectURL(img.preview))
+    setVehicleImages([])
     setMake('')
     setModel('')
     setYear('')
@@ -151,13 +212,15 @@ export function AddVehicleDrawer({
     setCustomerEmail('')
     setCustomerPhone('')
     setCustomerAddress('')
-    setVehiclePrice('')
-    setShippingCost('')
-    setCustomsFee('')
     setDestinationPort('')
     setNotes('')
-    setIncludeShipping(true)
-    setIncludeCustoms(true)
+    setInvoiceType('full')
+    setVehiclePrice('')
+    setShippingCost('')
+    setInspectionFee('')
+    setDocumentFee('')
+    setAdditionalFees('')
+    setDiscount('')
   }
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -234,11 +297,22 @@ export function AddVehicleDrawer({
     onOpenChange(open)
   }
 
+  // Calculate totals for invoice
+  const price = Number(vehiclePrice) || 0
+  const serviceFee = Math.round(price * 0.05)
+  const shippingAmount = Number(shippingCost) || 0
+  const inspectionAmount = Number(inspectionFee) || 0
+  const documentAmount = Number(documentFee) || 0
+  const additionalAmount = Number(additionalFees) || 0
+  const discountAmount = Number(discount) || 0
+  const subtotal = price + serviceFee + shippingAmount + inspectionAmount + documentAmount + additionalAmount
+  const total = subtotal - discountAmount
+
   const createVehicleData = (): Omit<WonAuction, 'id' | 'createdAt' | 'updatedAt'> => {
-    const price = Number(vehiclePrice) || 0
-    const shipping = Number(shippingCost) || 0
-    const customs = Number(customsFee) || 0
-    const total = price + shipping + customs
+    // Use uploaded images or placeholder
+    const imageUrls = vehicleImages.length > 0
+      ? vehicleImages.map(img => img.preview)
+      : ['#']
 
     return {
       auctionId: `MAN-${Date.now()}`,
@@ -249,7 +323,7 @@ export function AddVehicleDrawer({
         vin: vin || 'N/A',
         mileage: Number(mileage) || 0,
         color: color || 'N/A',
-        images: ['#'],
+        images: imageUrls,
       },
       winnerId: selectedCustomer?.id || `CUST-${Date.now()}`,
       winnerName: customerName,
@@ -258,8 +332,8 @@ export function AddVehicleDrawer({
       winnerAddress: customerAddress,
       winningBid: price,
       totalAmount: total,
-      shippingCost: shipping,
-      customsFee: customs,
+      shippingCost: shippingAmount,
+      insuranceFee: inspectionAmount + documentAmount + additionalAmount,
       currency: 'JPY',
       status: 'payment_pending',
       paymentStatus: 'pending',
@@ -268,30 +342,16 @@ export function AddVehicleDrawer({
       documents: [],
       shipment: undefined,
       destinationPort: destinationPort || undefined,
-      estimatedShippingCost: shipping,
+      estimatedShippingCost: shippingAmount,
       notes: notes || undefined,
       timeline: {},
       auctionEndDate: new Date(),
     }
   }
 
-  const handleSaveChanges = () => {
-    if (!make || !model || !customerName || !vehiclePrice) {
-      toast.error('Please fill in required fields: Make, Model, Customer Name, and Vehicle Price')
-      return
-    }
-
-    setIsSubmitting(true)
-    const vehicleData = createVehicleData()
-    onAddVehicle(vehicleData)
-    toast.success('Vehicle added successfully')
-    setIsSubmitting(false)
-    handleOpenChange(false)
-  }
-
   const handleNext = () => {
-    if (!make || !model || !customerName || !vehiclePrice) {
-      toast.error('Please fill in required fields: Make, Model, Customer Name, and Vehicle Price')
+    if (!make || !model || !customerName) {
+      toast.error('Please fill in required fields: Make, Model, and Customer')
       return
     }
     setStep(2)
@@ -301,43 +361,41 @@ export function AddVehicleDrawer({
     setStep(1)
   }
 
-  const handleInvoiceAction = async (action: 'download' | 'email' | 'print') => {
+  const handleSaveWithoutInvoice = () => {
+    if (!vehiclePrice) {
+      toast.error('Please enter the vehicle price')
+      return
+    }
+
+    setIsSubmitting(true)
+    const vehicleData = createVehicleData()
+    onAddVehicle(vehicleData)
+    toast.success('Vehicle added successfully')
+    setIsSubmitting(false)
+    handleOpenChange(false)
+  }
+
+  const handleCreateInvoice = async () => {
+    if (!vehiclePrice) {
+      toast.error('Please enter the vehicle price')
+      return
+    }
+
     setIsSubmitting(true)
 
     // Save the vehicle first
     const vehicleData = createVehicleData()
     onAddVehicle(vehicleData)
 
-    // Simulate invoice generation
+    // Simulate invoice creation
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    const messages = {
-      download: { title: 'Invoice downloaded', desc: 'PDF saved to downloads' },
-      email: { title: 'Invoice sent', desc: `Sent to ${customerEmail}` },
-      print: { title: 'Print dialog opened', desc: 'Prepare your printer' },
-    }
-
-    toast.success(messages[action].title, { description: messages[action].desc })
+    toast.success('Vehicle added and invoice created', {
+      description: `Invoice sent to ${customerEmail}`,
+    })
     setIsSubmitting(false)
     handleOpenChange(false)
   }
-
-  const handleDone = () => {
-    const vehicleData = createVehicleData()
-    onAddVehicle(vehicleData)
-    toast.success('Vehicle added successfully')
-    handleOpenChange(false)
-  }
-
-  // Calculate totals for invoice preview
-  const price = Number(vehiclePrice) || 0
-  const shipping = includeShipping ? (Number(shippingCost) || 0) : 0
-  const customs = includeCustoms ? (Number(customsFee) || 0) : 0
-  const total = price + shipping + customs
-
-  const invoiceNumber = `INV-MAN-${Date.now().toString().slice(-6)}`
-  const invoiceDate = format(new Date(), 'MMM dd, yyyy')
-  const dueDate = format(new Date(Date.now() + 14 * 24 * 60 * 60 * 1000), 'MMM dd, yyyy')
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
@@ -353,7 +411,7 @@ export function AddVehicleDrawer({
               <Badge variant='outline'>Step {step} of 2</Badge>
             </div>
             <SheetDescription>
-              {step === 1 ? 'Enter vehicle and customer details' : 'Review and create invoice'}
+              {step === 1 ? 'Enter vehicle and customer details' : 'Create invoice for this vehicle'}
             </SheetDescription>
           </SheetHeader>
         </div>
@@ -438,6 +496,83 @@ export function AddVehicleDrawer({
                       onChange={(e) => setMileage(e.target.value)}
                     />
                   </div>
+                </div>
+
+                {/* Photo Upload Section */}
+                <div className='space-y-3 pt-2'>
+                  <div className='flex items-center justify-between'>
+                    <div className='flex items-center gap-2'>
+                      <ImagePlus className='h-4 w-4 text-muted-foreground' />
+                      <Label className='text-sm font-medium'>Vehicle Photos</Label>
+                    </div>
+                    <span className='text-xs text-muted-foreground'>
+                      {vehicleImages.length}/10 photos
+                    </span>
+                  </div>
+
+                  {/* Drop Zone */}
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`
+                      relative cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-all
+                      ${isDragging
+                        ? 'border-primary bg-primary/5'
+                        : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-muted/30'
+                      }
+                    `}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type='file'
+                      accept='image/*'
+                      multiple
+                      className='hidden'
+                      onChange={(e) => handleFileSelect(e.target.files)}
+                    />
+                    <Upload className='mx-auto h-8 w-8 text-muted-foreground' />
+                    <p className='mt-2 text-sm font-medium'>
+                      Drop photos here or click to upload
+                    </p>
+                    <p className='mt-1 text-xs text-muted-foreground'>
+                      PNG, JPG, WEBP up to 10MB each
+                    </p>
+                  </div>
+
+                  {/* Image Previews */}
+                  {vehicleImages.length > 0 && (
+                    <div className='grid grid-cols-4 gap-2'>
+                      {vehicleImages.map((image, index) => (
+                        <div
+                          key={image.id}
+                          className='group relative aspect-square overflow-hidden rounded-lg border bg-muted'
+                        >
+                          <img
+                            src={image.preview}
+                            alt={`Vehicle photo ${index + 1}`}
+                            className='h-full w-full object-cover'
+                          />
+                          {index === 0 && (
+                            <span className='absolute left-1 top-1 rounded bg-primary px-1.5 py-0.5 text-[10px] font-medium text-primary-foreground'>
+                              Main
+                            </span>
+                          )}
+                          <button
+                            type='button'
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRemoveImage(image.id)
+                            }}
+                            className='absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100'
+                          >
+                            <Trash2 className='h-3 w-3' />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -590,48 +725,7 @@ export function AddVehicleDrawer({
 
               <Separator />
 
-              {/* Pricing */}
-              <div className='space-y-4'>
-                <Label className='text-sm font-semibold'>Pricing (JPY)</Label>
-                <div className='grid grid-cols-3 gap-3'>
-                  <div className='space-y-2'>
-                    <Label htmlFor='vehiclePrice'>
-                      Vehicle Price <span className='text-red-500'>*</span>
-                    </Label>
-                    <Input
-                      id='vehiclePrice'
-                      type='number'
-                      placeholder='0'
-                      value={vehiclePrice}
-                      onChange={(e) => setVehiclePrice(e.target.value)}
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label htmlFor='shippingCost'>Shipping</Label>
-                    <Input
-                      id='shippingCost'
-                      type='number'
-                      placeholder='0'
-                      value={shippingCost}
-                      onChange={(e) => setShippingCost(e.target.value)}
-                    />
-                  </div>
-                  <div className='space-y-2'>
-                    <Label htmlFor='customsFee'>Customs</Label>
-                    <Input
-                      id='customsFee'
-                      type='number'
-                      placeholder='0'
-                      value={customsFee}
-                      onChange={(e) => setCustomsFee(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Other */}
+              {/* Additional Details */}
               <div className='space-y-4'>
                 <Label className='text-sm font-semibold'>Additional Details</Label>
                 <div className='space-y-3'>
@@ -662,114 +756,227 @@ export function AddVehicleDrawer({
               </div>
             </div>
           ) : (
-            /* Step 2: Invoice Preview */
+            /* Step 2: Create Invoice */
             <div className='space-y-4'>
-              {/* Invoice Header */}
-              <div className='rounded-lg border bg-muted/30 p-4'>
-                <div className='flex items-center justify-between'>
-                  <div>
-                    <p className='text-sm text-muted-foreground'>Invoice</p>
-                    <p className='font-mono font-semibold'>{invoiceNumber}</p>
-                  </div>
-                  <div className='text-right'>
-                    <p className='text-sm text-muted-foreground'>Date</p>
-                    <p className='font-semibold'>{invoiceDate}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Customer Info */}
-              <div className='grid grid-cols-2 gap-4'>
-                <div>
-                  <p className='text-xs font-medium text-muted-foreground'>Bill To</p>
-                  <p className='font-medium'>{customerName}</p>
-                  {customerEmail && <p className='text-sm text-muted-foreground'>{customerEmail}</p>}
-                  {customerPhone && <p className='text-sm text-muted-foreground'>{customerPhone}</p>}
-                </div>
-                <div className='text-right'>
-                  <p className='text-xs font-medium text-muted-foreground'>Due Date</p>
-                  <p className='font-medium'>{dueDate}</p>
-                </div>
-              </div>
-
-              <Separator />
-
-              {/* Vehicle Info */}
               <div>
-                <p className='text-xs font-medium text-muted-foreground'>Vehicle</p>
-                <p className='font-medium'>
-                  {year} {make} {model}
-                </p>
-                {vin && (
-                  <p className='font-mono text-xs text-muted-foreground'>VIN: {vin}</p>
-                )}
-                {color && (
-                  <p className='text-sm text-muted-foreground'>Color: {color}</p>
-                )}
+                <h3 className='font-semibold mb-1'>Create Invoice</h3>
+                <p className='text-sm text-muted-foreground'>Configure pricing and review invoice details</p>
               </div>
 
-              <Separator />
+              {/* Customer Card */}
+              <div className='rounded-xl border border-border/50 p-4'>
+                <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
+                  <User className='h-3.5 w-3.5' />
+                  Customer
+                </div>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10'>
+                    <span className='text-sm font-medium text-primary'>
+                      {customerName.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div>
+                    <p className='font-semibold'>{customerName}</p>
+                    <p className='text-sm text-muted-foreground'>{customerEmail}</p>
+                    {customerPhone && <p className='text-xs text-muted-foreground'>{customerPhone}</p>}
+                  </div>
+                </div>
+              </div>
 
-              {/* Line Items */}
+              {/* Vehicle Card */}
+              <div className='rounded-xl border border-border/50 p-4'>
+                <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
+                  <Car className='h-3.5 w-3.5' />
+                  Vehicle
+                </div>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-12 w-16 items-center justify-center rounded-lg bg-muted'>
+                    <Car className='h-6 w-6 text-muted-foreground' />
+                  </div>
+                  <div>
+                    <p className='font-semibold'>{year} {make} {model}</p>
+                    {vin && <p className='text-sm text-muted-foreground font-mono'>VIN: {vin}</p>}
+                    {color && <p className='text-xs text-muted-foreground'>Color: {color}</p>}
+                  </div>
+                </div>
+              </div>
+
+              {/* Destination Card */}
+              {destinationPort && (
+                <div className='rounded-xl border border-border/50 p-4'>
+                  <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2'>
+                    <Ship className='h-3.5 w-3.5' />
+                    Destination
+                  </div>
+                  <p className='font-medium'>{destinationPort}</p>
+                </div>
+              )}
+
+              {/* Invoice Type */}
+              <div className='space-y-2'>
+                <Label>Invoice Type</Label>
+                <Select value={invoiceType} onValueChange={(v: 'full' | 'deposit' | 'balance') => setInvoiceType(v)}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='full'>Full Payment</SelectItem>
+                    <SelectItem value='deposit'>Deposit Only (30%)</SelectItem>
+                    <SelectItem value='balance'>Balance Payment</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Pricing Fields */}
               <div className='space-y-3'>
-                <div className='flex justify-between'>
-                  <span className='text-sm'>Vehicle Price</span>
-                  <span className='font-medium'>¥{price.toLocaleString()}</span>
+                <div className='space-y-2'>
+                  <Label>
+                    Vehicle Price (¥) <span className='text-red-500'>*</span>
+                  </Label>
+                  <Input
+                    type='number'
+                    placeholder='e.g., 2500000'
+                    value={vehiclePrice}
+                    onChange={(e) => setVehiclePrice(e.target.value)}
+                  />
                 </div>
 
-                {shipping > 0 && (
-                  <div className='flex justify-between text-sm text-muted-foreground'>
-                    <span>Shipping ({destinationPort || 'TBD'})</span>
-                    <span>¥{shipping.toLocaleString()}</span>
+                <div className='grid grid-cols-2 gap-3'>
+                  <div className='space-y-2'>
+                    <Label className='text-sm'>Shipping Cost (¥)</Label>
+                    <Input
+                      type='number'
+                      placeholder='0'
+                      value={shippingCost}
+                      onChange={(e) => setShippingCost(e.target.value)}
+                    />
                   </div>
-                )}
-
-                {customs > 0 && (
-                  <div className='flex justify-between text-sm text-muted-foreground'>
-                    <span>Customs & Duties</span>
-                    <span>¥{customs.toLocaleString()}</span>
+                  <div className='space-y-2'>
+                    <Label className='text-sm'>Inspection Fee (¥)</Label>
+                    <Input
+                      type='number'
+                      placeholder='0'
+                      value={inspectionFee}
+                      onChange={(e) => setInspectionFee(e.target.value)}
+                    />
                   </div>
-                )}
+                  <div className='space-y-2'>
+                    <Label className='text-sm'>Document Fee (¥)</Label>
+                    <Input
+                      type='number'
+                      placeholder='0'
+                      value={documentFee}
+                      onChange={(e) => setDocumentFee(e.target.value)}
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label className='text-sm'>Additional Fees (¥)</Label>
+                    <Input
+                      type='number'
+                      placeholder='0'
+                      value={additionalFees}
+                      onChange={(e) => setAdditionalFees(e.target.value)}
+                    />
+                  </div>
+                </div>
 
-                <Separator />
-
-                <div className='flex justify-between text-lg font-bold'>
-                  <span>Total</span>
-                  <span>¥{total.toLocaleString()}</span>
+                <div className='space-y-2'>
+                  <Label className='text-sm'>Discount (¥)</Label>
+                  <Input
+                    type='number'
+                    placeholder='0'
+                    value={discount}
+                    onChange={(e) => setDiscount(e.target.value)}
+                  />
                 </div>
               </div>
 
-              <Separator />
+              {/* Invoice Summary */}
+              <div className='rounded-xl border border-primary/20 bg-primary/5 p-4'>
+                <div className='flex items-center gap-2 text-xs font-medium text-primary uppercase tracking-wider mb-3'>
+                  <FileText className='h-3.5 w-3.5' />
+                  Invoice Summary
+                </div>
+                <div className='space-y-2'>
+                  <div className='flex justify-between text-sm'>
+                    <span>Vehicle Price</span>
+                    <span>{formatPrice(price)}</span>
+                  </div>
+                  <div className='flex justify-between text-sm'>
+                    <span>Service Fee (5%)</span>
+                    <span>{formatPrice(serviceFee)}</span>
+                  </div>
+                  {shippingAmount > 0 && (
+                    <div className='flex justify-between text-sm'>
+                      <span>Shipping</span>
+                      <span>{formatPrice(shippingAmount)}</span>
+                    </div>
+                  )}
+                  {inspectionAmount > 0 && (
+                    <div className='flex justify-between text-sm'>
+                      <span>Inspection</span>
+                      <span>{formatPrice(inspectionAmount)}</span>
+                    </div>
+                  )}
+                  {documentAmount > 0 && (
+                    <div className='flex justify-between text-sm'>
+                      <span>Documents</span>
+                      <span>{formatPrice(documentAmount)}</span>
+                    </div>
+                  )}
+                  {additionalAmount > 0 && (
+                    <div className='flex justify-between text-sm'>
+                      <span>Additional</span>
+                      <span>{formatPrice(additionalAmount)}</span>
+                    </div>
+                  )}
+                  {discountAmount > 0 && (
+                    <div className='flex justify-between text-sm text-green-600'>
+                      <span>Discount</span>
+                      <span>-{formatPrice(discountAmount)}</span>
+                    </div>
+                  )}
+                  <Separator className='my-2' />
+                  <div className='flex justify-between font-bold text-lg'>
+                    <span>Total</span>
+                    <span className='text-primary'>{formatPrice(total)}</span>
+                  </div>
+                  <div className='flex items-center gap-2 mt-2'>
+                    <Badge variant='outline'>
+                      {invoiceType === 'full' ? 'Full Payment' : invoiceType === 'deposit' ? 'Deposit (30%)' : 'Balance'}
+                    </Badge>
+                    {invoiceType === 'deposit' && (
+                      <span className='text-sm text-muted-foreground'>
+                        Due: {formatPrice(Math.round(total * 0.3))}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-              {/* Options */}
-              <div className='flex items-center gap-6'>
-                <div className='flex items-center gap-2'>
-                  <Switch
-                    id='inc-shipping'
-                    checked={includeShipping}
-                    onCheckedChange={setIncludeShipping}
-                  />
-                  <Label htmlFor='inc-shipping' className='cursor-pointer text-sm'>
-                    Include Shipping
-                  </Label>
+              {/* Notes */}
+              {notes && (
+                <div className='rounded-xl border border-border/50 p-4'>
+                  <div className='text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2'>
+                    Notes
+                  </div>
+                  <p className='text-sm'>{notes}</p>
                 </div>
-                <div className='flex items-center gap-2'>
-                  <Switch
-                    id='inc-customs'
-                    checked={includeCustoms}
-                    onCheckedChange={setIncludeCustoms}
-                  />
-                  <Label htmlFor='inc-customs' className='cursor-pointer text-sm'>
-                    Include Customs
-                  </Label>
-                </div>
+              )}
+
+              {/* Email Preview */}
+              <div className='flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground'>
+                <FileText className='h-4 w-4 shrink-0' />
+                <span>
+                  Invoice will be sent to <span className='font-medium text-foreground'>{customerEmail}</span>
+                </span>
               </div>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <SheetFooter className='flex-row gap-2 border-t bg-muted/30 p-4'>
+        <div className='flex items-center justify-between border-t bg-muted/30 p-4'>
           {step === 1 ? (
             <>
               <Button
@@ -778,18 +985,6 @@ export function AddVehicleDrawer({
                 disabled={isSubmitting}
               >
                 Cancel
-              </Button>
-              <Button
-                variant='secondary'
-                onClick={handleSaveChanges}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <Loader2 className='mr-2 h-4 w-4 animate-spin' />
-                ) : (
-                  <Save className='mr-2 h-4 w-4' />
-                )}
-                Save Changes
               </Button>
               <Button onClick={handleNext} disabled={isSubmitting}>
                 Next
@@ -802,42 +997,31 @@ export function AddVehicleDrawer({
                 <ArrowLeft className='mr-2 h-4 w-4' />
                 Back
               </Button>
-              <div className='flex flex-1 justify-end gap-2'>
+              <div className='flex gap-2'>
                 <Button
                   variant='outline'
-                  size='sm'
-                  onClick={() => handleInvoiceAction('print')}
+                  onClick={handleSaveWithoutInvoice}
                   disabled={isSubmitting}
                 >
-                  <Printer className='mr-2 h-4 w-4' />
-                  Print
+                  Save Only
                 </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => handleInvoiceAction('email')}
-                  disabled={isSubmitting}
-                >
-                  <Send className='mr-2 h-4 w-4' />
-                  Email
-                </Button>
-                <Button
-                  variant='outline'
-                  size='sm'
-                  onClick={() => handleInvoiceAction('download')}
-                  disabled={isSubmitting}
-                >
-                  <Download className='mr-2 h-4 w-4' />
-                  PDF
-                </Button>
-                <Button onClick={handleDone} disabled={isSubmitting}>
-                  {isSubmitting && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-                  Done
+                <Button onClick={handleCreateInvoice} disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <FileText className='mr-2 h-4 w-4' />
+                      Create Invoice
+                    </>
+                  )}
                 </Button>
               </div>
             </>
           )}
-        </SheetFooter>
+        </div>
       </SheetContent>
 
       {/* Create Customer Dialog */}

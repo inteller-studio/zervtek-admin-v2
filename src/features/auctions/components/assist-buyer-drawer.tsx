@@ -56,7 +56,6 @@ export function AssistBuyerDrawer({
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
   const [bidAmount, setBidAmount] = useState('')
-  const [maxBidAmount, setMaxBidAmount] = useState('')
   const [notes, setNotes] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSearching, setIsSearching] = useState(false)
@@ -140,7 +139,6 @@ export function AssistBuyerDrawer({
     setSearchQuery('')
     setSelectedCustomer(null)
     setBidAmount('')
-    setMaxBidAmount('')
     setNotes('')
     setSearchResults([])
   }
@@ -431,23 +429,6 @@ export function AssistBuyerDrawer({
                       Bid must be at least {formatPrice(minimumBid)}
                     </p>
                   )}
-                </div>
-
-                <div className='space-y-2'>
-                  <Label htmlFor='maxBidAmount'>
-                    Max Bid Amount (¥)
-                    <span className='ml-1 text-xs font-normal text-muted-foreground'>Optional</span>
-                  </Label>
-                  <Input
-                    id='maxBidAmount'
-                    type='number'
-                    placeholder='Auto-bid up to this amount'
-                    value={maxBidAmount}
-                    onChange={(e) => setMaxBidAmount(e.target.value)}
-                  />
-                  <p className='text-xs text-muted-foreground'>
-                    System will automatically bid up to this amount if outbid
-                  </p>
                 </div>
 
                 <div className='space-y-2'>

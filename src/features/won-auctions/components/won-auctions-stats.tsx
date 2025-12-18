@@ -11,14 +11,12 @@ interface WonAuctionsStatsProps {
 export function WonAuctionsStats({ auctions, loading = false }: WonAuctionsStatsProps) {
   // Calculate stats
   const totalAuctions = auctions.length
-  const pendingPayment = auctions.filter((a) => a.paymentStatus !== 'completed').length
-  const inShipping = auctions.filter((a) => a.status === 'shipping').length
   const totalValue = auctions.reduce((sum, a) => sum + a.winningBid, 0)
+  const pendingPayment = auctions.filter((a) => a.status === 'payment_pending').length
+  const inShipping = auctions.filter((a) => a.status === 'shipping').length
 
   // Calculate changes (mock data - in real app, compare with previous period)
   const totalChange = 12
-  const pendingChange = -8
-  const shippingChange = 5
   const valueChange = 15
 
   return (
@@ -31,26 +29,24 @@ export function WonAuctionsStats({ auctions, loading = false }: WonAuctionsStats
         description='vs last month'
       />
       <StatsCard
-        title='Pending Payment'
-        value={pendingPayment}
-        change={pendingChange}
-        loading={loading}
-        description='vs last month'
-      />
-      <StatsCard
-        title='In Shipping'
-        value={inShipping}
-        change={shippingChange}
-        loading={loading}
-        description='vs last month'
-      />
-      <StatsCard
         title='Total Value'
         value={totalValue}
         change={valueChange}
         loading={loading}
-        prefix='$'
-        description='vs last month'
+        prefix='¥'
+        description='all purchases'
+      />
+      <StatsCard
+        title='Pending Payment'
+        value={pendingPayment}
+        loading={loading}
+        description='awaiting payment'
+      />
+      <StatsCard
+        title='In Shipping'
+        value={inShipping}
+        loading={loading}
+        description='in transit'
       />
     </div>
   )

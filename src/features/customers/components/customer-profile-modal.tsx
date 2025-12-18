@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -17,6 +17,9 @@ import {
   Clock,
   Award,
   FileQuestion,
+  Pencil,
+  UserPlus,
+  UserCheck,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -24,14 +27,18 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import { type Customer, type UserLevel } from '../data/customers'
+import { VerificationApprovalModal } from './verification-approval-modal'
 
 interface CustomerProfileModalProps {
   customer: Customer | null
@@ -41,6 +48,7 @@ interface CustomerProfileModalProps {
   onCallCustomer: (customer: Customer) => void
   onVerifyCustomer: (customer: Customer) => void
   onChangeUserLevel: (customer: Customer, level: UserLevel) => void
+  onClaimCustomer?: (customer: Customer) => void
   loading?: boolean
 }
 
@@ -159,10 +167,13 @@ export function CustomerProfileModal({
   onCallCustomer,
   onVerifyCustomer,
   onChangeUserLevel,
+  onClaimCustomer,
   loading = false,
 }: CustomerProfileModalProps) {
   const modalRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const [levelDialogOpen, setLevelDialogOpen] = useState(false)
+  const [claimDialogOpen, setClaimDialogOpen] = useState(false)
 
   // Handle ESC key
   useEffect(() => {
@@ -272,18 +283,43 @@ export function CustomerProfileModal({
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0 flex-1">
-                      <h2 id="customer-profile-title" className="text-xl font-semibold tracking-tight">
-                        {customer.name}
-                      </h2>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 id="customer-profile-title" className="text-xl font-semibold tracking-tight">
+                          {customer.name}
+                        </h2>
+                        {/* User Level Badge with Edit Button */}
+                        {customer.userLevel === 'unverified' ? (
+                          <button
+                            onClick={() => setLevelDialogOpen(true)}
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors',
+                              'hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
+                              'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20'
+                            )}
+                          >
+                            <CheckCircle className="h-3 w-3" />
+                            Verify Now
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => setLevelDialogOpen(true)}
+                            className={cn(
+                              'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium border transition-colors',
+                              'hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
+                              levelStyles[customer.userLevel]
+                            )}
+                          >
+                            <Award className="h-3 w-3" />
+                            {levelLabels[customer.userLevel]}
+                            <Pencil className="h-3 w-3 ml-0.5" />
+                          </button>
+                        )}
+                      </div>
                       <p id="customer-profile-description" className="text-sm text-muted-foreground mb-2">
                         {customer.email}
                       </p>
-                      {/* Unified badges */}
+                      {/* Status badges */}
                       <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="outline" className={cn('text-xs', levelStyles[customer.userLevel])}>
-                          <Award className="mr-1 h-3 w-3" />
-                          {levelLabels[customer.userLevel]}
-                        </Badge>
                         <Badge variant="outline" className={cn('text-xs', statusStyles[customer.status])}>
                           {customer.status.charAt(0).toUpperCase() + customer.status.slice(1)}
                         </Badge>
@@ -309,6 +345,12 @@ export function CustomerProfileModal({
                         className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
                       >
                         Financial
+                      </TabsTrigger>
+                      <TabsTrigger
+                        value="inquiries"
+                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
+                      >
+                        Inquiries
                       </TabsTrigger>
                       <TabsTrigger
                         value="activity"
@@ -339,6 +381,27 @@ export function CustomerProfileModal({
                         <div className="rounded-xl border border-border/50 bg-card/50 p-4 space-y-3">
                           <h3 className="text-sm font-medium text-muted-foreground">Account Details</h3>
                           <div className="space-y-2.5">
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-muted-foreground">Assigned To</span>
+                              {customer.assignedToName ? (
+                                <span className="font-medium flex items-center gap-1.5">
+                                  <UserCheck className="h-3.5 w-3.5 text-emerald-500" />
+                                  {customer.assignedToName}
+                                </span>
+                              ) : onClaimCustomer ? (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="h-7 text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
+                                  onClick={() => setClaimDialogOpen(true)}
+                                >
+                                  <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                                  Claim
+                                </Button>
+                              ) : (
+                                <span className="text-muted-foreground italic">Unassigned</span>
+                              )}
+                            </div>
                             <div className="flex justify-between text-sm">
                               <span className="text-muted-foreground">Registered</span>
                               <span className="font-medium">{format(customer.createdAt, 'MMM dd, yyyy')}</span>
@@ -410,6 +473,45 @@ export function CustomerProfileModal({
                       )}
                     </TabsContent>
 
+                    <TabsContent value="inquiries" className="mt-6 space-y-4">
+                      {/* Mock inquiries - in production this would come from API */}
+                      {[
+                        { id: '1', vehicle: '2023 Toyota Supra GR', type: 'Price Inquiry', date: '2 days ago', status: 'pending' },
+                        { id: '2', vehicle: '2022 Nissan GT-R Nismo', type: 'Availability', date: '5 days ago', status: 'responded' },
+                        { id: '3', vehicle: '2021 Honda NSX', type: 'Shipping Quote', date: '1 week ago', status: 'closed' },
+                      ].map((inquiry) => (
+                        <div
+                          key={inquiry.id}
+                          className="flex items-center justify-between rounded-lg border border-border/50 bg-card/50 p-3"
+                        >
+                          <div className="space-y-1">
+                            <p className="text-sm font-medium">{inquiry.vehicle}</p>
+                            <p className="text-xs text-muted-foreground">{inquiry.type}</p>
+                          </div>
+                          <div className="text-right">
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                'text-xs',
+                                inquiry.status === 'pending' && 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+                                inquiry.status === 'responded' && 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+                                inquiry.status === 'closed' && 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                              )}
+                            >
+                              {inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
+                            </Badge>
+                            <p className="mt-1 text-xs text-muted-foreground">{inquiry.date}</p>
+                          </div>
+                        </div>
+                      ))}
+                      {/* Empty state if no inquiries */}
+                      {false && (
+                        <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
+                          <p className="text-sm text-muted-foreground">No inquiries yet</p>
+                        </div>
+                      )}
+                    </TabsContent>
+
                     <TabsContent value="activity" className="mt-6">
                       <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
                         <p className="text-sm text-muted-foreground">Activity history coming soon...</p>
@@ -448,22 +550,6 @@ export function CustomerProfileModal({
                         Verify
                       </Button>
                     )}
-                    <Select
-                      value={customer.userLevel}
-                      onValueChange={(value: UserLevel) => onChangeUserLevel(customer, value)}
-                    >
-                      <SelectTrigger className="w-full sm:w-[140px] h-9">
-                        <Award className="mr-2 h-4 w-4" />
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unverified">Unverified</SelectItem>
-                        <SelectItem value="verified">Verified</SelectItem>
-                        <SelectItem value="premium">Premium</SelectItem>
-                        <SelectItem value="business">Business</SelectItem>
-                        <SelectItem value="business_premium">Business Premium</SelectItem>
-                      </SelectContent>
-                    </Select>
                   </div>
                 </div>
               ) : null}
@@ -471,6 +557,47 @@ export function CustomerProfileModal({
           </motion.div>
         </>
       )}
+
+      {/* Change User Level Modal */}
+      {customer && (
+        <VerificationApprovalModal
+          customer={customer}
+          open={levelDialogOpen}
+          onOpenChange={setLevelDialogOpen}
+          onApprove={(customer, data) => {
+            onChangeUserLevel(customer, data.userLevel)
+            setLevelDialogOpen(false)
+          }}
+        />
+      )}
+
+      {/* Claim Customer Confirmation Dialog */}
+      <AlertDialog open={claimDialogOpen} onOpenChange={setClaimDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Claim Customer</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to claim <span className="font-medium text-foreground">{customer?.name}</span>?
+              This customer will be assigned to you and appear in your customer list.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-emerald-600 hover:bg-emerald-700"
+              onClick={() => {
+                if (customer && onClaimCustomer) {
+                  onClaimCustomer(customer)
+                }
+                setClaimDialogOpen(false)
+              }}
+            >
+              <UserPlus className="mr-2 h-4 w-4" />
+              Claim Customer
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AnimatePresence>
   )
 }

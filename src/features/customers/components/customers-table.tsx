@@ -16,42 +16,42 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, Mail, Phone } from 'lucide-react'
+import { MoreHorizontal, Eye, Edit, Trash2, Mail, Phone, UserCircle } from 'lucide-react'
 import { type Customer } from '../data/customers'
 import { format } from 'date-fns'
+import { cn } from '@/lib/utils'
 
 interface CustomersTableProps {
   data: Customer[]
 }
 
-const getStatusBadge = (status: Customer['status']) => {
-  const variants: Record<Customer['status'], string> = {
-    active: 'text-green-600 bg-green-100',
-    inactive: 'text-gray-600 bg-gray-100',
-    pending: 'text-yellow-600 bg-yellow-100',
-    suspended: 'text-red-600 bg-red-100',
-  }
-
-  return (
-    <Badge className={variants[status]}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
+// Status styles matching purchases page pattern
+const statusStyles: Record<Customer['status'], string> = {
+  active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+  inactive: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
+  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  suspended: 'bg-red-500/10 text-red-600 border-red-500/20',
 }
 
-const getVerificationBadge = (status: Customer['verificationStatus']) => {
-  const variants: Record<Customer['verificationStatus'], string> = {
-    verified: 'text-green-600 bg-green-100',
-    pending: 'text-yellow-600 bg-yellow-100',
-    unverified: 'text-red-600 bg-red-100',
-    documents_requested: 'text-blue-600 bg-blue-100',
-  }
+const statusLabels: Record<Customer['status'], string> = {
+  active: 'Active',
+  inactive: 'Inactive',
+  pending: 'Pending',
+  suspended: 'Suspended',
+}
 
-  return (
-    <Badge variant='outline' className={variants[status]}>
-      {status.charAt(0).toUpperCase() + status.slice(1)}
-    </Badge>
-  )
+const verificationStyles: Record<Customer['verificationStatus'], string> = {
+  verified: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  unverified: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
+  documents_requested: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+}
+
+const verificationLabels: Record<Customer['verificationStatus'], string> = {
+  verified: 'Verified',
+  pending: 'Pending',
+  unverified: 'Unverified',
+  documents_requested: 'Docs Requested',
 }
 
 export function CustomersTable({ data }: CustomersTableProps) {
@@ -62,6 +62,7 @@ export function CustomersTable({ data }: CustomersTableProps) {
           <TableRow>
             <TableHead>Customer</TableHead>
             <TableHead>Country</TableHead>
+            <TableHead>Assigned To</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Verification</TableHead>
             <TableHead>Total Spent</TableHead>
@@ -80,8 +81,26 @@ export function CustomersTable({ data }: CustomersTableProps) {
                 </div>
               </TableCell>
               <TableCell>{customer.country}</TableCell>
-              <TableCell>{getStatusBadge(customer.status)}</TableCell>
-              <TableCell>{getVerificationBadge(customer.verificationStatus)}</TableCell>
+              <TableCell>
+                {customer.assignedToName ? (
+                  <div className='flex items-center gap-2'>
+                    <UserCircle className='h-4 w-4 text-muted-foreground' />
+                    <span className='text-sm'>{customer.assignedToName}</span>
+                  </div>
+                ) : (
+                  <span className='text-sm text-muted-foreground'>Unassigned</span>
+                )}
+              </TableCell>
+              <TableCell>
+                <Badge variant='outline' className={cn('text-xs', statusStyles[customer.status])}>
+                  {statusLabels[customer.status]}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant='outline' className={cn('text-xs', verificationStyles[customer.verificationStatus])}>
+                  {verificationLabels[customer.verificationStatus]}
+                </Badge>
+              </TableCell>
               <TableCell className='font-medium'>¥{customer.totalSpent.toLocaleString()}</TableCell>
               <TableCell>{customer.wonAuctions}</TableCell>
               <TableCell>{format(customer.lastActivity, 'MMM dd, yyyy')}</TableCell>

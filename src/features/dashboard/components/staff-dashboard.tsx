@@ -132,15 +132,15 @@ export function StaffDashboard() {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'urgent':
-        return <Badge className='bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-400'>Urgent</Badge>
+        return <Badge variant='red'>Urgent</Badge>
       case 'high':
-        return <Badge className='bg-orange-100 text-orange-700 dark:bg-orange-950 dark:text-orange-400'>High</Badge>
+        return <Badge variant='orange'>High</Badge>
       case 'medium':
-        return <Badge className='bg-yellow-100 text-yellow-700 dark:bg-yellow-950 dark:text-yellow-400'>Medium</Badge>
+        return <Badge variant='amber'>Medium</Badge>
       case 'low':
-        return <Badge className='bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400'>Low</Badge>
+        return <Badge variant='green'>Low</Badge>
       default:
-        return <Badge variant='outline'>{priority}</Badge>
+        return <Badge variant='zinc'>{priority}</Badge>
     }
   }
 

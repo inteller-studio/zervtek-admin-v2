@@ -27,6 +27,8 @@ export interface Customer {
   preferredLanguage: string
   notes?: string
   tags: string[]
+  assignedTo?: string
+  assignedToName?: string
   createdAt: Date
   lastActivity: Date
   lastPurchase?: Date
@@ -54,6 +56,18 @@ const languages = ['English', 'Japanese', 'German', 'French', 'Spanish', 'Chines
 const tags = ['VIP Client', 'Repeat Buyer', 'High Volume', 'New Customer', 'Preferred', 'Wholesale', 'Dealer', 'Collector', 'First-Time', 'International']
 const companies = ['Auto Imports LLC', 'Premium Cars Inc', 'Global Motors', 'Elite Vehicles', 'Car Enthusiasts Co', 'Luxury Auto Group', 'Speed Imports', 'Classic Cars Ltd', '']
 
+// Sales staff / account managers
+const salesStaff = [
+  { id: 'staff-001', name: 'Mike Johnson' },
+  { id: 'staff-002', name: 'Sarah Williams' },
+  { id: 'staff-003', name: 'Tom Anderson' },
+  { id: 'staff-004', name: 'Jessica Chen' },
+  { id: 'staff-005', name: 'Kevin Miller' },
+  { id: 'staff-006', name: 'Emily Davis' },
+  { id: 'staff-007', name: 'David Wilson' },
+  { id: 'staff-008', name: 'Rachel Brown' },
+]
+
 const getUserLevel = (totalSpent: number): UserLevel => {
   if (totalSpent >= 500000) return 'business_premium'
   if (totalSpent >= 300000) return 'business'
@@ -80,6 +94,9 @@ export const customers: Customer[] = Array.from({ length: 150 }, () => {
   const outstandingBalance = faker.helpers.maybe(() => faker.number.int({ min: 10000, max: 200000 })) || 0
   const hasCompany = faker.datatype.boolean()
   const lastPurchaseDate = wonAuctions > 0 ? faker.date.recent({ days: 90 }) : undefined
+  // Most active customers get assigned to staff (80% chance for active, 50% for others)
+  const shouldAssign = status === 'active' ? faker.datatype.boolean({ probability: 0.8 }) : faker.datatype.boolean({ probability: 0.5 })
+  const assignedStaff = shouldAssign ? faker.helpers.arrayElement(salesStaff) : null
 
   return {
     id: faker.string.uuid(),
@@ -104,6 +121,8 @@ export const customers: Customer[] = Array.from({ length: 150 }, () => {
     preferredLanguage: faker.helpers.arrayElement(languages),
     notes: faker.helpers.maybe(() => faker.lorem.sentence()),
     tags: faker.helpers.arrayElements(tags, faker.number.int({ min: 0, max: 3 })),
+    assignedTo: assignedStaff?.id,
+    assignedToName: assignedStaff?.name,
     createdAt: faker.date.past({ years: 3 }),
     lastActivity: faker.date.recent({ days: 60 }),
     lastPurchase: lastPurchaseDate,

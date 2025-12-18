@@ -76,6 +76,7 @@ import {
   AlertCircle,
   ShieldCheck,
   FileQuestion,
+  UserCircle,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -86,6 +87,10 @@ import { VerificationApprovalModal } from './components/verification-approval-mo
 
 type SortField = 'name' | 'totalSpent' | 'createdAt' | 'lastActivity' | 'wonAuctions' | 'depositAmount'
 type SortOrder = 'asc' | 'desc'
+
+// Simulated current user - in production this comes from auth context
+const CURRENT_USER_ID = 'staff-001'
+const CURRENT_USER_NAME = 'Staff Member'
 
 const countries = [
   'United States', 'United Kingdom', 'Germany', 'Japan', 'Canada',
@@ -209,20 +214,20 @@ export function Customers() {
 
   const getStatusBadge = (status: Customer['status']) => {
     const config = {
-      active: { label: 'Active', className: 'bg-green-100 text-green-700' },
-      inactive: { label: 'Inactive', className: 'bg-gray-100 text-gray-700' },
-      pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-700' },
-      suspended: { label: 'Suspended', className: 'bg-red-100 text-red-700' },
+      active: { label: 'Active', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+      inactive: { label: 'Inactive', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20' },
+      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+      suspended: { label: 'Suspended', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
     }
-    return <Badge className={config[status].className}>{config[status].label}</Badge>
+    return <Badge variant='outline' className={config[status].className}>{config[status].label}</Badge>
   }
 
   const getVerificationBadge = (status: Customer['verificationStatus']) => {
     const config = {
-      verified: { label: 'Verified', className: 'bg-green-100 text-green-700', icon: CheckCircle },
-      pending: { label: 'Pending', className: 'bg-yellow-100 text-yellow-700', icon: Clock },
-      unverified: { label: 'Unverified', className: 'bg-red-100 text-red-700', icon: XCircle },
-      documents_requested: { label: 'Docs Requested', className: 'bg-blue-100 text-blue-700', icon: FileQuestion },
+      verified: { label: 'Verified', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
+      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
+      unverified: { label: 'Unverified', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20', icon: XCircle },
+      documents_requested: { label: 'Docs Requested', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: FileQuestion },
     }
     const Icon = config[status].icon
     return (
@@ -288,6 +293,17 @@ export function Customers() {
     toast.success(`${customer.name} has been verified`)
   }
 
+  const handleClaimCustomer = (customer: Customer) => {
+    setCustomers(customers.map((c) =>
+      c.id === customer.id ? { ...c, assignedTo: CURRENT_USER_ID, assignedToName: CURRENT_USER_NAME } : c
+    ))
+    // Update selected customer if viewing in modal
+    if (selectedCustomer?.id === customer.id) {
+      setSelectedCustomer({ ...customer, assignedTo: CURRENT_USER_ID, assignedToName: CURRENT_USER_NAME })
+    }
+    toast.success(`${customer.name} has been assigned to you`)
+  }
+
   const handleOpenApprovalModal = (customer: Customer) => {
     setCustomerToApprove(customer)
     setApprovalModalOpen(true)
@@ -316,23 +332,6 @@ export function Customers() {
     ))
     toast.success(`${customer.name} has been verified`, {
       description: `User level set to ${data.userLevel.replace('_', ' ')}`,
-    })
-  }
-
-  const handleRequestDocuments = (customer: Customer, message?: string) => {
-    setCustomers(customers.map((c) =>
-      c.id === customer.id
-        ? {
-            ...c,
-            verificationStatus: 'documents_requested' as const,
-            notes: message
-              ? `[Document Request] ${message}${c.notes ? `\n\n${c.notes}` : ''}`
-              : c.notes,
-          }
-        : c
-    ))
-    toast.success(`Document request sent to ${customer.name}`, {
-      description: 'Verification status updated to Documents Requested',
     })
   }
 
@@ -478,6 +477,7 @@ export function Customers() {
                         Customer <ArrowUpDown className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
+                    <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('totalSpent')}>
@@ -520,6 +520,16 @@ export function Customers() {
                               )}
                             </div>
                           </div>
+                        </TableCell>
+                        <TableCell>
+                          {customer.assignedToName ? (
+                            <div className='flex items-center gap-2'>
+                              <UserCircle className='h-4 w-4 text-muted-foreground' />
+                              <span className='text-sm'>{customer.assignedToName}</span>
+                            </div>
+                          ) : (
+                            <span className='text-sm text-muted-foreground'>Unassigned</span>
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className='flex flex-col gap-1'>
@@ -607,7 +617,7 @@ export function Customers() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className='h-24 text-center'>No customers found.</TableCell>
+                      <TableCell colSpan={9} className='h-24 text-center'>No customers found.</TableCell>
                     </TableRow>
                   )}
                 </TableBody>
@@ -740,6 +750,7 @@ export function Customers() {
         onCallCustomer={handleCallCustomer}
         onVerifyCustomer={handleVerifyCustomer}
         onChangeUserLevel={handleChangeUserLevel}
+        onClaimCustomer={handleClaimCustomer}
       />
 
       {/* Verification Approval Modal */}
@@ -748,7 +759,6 @@ export function Customers() {
         open={approvalModalOpen}
         onOpenChange={setApprovalModalOpen}
         onApprove={handleApproveVerification}
-        onRequestDocuments={handleRequestDocuments}
       />
 
       {/* Add Customer Dialog */}

@@ -203,9 +203,9 @@ export function AuctionDetailDialog({
                   </span>
                 </div>
                 <div className='flex justify-between'>
-                  <span className='text-muted-foreground'>Customs Fee</span>
+                  <span className='text-muted-foreground'>Insurance</span>
                   <span className='font-medium'>
-                    ¥{auction.customsFee.toLocaleString()}
+                    ¥{auction.insuranceFee.toLocaleString()}
                   </span>
                 </div>
                 <div className='flex justify-between border-t pt-2'>

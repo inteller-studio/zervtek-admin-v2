@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Users,
+  UserCircle,
   CreditCard,
   FileText,
   Gavel,
@@ -17,16 +18,30 @@ import {
   Command,
   ClipboardCheck,
   MessageCircle,
+  Headphones,
+  TicketCheck,
+  HelpCircle,
+  CircleHelp,
 } from 'lucide-react'
 import { type NavGroup, type User, type Team } from '../types'
 import { ROLES } from '@/lib/rbac/types'
 import { bids } from '@/features/bids/data/bids'
 import { requests } from '@/features/requests/data/requests'
+import { customers } from '@/features/customers/data/customers'
+import { getTicketStats } from '@/features/support/data/tickets'
+
+// Count customers assigned to current user (simulated - in production this would use auth context)
+const CURRENT_USER_ID = 'staff-001'
+const myCustomersCount = customers.filter(c => c.assignedTo === CURRENT_USER_ID).length
 
 // Calculate pending approval count
 const pendingBidsCount = bids.filter((b) => b.status === 'pending_approval').length
 const pendingTranslationsCount = requests.filter((r) => r.type === 'translation' && r.status === 'pending').length
 const pendingInspectionsCount = requests.filter((r) => r.type === 'inspection' && r.status === 'pending').length
+
+// Support ticket stats
+const ticketStats = getTicketStats()
+const openTicketsCount = ticketStats.open + ticketStats.inProgress
 
 // Role group shortcuts
 const SALES_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.SALES_STAFF] as const
@@ -58,6 +73,12 @@ export const sidebarNavGroups: NavGroup[] = [
         url: '/',
         icon: LayoutDashboard,
       },
+      {
+        title: 'My Customers',
+        url: '/my-customers',
+        icon: UserCircle,
+        badge: myCustomersCount > 0 ? String(myCustomersCount) : undefined,
+      },
     ],
   },
   {
@@ -73,6 +94,7 @@ export const sidebarNavGroups: NavGroup[] = [
         badge: pendingBidsCount > 0 ? String(pendingBidsCount) : undefined,
       },
       { title: 'Stock Vehicles', url: '/stock-vehicles', icon: Car },
+      { title: 'Inquiries', url: '/inquiries', icon: HelpCircle },
     ],
   },
   {
@@ -122,6 +144,23 @@ export const sidebarNavGroups: NavGroup[] = [
     roles: [...MANAGEMENT_ROLES],
     items: [
       { title: 'WhatsApp', url: '/whatsapp', icon: MessageCircle },
+    ],
+  },
+  {
+    title: 'Support',
+    roles: [...MANAGEMENT_ROLES],
+    items: [
+      {
+        title: 'Support Tickets',
+        url: '/support',
+        icon: TicketCheck,
+        badge: openTicketsCount > 0 ? String(openTicketsCount) : undefined,
+      },
+      {
+        title: 'FAQ',
+        url: '/faq',
+        icon: CircleHelp,
+      },
     ],
   },
   {

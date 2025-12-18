@@ -22,11 +22,9 @@ import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Separator } from '@/components/ui/separator'
 import {
   Award,
   CheckCircle,
-  FileQuestion,
   Building2,
   Wallet,
   StickyNote,
@@ -46,7 +44,6 @@ interface VerificationApprovalModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onApprove: (customer: Customer, data: ApprovalData) => void
-  onRequestDocuments: (customer: Customer, message?: string) => void
 }
 
 const USER_LEVEL_OPTIONS: { value: Exclude<UserLevel, 'unverified'>; label: string; description: string }[] = [
@@ -67,14 +64,11 @@ export function VerificationApprovalModal({
   open,
   onOpenChange,
   onApprove,
-  onRequestDocuments,
 }: VerificationApprovalModalProps) {
   const [userLevel, setUserLevel] = useState<Exclude<UserLevel, 'unverified'>>('verified')
   const [depositAmount, setDepositAmount] = useState<string>('')
   const [notes, setNotes] = useState<string>('')
   const [accountStatus, setAccountStatus] = useState<'active' | 'inactive' | 'suspended'>('active')
-  const [documentRequestMessage, setDocumentRequestMessage] = useState<string>('')
-  const [showDocumentRequest, setShowDocumentRequest] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   useEffect(() => {
@@ -83,8 +77,6 @@ export function VerificationApprovalModal({
       setDepositAmount(customer.depositAmount > 0 ? String(customer.depositAmount) : '')
       setNotes(customer.notes || '')
       setAccountStatus('active')
-      setDocumentRequestMessage('')
-      setShowDocumentRequest(false)
     }
   }, [customer, open])
 
@@ -105,13 +97,6 @@ export function VerificationApprovalModal({
     })
 
     setIsSubmitting(false)
-    onOpenChange(false)
-  }
-
-  const handleRequestDocuments = () => {
-    if (!customer) return
-
-    onRequestDocuments(customer, documentRequestMessage || undefined)
     onOpenChange(false)
   }
 
@@ -149,156 +134,104 @@ export function VerificationApprovalModal({
           )}
         </div>
 
-        {!showDocumentRequest ? (
-          <>
-            {/* Main Form */}
-            <div className='space-y-4'>
-              {/* User Level Selection (Required) */}
-              <div className='space-y-2'>
-                <Label className='flex items-center gap-2'>
-                  <Award className='h-4 w-4 text-muted-foreground' />
-                  User Level <span className='text-destructive'>*</span>
-                </Label>
-                <Select value={userLevel} onValueChange={(v) => setUserLevel(v as Exclude<UserLevel, 'unverified'>)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder='Select user level' />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {USER_LEVEL_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        <div className='flex flex-col'>
-                          <span>{option.label}</span>
-                          <span className='text-xs text-muted-foreground'>{option.description}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className='text-xs text-muted-foreground'>
-                  Determines customer privileges and bidding limits
-                </p>
-              </div>
+        {/* Main Form */}
+        <div className='space-y-4'>
+          {/* User Level Selection (Required) */}
+          <div className='space-y-2'>
+            <Label className='flex items-center gap-2'>
+              <Award className='h-4 w-4 text-muted-foreground' />
+              User Level <span className='text-destructive'>*</span>
+            </Label>
+            <Select value={userLevel} onValueChange={(v) => setUserLevel(v as Exclude<UserLevel, 'unverified'>)}>
+              <SelectTrigger>
+                <SelectValue placeholder='Select user level' />
+              </SelectTrigger>
+              <SelectContent>
+                {USER_LEVEL_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    <div className='flex flex-col'>
+                      <span>{option.label}</span>
+                      <span className='text-xs text-muted-foreground'>{option.description}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className='text-xs text-muted-foreground'>
+              Determines customer privileges and bidding limits
+            </p>
+          </div>
 
-              {/* Deposit Amount (Optional) */}
-              <div className='space-y-2'>
-                <Label className='flex items-center gap-2'>
-                  <Wallet className='h-4 w-4 text-muted-foreground' />
-                  Deposit Amount
-                </Label>
-                <div className='relative'>
-                  <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm'>
-                    ¥
-                  </span>
-                  <Input
-                    type='number'
-                    placeholder={customer.depositAmount > 0 ? String(customer.depositAmount) : '0'}
-                    value={depositAmount}
-                    onChange={(e) => setDepositAmount(e.target.value)}
-                    className='pl-8'
-                    min='0'
-                  />
-                </div>
-                {customer.depositAmount > 0 && (
-                  <p className='text-xs text-muted-foreground'>
-                    Current deposit: ¥{customer.depositAmount.toLocaleString()}
-                  </p>
-                )}
-              </div>
-
-              {/* Account Status (Optional) */}
-              <div className='space-y-2'>
-                <Label className='flex items-center gap-2'>
-                  <CheckCircle className='h-4 w-4 text-muted-foreground' />
-                  Account Status
-                </Label>
-                <Select value={accountStatus} onValueChange={(v) => setAccountStatus(v as 'active' | 'inactive' | 'suspended')}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ACCOUNT_STATUS_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Notes (Optional) */}
-              <div className='space-y-2'>
-                <Label className='flex items-center gap-2'>
-                  <StickyNote className='h-4 w-4 text-muted-foreground' />
-                  Notes / Comments
-                </Label>
-                <Textarea
-                  placeholder='Add internal notes about this verification decision...'
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  rows={3}
-                />
-              </div>
+          {/* Deposit Amount (Optional) */}
+          <div className='space-y-2'>
+            <Label className='flex items-center gap-2'>
+              <Wallet className='h-4 w-4 text-muted-foreground' />
+              Deposit Amount
+            </Label>
+            <div className='relative'>
+              <span className='absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm'>
+                ¥
+              </span>
+              <Input
+                type='number'
+                placeholder={customer.depositAmount > 0 ? String(customer.depositAmount) : '0'}
+                value={depositAmount}
+                onChange={(e) => setDepositAmount(e.target.value)}
+                className='pl-8'
+                min='0'
+              />
             </div>
+            {customer.depositAmount > 0 && (
+              <p className='text-xs text-muted-foreground'>
+                Current deposit: ¥{customer.depositAmount.toLocaleString()}
+              </p>
+            )}
+          </div>
 
-            <Separator />
+          {/* Account Status (Optional) */}
+          <div className='space-y-2'>
+            <Label className='flex items-center gap-2'>
+              <CheckCircle className='h-4 w-4 text-muted-foreground' />
+              Account Status
+            </Label>
+            <Select value={accountStatus} onValueChange={(v) => setAccountStatus(v as 'active' | 'inactive' | 'suspended')}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {ACCOUNT_STATUS_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-            {/* Request Documents Option */}
-            <div className='flex items-center justify-between rounded-lg border border-dashed p-3'>
-              <div className='flex items-center gap-2 text-sm text-muted-foreground'>
-                <FileQuestion className='h-4 w-4' />
-                Need additional documents?
-              </div>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => setShowDocumentRequest(true)}
-              >
-                Request Documents
-              </Button>
-            </div>
+          {/* Notes (Optional) */}
+          <div className='space-y-2'>
+            <Label className='flex items-center gap-2'>
+              <StickyNote className='h-4 w-4 text-muted-foreground' />
+              Notes / Comments
+            </Label>
+            <Textarea
+              placeholder='Add internal notes about this verification decision...'
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={3}
+            />
+          </div>
+        </div>
 
-            <DialogFooter>
-              <Button variant='outline' onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleApprove} disabled={isSubmitting}>
-                <CheckCircle className='mr-2 h-4 w-4' />
-                Approve Verification
-              </Button>
-            </DialogFooter>
-          </>
-        ) : (
-          <>
-            {/* Document Request View */}
-            <div className='space-y-4'>
-              <div className='space-y-2'>
-                <Label className='flex items-center gap-2'>
-                  <FileQuestion className='h-4 w-4 text-muted-foreground' />
-                  Document Request Message
-                </Label>
-                <Textarea
-                  placeholder='Specify which documents are needed (optional)...'
-                  value={documentRequestMessage}
-                  onChange={(e) => setDocumentRequestMessage(e.target.value)}
-                  rows={4}
-                />
-                <p className='text-xs text-muted-foreground'>
-                  This will set the verification status to &quot;Documents Requested&quot; and notify the customer.
-                </p>
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button variant='outline' onClick={() => setShowDocumentRequest(false)}>
-                Back
-              </Button>
-              <Button variant='secondary' onClick={handleRequestDocuments}>
-                <FileQuestion className='mr-2 h-4 w-4' />
-                Request Documents
-              </Button>
-            </DialogFooter>
-          </>
-        )}
+        <DialogFooter>
+          <Button variant='outline' onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleApprove} disabled={isSubmitting}>
+            <CheckCircle className='mr-2 h-4 w-4' />
+            Save Changes
+          </Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )

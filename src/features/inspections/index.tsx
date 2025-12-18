@@ -231,25 +231,25 @@ export function Inspections() {
     return colors[priority]
   }
 
-  const getPriorityBadge = (priority: ServiceRequest['priority']) => {
-    const colors = {
-      urgent: 'bg-red-500/10 text-red-400 border-red-500/20',
-      high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-      medium: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-      low: 'bg-muted text-muted-foreground border-transparent',
+  const getPriorityVariant = (priority: ServiceRequest['priority']) => {
+    const variants = {
+      urgent: 'red',
+      high: 'orange',
+      medium: 'amber',
+      low: 'zinc',
     }
-    return colors[priority]
+    return variants[priority]
   }
 
-  const getStatusBadge = (status: ServiceRequest['status']) => {
-    const colors = {
-      completed: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20',
-      in_progress: 'bg-blue-500/15 text-blue-400 border-blue-500/20',
-      assigned: 'bg-violet-500/15 text-violet-400 border-violet-500/20',
-      pending: 'bg-amber-500/15 text-amber-400 border-amber-500/20',
-      cancelled: 'bg-muted text-muted-foreground border-transparent',
+  const getStatusVariant = (status: ServiceRequest['status']) => {
+    const variants = {
+      completed: 'emerald',
+      in_progress: 'blue',
+      assigned: 'violet',
+      pending: 'amber',
+      cancelled: 'zinc',
     }
-    return colors[status]
+    return variants[status]
   }
 
   const getRelativeTime = (date: Date) => {
@@ -401,10 +401,8 @@ export function Inspections() {
                         </p>
                         <div className='flex items-center gap-2 mt-1.5'>
                           <Badge
-                            className={cn(
-                              'text-[10px] px-1.5 py-0 h-5 font-medium',
-                              getStatusBadge(request.status)
-                            )}
+                            variant={getStatusVariant(request.status) as any}
+                            className='text-[10px] px-1.5 h-5'
                           >
                             {request.status.replace('_', ' ')}
                           </Badge>
@@ -476,7 +474,7 @@ export function Inspections() {
                       <div className='flex items-center gap-2'>
                         <Car className='h-5 w-5 text-muted-foreground' />
                         <h3 className='font-semibold'>{getVehicleName(selectedRequest)}</h3>
-                        <Badge className={cn('text-xs', getStatusBadge(selectedRequest.status))}>
+                        <Badge variant={getStatusVariant(selectedRequest.status) as any}>
                           {selectedRequest.status.replace('_', ' ')}
                         </Badge>
                       </div>
@@ -488,10 +486,8 @@ export function Inspections() {
                         <span className='font-mono text-xs'>{selectedRequest.requestId}</span>
                         <span>•</span>
                         <Badge
-                          className={cn(
-                            'text-xs capitalize',
-                            getPriorityBadge(selectedRequest.priority)
-                          )}
+                          variant={getPriorityVariant(selectedRequest.priority) as any}
+                          className='capitalize'
                         >
                           {selectedRequest.priority}
                         </Badge>

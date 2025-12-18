@@ -20,6 +20,7 @@ import {
   Banknote,
   FileCheck,
   Anchor,
+  ClipboardList,
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -45,6 +46,7 @@ interface VehicleCardProps {
   loading?: boolean
   selected?: boolean
   onViewDetails: () => void
+  onManageWorkflow?: () => void
   onRecordPayment: () => void
   onUploadDocuments: () => void
   onManageDocuments: () => void
@@ -54,45 +56,38 @@ interface VehicleCardProps {
   onMarkCompleted: () => void
 }
 
-// Muted, sophisticated status configuration
+// Status configuration with Catalyst variants
 const getStatusConfig = (status: WonAuction['status']) => {
   const config: Record<
     WonAuction['status'],
     {
       label: string
-      icon: React.ReactNode
-      className: string
+      variant: 'amber' | 'blue' | 'zinc' | 'emerald'
     }
   > = {
     payment_pending: {
       label: 'Payment Pending',
-      icon: <CreditCard className='h-3 w-3' />,
-      className: 'bg-amber-500/10 text-amber-600 border-transparent',
+      variant: 'amber',
     },
     processing: {
       label: 'Processing',
-      icon: <Clock className='h-3 w-3' />,
-      className: 'bg-blue-500/10 text-blue-600 border-transparent',
+      variant: 'blue',
     },
     documents_pending: {
       label: 'Documents Pending',
-      icon: <FileText className='h-3 w-3' />,
-      className: 'bg-muted text-muted-foreground border-transparent',
+      variant: 'zinc',
     },
     shipping: {
       label: 'In Transit',
-      icon: <Ship className='h-3 w-3' />,
-      className: 'bg-blue-500/10 text-blue-600 border-transparent',
+      variant: 'blue',
     },
     delivered: {
       label: 'Delivered',
-      icon: <Package className='h-3 w-3' />,
-      className: 'bg-emerald-500/10 text-emerald-600 border-transparent',
+      variant: 'emerald',
     },
     completed: {
       label: 'Completed',
-      icon: <CheckCircle2 className='h-3 w-3' />,
-      className: 'bg-muted text-muted-foreground border-transparent',
+      variant: 'zinc',
     },
   }
   return config[status]
@@ -103,6 +98,7 @@ export function VehicleCard({
   loading = false,
   selected = false,
   onViewDetails,
+  onManageWorkflow,
   onRecordPayment,
   onUploadDocuments,
   onManageDocuments,
@@ -143,9 +139,9 @@ export function VehicleCard({
   // Loading skeleton
   if (loading) {
     return (
-      <Card className='border-border/50'>
-        <CardContent className='p-5'>
-          <div className='flex gap-5'>
+      <Card className='border-border/50 py-0 gap-0'>
+        <CardContent className='px-4 py-2'>
+          <div className='flex gap-4'>
             {/* Image skeleton */}
             <div className='w-[200px] h-[140px] rounded-lg animate-pulse bg-muted/50 shrink-0' />
             {/* Content skeleton */}
@@ -201,7 +197,7 @@ export function VehicleCard({
         role='button'
         aria-label={`View details for ${vehicleTitle}`}
         className={cn(
-          'cursor-pointer overflow-hidden transition-all duration-150',
+          'cursor-pointer overflow-hidden transition-all duration-150 py-0 gap-0',
           'border-border/50 bg-card',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           selected
@@ -216,8 +212,8 @@ export function VehicleCard({
           }
         }}
       >
-        <CardContent className='p-5'>
-          <div className='flex gap-5'>
+        <CardContent className='px-4 py-2'>
+          <div className='flex gap-4'>
             {/* Vehicle Image - Larger with hover slideshow */}
             <div
               className={cn(
@@ -266,7 +262,7 @@ export function VehicleCard({
             {/* Main Content */}
             <div className='flex-1 min-w-0'>
               {/* Header Row */}
-              <div className='flex items-start justify-between gap-4 mb-4'>
+              <div className='flex items-start justify-between gap-4 mb-2'>
                 {/* Left: Title, VIN, Customer */}
                 <div className='min-w-0 flex-1'>
                   <div className='flex items-center gap-3'>
@@ -318,15 +314,8 @@ export function VehicleCard({
 
                 {/* Right: Status Badge + Actions */}
                 <div className='flex items-center gap-2 shrink-0'>
-                  <Badge
-                    variant='outline'
-                    className={cn(
-                      'text-xs font-medium px-2.5 py-1 rounded-md gap-1.5',
-                      statusConfig.className
-                    )}
-                  >
-                    {statusConfig.icon}
-                    <span>{statusConfig.label}</span>
+                  <Badge variant={statusConfig.variant}>
+                    {statusConfig.label}
                   </Badge>
 
                   {/* Actions Menu */}
@@ -354,6 +343,12 @@ export function VehicleCard({
                               <FileText className='mr-2 h-4 w-4' />
                               View Details
                             </DropdownMenuItem>
+                            {onManageWorkflow && (
+                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onManageWorkflow() }}>
+                                <ClipboardList className='mr-2 h-4 w-4' />
+                                Manage Workflow
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onGenerateInvoice() }}>
                               <FileText className='mr-2 h-4 w-4' />
                               Download Invoice
@@ -405,12 +400,12 @@ export function VehicleCard({
                 </div>
               </div>
 
-              {/* Data Grid - 2 rows */}
-              <div className='grid grid-cols-7 gap-x-6 gap-y-3'>
+              {/* Data Grid - 2 rows with consistent columns */}
+              <div className='grid grid-cols-7 gap-x-6 gap-y-2' style={{ gridTemplateColumns: 'repeat(7, minmax(85px, 1fr))' }}>
                 {/* Row 1 */}
                 {/* Mileage */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Mileage
                   </p>
                   <p className='text-sm font-medium tabular-nums'>
@@ -419,8 +414,8 @@ export function VehicleCard({
                 </div>
 
                 {/* Color */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Color
                   </p>
                   <Tooltip>
@@ -436,8 +431,8 @@ export function VehicleCard({
                 </div>
 
                 {/* Winning Bid */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Winning Bid
                   </p>
                   <p className='text-sm font-medium tabular-nums'>
@@ -446,8 +441,8 @@ export function VehicleCard({
                 </div>
 
                 {/* Shipping */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Shipping
                   </p>
                   <p className='text-sm font-medium tabular-nums'>
@@ -456,8 +451,8 @@ export function VehicleCard({
                 </div>
 
                 {/* Total Amount */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Total
                   </p>
                   <p className='text-sm font-semibold tabular-nums'>
@@ -466,38 +461,38 @@ export function VehicleCard({
                 </div>
 
                 {/* Payment Progress */}
-                <div className='space-y-1'>
+                <div className='space-y-1 min-w-[90px]'>
                   <div className='flex items-center justify-between'>
-                    <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                    <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                       Paid
                     </p>
                     <div className='flex items-center gap-1'>
                       {paymentProgress === 100 && (
-                        <CheckCircle2 className='h-3 w-3 text-muted-foreground' />
+                        <CheckCircle2 className='h-3 w-3 text-emerald-500' />
                       )}
-                      <span className='text-[11px] font-medium tabular-nums'>{paymentProgress}%</span>
+                      <span className='text-xs font-medium tabular-nums'>{paymentProgress}%</span>
                     </div>
                   </div>
-                  <div className='h-1.5 w-full bg-muted/50 rounded-full overflow-hidden'>
+                  <div className='h-1.5 w-full bg-muted rounded-full overflow-hidden'>
                     <div
-                      className='h-full bg-foreground/70 rounded-full transition-all duration-300'
+                      className='h-full bg-foreground/60 rounded-full transition-all duration-300'
                       style={{ width: `${paymentProgress}%` }}
                     />
                   </div>
                 </div>
 
                 {/* Outstanding / Paid Status */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Balance
                   </p>
                   {outstandingBalance > 0 ? (
-                    <p className='text-sm font-medium tabular-nums text-muted-foreground'>
+                    <p className='text-sm font-medium tabular-nums'>
                       ¥{outstandingBalance.toLocaleString()}
                     </p>
                   ) : (
-                    <p className='text-sm font-medium text-muted-foreground flex items-center gap-1'>
-                      <CheckCircle2 className='h-3 w-3' />
+                    <p className='text-sm font-medium text-emerald-600 dark:text-emerald-500 flex items-center gap-1'>
+                      <CheckCircle2 className='h-3.5 w-3.5' />
                       Cleared
                     </p>
                   )}
@@ -505,15 +500,15 @@ export function VehicleCard({
 
                 {/* Row 2 */}
                 {/* Destination */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Destination
                   </p>
                   {auction.destinationPort ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <p className='text-sm font-medium truncate flex items-center gap-1 cursor-default'>
-                          <MapPin className='h-3 w-3 text-muted-foreground shrink-0' />
+                        <p className='text-sm font-medium truncate flex items-center gap-1.5 cursor-default'>
+                          <MapPin className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
                           <span className='truncate'>{auction.destinationPort.split(',')[0]}</span>
                         </p>
                       </TooltipTrigger>
@@ -527,36 +522,36 @@ export function VehicleCard({
                 </div>
 
                 {/* Documents */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Documents
                   </p>
-                  <p className='text-sm font-medium flex items-center gap-1'>
-                    <FileCheck className='h-3 w-3 text-muted-foreground' />
-                    {documentsCount} uploaded
+                  <p className='text-sm font-medium flex items-center gap-1.5'>
+                    <FileCheck className='h-3.5 w-3.5 text-muted-foreground' />
+                    {documentsCount}
                   </p>
                 </div>
 
                 {/* Payments */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Payments
                   </p>
-                  <p className='text-sm font-medium flex items-center gap-1'>
-                    <Banknote className='h-3 w-3 text-muted-foreground' />
-                    {paymentsCount} recorded
+                  <p className='text-sm font-medium flex items-center gap-1.5'>
+                    <Banknote className='h-3.5 w-3.5 text-muted-foreground' />
+                    {paymentsCount}
                   </p>
                 </div>
 
                 {/* Carrier / Shipping Info */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Carrier
                   </p>
                   {auction.shipment ? (
-                    <p className='text-sm font-medium truncate flex items-center gap-1'>
-                      <Anchor className='h-3 w-3 text-muted-foreground' />
-                      {auction.shipment.carrier}
+                    <p className='text-sm font-medium truncate flex items-center gap-1.5'>
+                      <Anchor className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
+                      <span className='truncate'>{auction.shipment.carrier}</span>
                     </p>
                   ) : (
                     <p className='text-sm text-muted-foreground'>—</p>
@@ -564,8 +559,8 @@ export function VehicleCard({
                 </div>
 
                 {/* ETA */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     ETA
                   </p>
                   {auction.shipment?.estimatedDelivery ? (
@@ -585,15 +580,15 @@ export function VehicleCard({
                 </div>
 
                 {/* Tracking */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Tracking
                   </p>
                   {auction.shipment?.trackingNumber ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <p className='text-sm font-mono font-medium truncate cursor-default'>
-                          {auction.shipment.trackingNumber.slice(0, 10)}...
+                          {auction.shipment.trackingNumber.slice(0, 8)}...
                         </p>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -606,11 +601,11 @@ export function VehicleCard({
                 </div>
 
                 {/* Time Since Won */}
-                <div className='space-y-0.5'>
-                  <p className='text-[11px] text-muted-foreground uppercase tracking-wide'>
+                <div className='space-y-1'>
+                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
                     Age
                   </p>
-                  <p className='text-sm font-medium text-muted-foreground'>
+                  <p className='text-sm font-medium'>
                     {formatDistanceToNow(new Date(auction.auctionEndDate), { addSuffix: false })}
                   </p>
                 </div>

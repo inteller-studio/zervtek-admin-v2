@@ -72,6 +72,8 @@ import {
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 
+import { Car, Users } from 'lucide-react'
+
 // Types
 interface InvoiceItem {
   id: string
@@ -79,6 +81,40 @@ interface InvoiceItem {
   quantity: number
   unitPrice: number
   total: number
+}
+
+interface InvoiceVehicle {
+  id: string
+  stockNumber: string
+  year: number
+  make: string
+  model: string
+  price: number
+  serviceFee: number
+}
+
+interface SharedInvoice {
+  id: string
+  invoiceNumber: string
+  date: string
+  dueDate: string
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  customerName: string
+  customerEmail: string
+  customerPhone: string
+  customerAddress: string
+  customerCity: string
+  customerCountry: string
+  vehicles: InvoiceVehicle[]
+  subtotal: number
+  tax: number
+  shipping: number
+  discount: number
+  total: number
+  currency: string
+  notes: string
+  createdAt: string
+  updatedAt: string
 }
 
 interface Invoice {
@@ -436,6 +472,103 @@ const mockInvoices: Invoice[] = [
   },
 ]
 
+// Mock shared invoices data
+const mockSharedInvoices: SharedInvoice[] = [
+  {
+    id: 'shared-1',
+    invoiceNumber: 'SINV-2024-0001',
+    date: '2024-01-25',
+    dueDate: '2024-02-01',
+    status: 'paid',
+    customerName: 'Tokyo Motors Import',
+    customerEmail: 'orders@tokyomotors.com',
+    customerPhone: '+81 3-5555-1234',
+    customerAddress: '1-2-3 Shibuya',
+    customerCity: 'Tokyo',
+    customerCountry: 'Japan',
+    vehicles: [
+      { id: 'v1', stockNumber: 'STK-00123', year: 2023, make: 'Toyota', model: 'Supra RZ', price: 5500000, serviceFee: 275000 },
+      { id: 'v2', stockNumber: 'STK-00124', year: 2022, make: 'Nissan', model: 'GT-R Nismo', price: 8200000, serviceFee: 410000 },
+      { id: 'v3', stockNumber: 'STK-00125', year: 2023, make: 'Honda', model: 'NSX Type S', price: 12000000, serviceFee: 600000 },
+    ],
+    subtotal: 26985000,
+    tax: 2698500,
+    shipping: 450000,
+    discount: 500000,
+    total: 29633500,
+    currency: 'JPY',
+    notes: 'Bulk order - 3 premium sports cars for showroom',
+    createdAt: '2024-01-25T10:00:00Z',
+    updatedAt: '2024-01-30T14:00:00Z',
+  },
+  {
+    id: 'shared-2',
+    invoiceNumber: 'SINV-2024-0002',
+    date: '2024-02-05',
+    dueDate: '2024-02-12',
+    status: 'sent',
+    customerName: 'European Auto Gallery',
+    customerEmail: 'purchasing@eurogallery.de',
+    customerPhone: '+49 30-1234-5678',
+    customerAddress: '123 Autobahn Street',
+    customerCity: 'Berlin',
+    customerCountry: 'Germany',
+    vehicles: [
+      { id: 'v4', stockNumber: 'STK-00201', year: 2024, make: 'Lexus', model: 'LC 500', price: 9800000, serviceFee: 490000 },
+      { id: 'v5', stockNumber: 'STK-00202', year: 2023, make: 'Toyota', model: 'Land Cruiser 300', price: 7500000, serviceFee: 375000 },
+    ],
+    subtotal: 18165000,
+    tax: 1816500,
+    shipping: 850000,
+    discount: 0,
+    total: 20831500,
+    currency: 'JPY',
+    notes: 'Export to Germany - includes shipping to Hamburg port',
+    createdAt: '2024-02-05T09:30:00Z',
+    updatedAt: '2024-02-05T09:30:00Z',
+  },
+  {
+    id: 'shared-3',
+    invoiceNumber: 'SINV-2024-0003',
+    date: '2024-02-10',
+    dueDate: '2024-02-17',
+    status: 'draft',
+    customerName: 'Premium Motors Dubai',
+    customerEmail: 'fleet@premiummotors.ae',
+    customerPhone: '+971 4-123-4567',
+    customerAddress: 'Sheikh Zayed Road',
+    customerCity: 'Dubai',
+    customerCountry: 'UAE',
+    vehicles: [
+      { id: 'v6', stockNumber: 'STK-00301', year: 2024, make: 'Mercedes-Benz', model: 'G63 AMG', price: 22000000, serviceFee: 1100000 },
+      { id: 'v7', stockNumber: 'STK-00302', year: 2024, make: 'Porsche', model: 'Cayenne Turbo GT', price: 18500000, serviceFee: 925000 },
+      { id: 'v8', stockNumber: 'STK-00303', year: 2024, make: 'BMW', model: 'X7 M60i', price: 15800000, serviceFee: 790000 },
+      { id: 'v9', stockNumber: 'STK-00304', year: 2023, make: 'Range Rover', model: 'Sport SVR', price: 16500000, serviceFee: 825000 },
+    ],
+    subtotal: 76440000,
+    tax: 0,
+    shipping: 1200000,
+    discount: 2000000,
+    total: 75640000,
+    currency: 'JPY',
+    notes: 'Luxury fleet order - Tax exempt for export',
+    createdAt: '2024-02-10T11:00:00Z',
+    updatedAt: '2024-02-10T11:00:00Z',
+  },
+]
+
+// Sample available vehicles for selection
+const availableVehiclesForInvoice = [
+  { id: 'av1', stockNumber: 'STK-00401', year: 2024, make: 'Toyota', model: 'Supra RZ', price: 5500000 },
+  { id: 'av2', stockNumber: 'STK-00402', year: 2023, make: 'Nissan', model: 'GT-R Premium', price: 7800000 },
+  { id: 'av3', stockNumber: 'STK-00403', year: 2024, make: 'Honda', model: 'Civic Type R', price: 4200000 },
+  { id: 'av4', stockNumber: 'STK-00404', year: 2023, make: 'Mazda', model: 'MX-5 RF', price: 3800000 },
+  { id: 'av5', stockNumber: 'STK-00405', year: 2024, make: 'Subaru', model: 'WRX STI', price: 4500000 },
+  { id: 'av6', stockNumber: 'STK-00406', year: 2023, make: 'Lexus', model: 'IS 500 F Sport', price: 6200000 },
+  { id: 'av7', stockNumber: 'STK-00407', year: 2024, make: 'Toyota', model: 'GR86', price: 3200000 },
+  { id: 'av8', stockNumber: 'STK-00408', year: 2023, make: 'Nissan', model: 'Z Performance', price: 5800000 },
+]
+
 const emptyInvoice: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'> = {
   invoiceNumber: `INV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
   date: new Date().toISOString().split('T')[0],
@@ -469,14 +602,31 @@ const emptyInvoice: Omit<Invoice, 'id' | 'createdAt' | 'updatedAt'> = {
 }
 
 export function Invoices() {
+  const [mainTab, setMainTab] = useState<'single' | 'shared'>('single')
   const [invoices, setInvoices] = useState<Invoice[]>(mockInvoices)
+  const [sharedInvoices, setSharedInvoices] = useState<SharedInvoice[]>(mockSharedInvoices)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('all')
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+  const [selectedSharedInvoice, setSelectedSharedInvoice] = useState<SharedInvoice | null>(null)
   const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [viewSharedDialogOpen, setViewSharedDialogOpen] = useState(false)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
+  const [createSharedDialogOpen, setCreateSharedDialogOpen] = useState(false)
   const [previewMode, setPreviewMode] = useState(false)
   const [newInvoice, setNewInvoice] = useState(emptyInvoice)
+  const [selectedVehicles, setSelectedVehicles] = useState<typeof availableVehiclesForInvoice>([])
+  const [sharedInvoiceForm, setSharedInvoiceForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    customerPhone: '',
+    customerAddress: '',
+    customerCity: '',
+    customerCountry: '',
+    notes: '',
+    shipping: 0,
+    discount: 0,
+  })
 
   // Filter invoices
   const filteredInvoices = invoices.filter((invoice) => {
@@ -489,7 +639,7 @@ export function Invoices() {
     return matchesSearch && matchesStatus
   })
 
-  // Stats
+  // Stats for single invoices
   const totalRevenue = invoices
     .filter((inv) => inv.status === 'paid')
     .reduce((sum, inv) => sum + inv.total, 0)
@@ -498,6 +648,27 @@ export function Invoices() {
     .reduce((sum, inv) => sum + inv.total, 0)
   const overdueCount = invoices.filter((inv) => inv.status === 'overdue').length
   const draftCount = invoices.filter((inv) => inv.status === 'draft').length
+
+  // Filter shared invoices
+  const filteredSharedInvoices = sharedInvoices.filter((invoice) => {
+    const matchesSearch =
+      searchTerm === '' ||
+      invoice.invoiceNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      invoice.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
+    const matchesStatus = statusFilter === 'all' || invoice.status === statusFilter
+    return matchesSearch && matchesStatus
+  })
+
+  // Stats for shared invoices
+  const sharedTotalRevenue = sharedInvoices
+    .filter((inv) => inv.status === 'paid')
+    .reduce((sum, inv) => sum + inv.total, 0)
+  const sharedPendingAmount = sharedInvoices
+    .filter((inv) => inv.status === 'sent' || inv.status === 'overdue')
+    .reduce((sum, inv) => sum + inv.total, 0)
+  const sharedTotalVehicles = sharedInvoices.reduce((sum, inv) => sum + inv.vehicles.length, 0)
+  const sharedDraftCount = sharedInvoices.filter((inv) => inv.status === 'draft').length
 
   const getStatusBadge = (status: Invoice['status']) => {
     const statusConfig = {
@@ -634,6 +805,107 @@ export function Invoices() {
     toast.success('Invoice sent to customer')
   }
 
+  // Shared invoice handlers
+  const handleViewSharedInvoice = (invoice: SharedInvoice) => {
+    setSelectedSharedInvoice(invoice)
+    setViewSharedDialogOpen(true)
+  }
+
+  const handleToggleVehicle = (vehicle: typeof availableVehiclesForInvoice[0]) => {
+    const exists = selectedVehicles.find((v) => v.id === vehicle.id)
+    if (exists) {
+      setSelectedVehicles(selectedVehicles.filter((v) => v.id !== vehicle.id))
+    } else {
+      setSelectedVehicles([...selectedVehicles, vehicle])
+    }
+  }
+
+  const calculateSharedInvoiceTotal = () => {
+    const serviceFeeRate = 0.05 // 5% service fee
+    const vehicleTotal = selectedVehicles.reduce((sum, v) => sum + v.price, 0)
+    const serviceFees = selectedVehicles.reduce((sum, v) => sum + v.price * serviceFeeRate, 0)
+    const subtotal = vehicleTotal + serviceFees
+    const tax = subtotal * 0.1 // 10% tax
+    const total = subtotal + tax + sharedInvoiceForm.shipping - sharedInvoiceForm.discount
+    return { vehicleTotal, serviceFees, subtotal, tax, total }
+  }
+
+  const handleCreateSharedInvoice = (sendNow: boolean = false) => {
+    if (selectedVehicles.length === 0) {
+      toast.error('Please select at least one vehicle')
+      return
+    }
+    if (!sharedInvoiceForm.customerName || !sharedInvoiceForm.customerEmail) {
+      toast.error('Please enter customer name and email')
+      return
+    }
+
+    const totals = calculateSharedInvoiceTotal()
+    const serviceFeeRate = 0.05
+
+    const newSharedInvoice: SharedInvoice = {
+      id: `shared-${Date.now()}`,
+      invoiceNumber: `SINV-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+      date: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: sendNow ? 'sent' : 'draft',
+      customerName: sharedInvoiceForm.customerName,
+      customerEmail: sharedInvoiceForm.customerEmail,
+      customerPhone: sharedInvoiceForm.customerPhone,
+      customerAddress: sharedInvoiceForm.customerAddress,
+      customerCity: sharedInvoiceForm.customerCity,
+      customerCountry: sharedInvoiceForm.customerCountry,
+      vehicles: selectedVehicles.map((v) => ({
+        ...v,
+        serviceFee: v.price * serviceFeeRate,
+      })),
+      subtotal: totals.subtotal,
+      tax: totals.tax,
+      shipping: sharedInvoiceForm.shipping,
+      discount: sharedInvoiceForm.discount,
+      total: totals.total,
+      currency: 'JPY',
+      notes: sharedInvoiceForm.notes,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    }
+
+    setSharedInvoices([newSharedInvoice, ...sharedInvoices])
+    setCreateSharedDialogOpen(false)
+    setSelectedVehicles([])
+    setSharedInvoiceForm({
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      customerAddress: '',
+      customerCity: '',
+      customerCountry: '',
+      notes: '',
+      shipping: 0,
+      discount: 0,
+    })
+    toast.success(sendNow ? 'Shared invoice sent to customer' : 'Shared invoice saved as draft')
+  }
+
+  const handleDeleteSharedInvoice = (invoiceId: string) => {
+    setSharedInvoices(sharedInvoices.filter((inv) => inv.id !== invoiceId))
+    toast.success('Shared invoice deleted')
+  }
+
+  const handleSendSharedInvoice = (invoice: SharedInvoice) => {
+    setSharedInvoices(
+      sharedInvoices.map((inv) => (inv.id === invoice.id ? { ...inv, status: 'sent' as const } : inv))
+    )
+    toast.success(`Invoice sent to ${invoice.customerEmail}`)
+  }
+
+  const handleMarkSharedPaid = (invoice: SharedInvoice) => {
+    setSharedInvoices(
+      sharedInvoices.map((inv) => (inv.id === invoice.id ? { ...inv, status: 'paid' as const } : inv))
+    )
+    toast.success('Invoice marked as paid')
+  }
+
   return (
     <>
       <Header fixed>
@@ -651,44 +923,59 @@ export function Invoices() {
             <h1 className='text-3xl font-bold tracking-tight'>Invoices</h1>
             <p className='text-muted-foreground'>Manage and track all your invoices</p>
           </div>
-          <Button onClick={() => setCreateDialogOpen(true)}>
+          <Button onClick={() => mainTab === 'single' ? setCreateDialogOpen(true) : setCreateSharedDialogOpen(true)}>
             <Plus className='mr-2 h-4 w-4' />
-            Create New Invoice
+            {mainTab === 'single' ? 'Create Invoice' : 'Create Shared Invoice'}
           </Button>
         </div>
 
-        {/* Stats Cards */}
-        <div className='grid gap-4 md:grid-cols-4'>
-          <StatsCard
-            title='Total Revenue'
-            value={totalRevenue}
-            change={18}
-            prefix='$'
-            description='from paid invoices'
-          />
-          <StatsCard
-            title='Pending Amount'
-            value={pendingAmount}
-            change={-5}
-            prefix='$'
-            description='awaiting payment'
-          />
-          <StatsCard
-            title='Overdue'
-            value={overdueCount}
-            change={-12}
-            description='invoices overdue'
-          />
-          <StatsCard
-            title='Drafts'
-            value={draftCount}
-            change={3}
-            description='unsent invoices'
-          />
-        </div>
+        {/* Main Tabs */}
+        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'single' | 'shared')}>
+          <TabsList className='grid w-full max-w-md grid-cols-2'>
+            <TabsTrigger value='single' className='flex items-center gap-2'>
+              <FileText className='h-4 w-4' />
+              Single Invoices
+            </TabsTrigger>
+            <TabsTrigger value='shared' className='flex items-center gap-2'>
+              <Users className='h-4 w-4' />
+              Shared Invoices
+            </TabsTrigger>
+          </TabsList>
 
-        {/* Main Content Card */}
-        <Card>
+          {/* Single Invoices Tab */}
+          <TabsContent value='single' className='mt-4 space-y-4'>
+            {/* Stats Cards */}
+            <div className='grid gap-4 md:grid-cols-4'>
+              <StatsCard
+                title='Total Revenue'
+                value={totalRevenue}
+                change={18}
+                prefix='$'
+                description='from paid invoices'
+              />
+              <StatsCard
+                title='Pending Amount'
+                value={pendingAmount}
+                change={-5}
+                prefix='$'
+                description='awaiting payment'
+              />
+              <StatsCard
+                title='Overdue'
+                value={overdueCount}
+                change={-12}
+                description='invoices overdue'
+              />
+              <StatsCard
+                title='Drafts'
+                value={draftCount}
+                change={3}
+                description='unsent invoices'
+              />
+            </div>
+
+            {/* Main Content Card */}
+            <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
               <CardTitle>All Invoices</CardTitle>
@@ -803,6 +1090,175 @@ export function Invoices() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          {/* Shared Invoices Tab */}
+          <TabsContent value='shared' className='mt-4 space-y-4'>
+            {/* Stats Cards */}
+            <div className='grid gap-4 md:grid-cols-4'>
+              <StatsCard
+                title='Total Revenue'
+                value={sharedTotalRevenue}
+                change={25}
+                prefix='¥'
+                description='from paid shared invoices'
+              />
+              <StatsCard
+                title='Pending Amount'
+                value={sharedPendingAmount}
+                change={-8}
+                prefix='¥'
+                description='awaiting payment'
+              />
+              <StatsCard
+                title='Total Vehicles'
+                value={sharedTotalVehicles}
+                change={15}
+                description='across all invoices'
+              />
+              <StatsCard
+                title='Drafts'
+                value={sharedDraftCount}
+                change={2}
+                description='unsent invoices'
+              />
+            </div>
+
+            {/* Shared Invoices Card */}
+            <Card>
+              <CardHeader>
+                <div className='flex items-center justify-between'>
+                  <div>
+                    <CardTitle className='flex items-center gap-2'>
+                      <Car className='h-5 w-5' />
+                      Shared Invoices
+                    </CardTitle>
+                    <CardDescription>Invoices with multiple vehicles per customer</CardDescription>
+                  </div>
+                  <div className='flex gap-2'>
+                    <div className='relative'>
+                      <SearchIcon className='text-muted-foreground absolute left-2 top-2.5 h-4 w-4' />
+                      <Input
+                        placeholder='Search shared invoices...'
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className='w-[250px] pl-8'
+                      />
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant='outline' size='icon'>
+                          <Filter className='h-4 w-4' />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align='end'>
+                        <DropdownMenuItem onClick={() => setStatusFilter('all')}>All Status</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setStatusFilter('draft')}>Draft</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setStatusFilter('sent')}>Sent</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setStatusFilter('paid')}>Paid</DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setStatusFilter('overdue')}>Overdue</DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Invoice #</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Vehicles</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className='text-right'>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredSharedInvoices.map((invoice) => (
+                      <TableRow key={invoice.id}>
+                        <TableCell className='font-medium'>{invoice.invoiceNumber}</TableCell>
+                        <TableCell>
+                          <div>
+                            <div className='font-medium'>{invoice.customerName}</div>
+                            <div className='text-muted-foreground text-sm'>{invoice.customerEmail}</div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className='flex items-center gap-2'>
+                            <Badge variant='secondary' className='flex items-center gap-1'>
+                              <Car className='h-3 w-3' />
+                              {invoice.vehicles.length} vehicles
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell>{format(new Date(invoice.date), 'MMM dd, yyyy')}</TableCell>
+                        <TableCell>
+                          <div className='font-medium'>
+                            {invoice.currency} {invoice.total.toLocaleString()}
+                          </div>
+                        </TableCell>
+                        <TableCell>{getStatusBadge(invoice.status)}</TableCell>
+                        <TableCell className='text-right'>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant='ghost' size='icon'>
+                                <MoreHorizontal className='h-4 w-4' />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align='end'>
+                              <DropdownMenuItem onClick={() => handleViewSharedInvoice(invoice)}>
+                                <Eye className='mr-2 h-4 w-4' />
+                                View Details
+                              </DropdownMenuItem>
+                              {invoice.status === 'draft' && (
+                                <DropdownMenuItem onClick={() => handleSendSharedInvoice(invoice)}>
+                                  <Send className='mr-2 h-4 w-4' />
+                                  Send
+                                </DropdownMenuItem>
+                              )}
+                              {invoice.status === 'sent' && (
+                                <>
+                                  <DropdownMenuItem onClick={() => handleSendSharedInvoice(invoice)}>
+                                    <Send className='mr-2 h-4 w-4' />
+                                    Resend
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleMarkSharedPaid(invoice)}>
+                                    <CheckCircle className='mr-2 h-4 w-4' />
+                                    Mark as Paid
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+                              <DropdownMenuItem onClick={() => toast.success(`Downloading ${invoice.invoiceNumber}.pdf`)}>
+                                <Download className='mr-2 h-4 w-4' />
+                                Download PDF
+                              </DropdownMenuItem>
+                              {invoice.status === 'draft' && (
+                                <DropdownMenuItem
+                                  onClick={() => handleDeleteSharedInvoice(invoice.id)}
+                                  className='text-destructive'
+                                >
+                                  <Trash2 className='mr-2 h-4 w-4' />
+                                  Delete
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                {filteredSharedInvoices.length === 0 && (
+                  <div className='py-8 text-center'>
+                    <p className='text-muted-foreground'>No shared invoices found</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </Main>
 
       {/* View Invoice Dialog */}
@@ -1635,6 +2091,465 @@ export function Invoices() {
               </div>
             </div>
           )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View Shared Invoice Dialog */}
+      <Dialog open={viewSharedDialogOpen} onOpenChange={setViewSharedDialogOpen}>
+        <DialogContent className='flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden sm:max-w-4xl'>
+          {selectedSharedInvoice && (
+            <>
+              <DialogHeader>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-4'>
+                    <DialogTitle className='flex items-center gap-2'>
+                      <Car className='h-5 w-5' />
+                      {selectedSharedInvoice.invoiceNumber}
+                    </DialogTitle>
+                    {getStatusBadge(selectedSharedInvoice.status)}
+                  </div>
+                  <div className='flex gap-2'>
+                    {selectedSharedInvoice.status === 'draft' && (
+                      <Button size='sm' onClick={() => handleSendSharedInvoice(selectedSharedInvoice)}>
+                        <Send className='mr-2 h-4 w-4' />
+                        Send
+                      </Button>
+                    )}
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      onClick={() => toast.success(`Downloading ${selectedSharedInvoice.invoiceNumber}.pdf`)}
+                    >
+                      <Download className='mr-2 h-4 w-4' />
+                      Download
+                    </Button>
+                  </div>
+                </div>
+              </DialogHeader>
+
+              <div className='flex-1 overflow-y-auto'>
+                <div className='space-y-6'>
+                  {/* Header */}
+                  <div className='flex justify-between'>
+                    <div>
+                      <h2 className='text-2xl font-bold'>Zervtek Ltd.</h2>
+                      <p className='text-muted-foreground mt-1 text-sm'>
+                        123 Auction Street
+                        <br />
+                        Tokyo, Japan
+                        <br />
+                        sales@zervtek.com
+                        <br />
+                        +81 3-1234-5678
+                      </p>
+                    </div>
+                    <div className='text-right'>
+                      <h3 className='text-xl font-bold'>SHARED INVOICE</h3>
+                      <p className='mt-2 text-sm'>
+                        <span className='font-medium'>Invoice #:</span> {selectedSharedInvoice.invoiceNumber}
+                      </p>
+                      <p className='text-sm'>
+                        <span className='font-medium'>Date:</span>{' '}
+                        {format(new Date(selectedSharedInvoice.date), 'MMM dd, yyyy')}
+                      </p>
+                      <p className='text-sm'>
+                        <span className='font-medium'>Due Date:</span>{' '}
+                        {format(new Date(selectedSharedInvoice.dueDate), 'MMM dd, yyyy')}
+                      </p>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Bill To */}
+                  <div>
+                    <h4 className='mb-2 font-semibold'>Bill To:</h4>
+                    <p className='text-sm'>
+                      {selectedSharedInvoice.customerName}
+                      <br />
+                      {selectedSharedInvoice.customerAddress}
+                      <br />
+                      {selectedSharedInvoice.customerCity}, {selectedSharedInvoice.customerCountry}
+                      <br />
+                      {selectedSharedInvoice.customerEmail}
+                      <br />
+                      {selectedSharedInvoice.customerPhone}
+                    </p>
+                  </div>
+
+                  {/* Vehicles Table */}
+                  <div>
+                    <h4 className='mb-2 font-semibold flex items-center gap-2'>
+                      <Car className='h-4 w-4' />
+                      Vehicles ({selectedSharedInvoice.vehicles.length})
+                    </h4>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Stock #</TableHead>
+                          <TableHead>Vehicle</TableHead>
+                          <TableHead className='text-right'>Price</TableHead>
+                          <TableHead className='text-right'>Service Fee</TableHead>
+                          <TableHead className='text-right'>Total</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {selectedSharedInvoice.vehicles.map((vehicle) => (
+                          <TableRow key={vehicle.id}>
+                            <TableCell className='font-medium'>{vehicle.stockNumber}</TableCell>
+                            <TableCell>
+                              {vehicle.year} {vehicle.make} {vehicle.model}
+                            </TableCell>
+                            <TableCell className='text-right'>
+                              {selectedSharedInvoice.currency} {vehicle.price.toLocaleString()}
+                            </TableCell>
+                            <TableCell className='text-right'>
+                              {selectedSharedInvoice.currency} {vehicle.serviceFee.toLocaleString()}
+                            </TableCell>
+                            <TableCell className='text-right'>
+                              {selectedSharedInvoice.currency}{' '}
+                              {(vehicle.price + vehicle.serviceFee).toLocaleString()}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </div>
+
+                  {/* Totals */}
+                  <div className='flex justify-end'>
+                    <div className='w-64 space-y-2'>
+                      <div className='flex justify-between text-sm'>
+                        <span>Subtotal:</span>
+                        <span>
+                          {selectedSharedInvoice.currency} {selectedSharedInvoice.subtotal.toLocaleString()}
+                        </span>
+                      </div>
+                      {selectedSharedInvoice.tax > 0 && (
+                        <div className='flex justify-between text-sm'>
+                          <span>Tax:</span>
+                          <span>
+                            {selectedSharedInvoice.currency} {selectedSharedInvoice.tax.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {selectedSharedInvoice.shipping > 0 && (
+                        <div className='flex justify-between text-sm'>
+                          <span>Shipping:</span>
+                          <span>
+                            {selectedSharedInvoice.currency} {selectedSharedInvoice.shipping.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      {selectedSharedInvoice.discount > 0 && (
+                        <div className='flex justify-between text-sm'>
+                          <span>Discount:</span>
+                          <span>
+                            -{selectedSharedInvoice.currency} {selectedSharedInvoice.discount.toLocaleString()}
+                          </span>
+                        </div>
+                      )}
+                      <Separator />
+                      <div className='flex justify-between text-lg font-bold'>
+                        <span>Total:</span>
+                        <span>
+                          {selectedSharedInvoice.currency} {selectedSharedInvoice.total.toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Notes */}
+                  {selectedSharedInvoice.notes && (
+                    <>
+                      <Separator />
+                      <div>
+                        <h4 className='mb-1 font-semibold'>Notes</h4>
+                        <p className='text-muted-foreground text-sm'>{selectedSharedInvoice.notes}</p>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Footer */}
+                  <Separator />
+                  <div className='text-muted-foreground text-center text-sm'>
+                    <p>Thank you for your business!</p>
+                    <p className='mt-2'>
+                      Created on {format(new Date(selectedSharedInvoice.createdAt), 'MMM dd, yyyy')}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Shared Invoice Dialog */}
+      <Dialog open={createSharedDialogOpen} onOpenChange={setCreateSharedDialogOpen}>
+        <DialogContent className='flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden sm:max-w-5xl'>
+          <DialogHeader>
+            <DialogTitle className='flex items-center gap-2'>
+              <Car className='h-5 w-5' />
+              Create Shared Invoice
+            </DialogTitle>
+            <DialogDescription>Create an invoice with multiple vehicles for a single customer</DialogDescription>
+          </DialogHeader>
+
+          <div className='flex-1 overflow-y-auto'>
+            <div className='space-y-6'>
+              <div className='flex justify-end gap-2'>
+                <Button variant='outline' onClick={() => handleCreateSharedInvoice(false)}>
+                  <Save className='mr-2 h-4 w-4' />
+                  Save Draft
+                </Button>
+                <Button onClick={() => handleCreateSharedInvoice(true)}>
+                  <Send className='mr-2 h-4 w-4' />
+                  Send Invoice
+                </Button>
+              </div>
+
+              <div className='grid gap-6 lg:grid-cols-3'>
+                {/* Main Content */}
+                <div className='space-y-6 lg:col-span-2'>
+                  {/* Customer Information */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Customer Information</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='grid gap-4 md:grid-cols-2'>
+                        <div>
+                          <Label>Customer Name *</Label>
+                          <Input
+                            placeholder='Company or Customer Name'
+                            value={sharedInvoiceForm.customerName}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerName: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Email *</Label>
+                          <Input
+                            type='email'
+                            placeholder='customer@example.com'
+                            value={sharedInvoiceForm.customerEmail}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerEmail: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Phone</Label>
+                          <Input
+                            placeholder='+81 3-1234-5678'
+                            value={sharedInvoiceForm.customerPhone}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerPhone: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Address</Label>
+                          <Input
+                            placeholder='Street Address'
+                            value={sharedInvoiceForm.customerAddress}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerAddress: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>City</Label>
+                          <Input
+                            placeholder='Tokyo'
+                            value={sharedInvoiceForm.customerCity}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerCity: e.target.value })
+                            }
+                          />
+                        </div>
+                        <div>
+                          <Label>Country</Label>
+                          <Input
+                            placeholder='Japan'
+                            value={sharedInvoiceForm.customerCountry}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, customerCountry: e.target.value })
+                            }
+                          />
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Vehicle Selection */}
+                  <Card>
+                    <CardHeader>
+                      <div className='flex items-center justify-between'>
+                        <div>
+                          <CardTitle className='flex items-center gap-2'>
+                            <Car className='h-5 w-5' />
+                            Select Vehicles
+                          </CardTitle>
+                          <CardDescription>Choose vehicles to include in this invoice</CardDescription>
+                        </div>
+                        <Badge variant='secondary'>
+                          {selectedVehicles.length} selected
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className='grid gap-3 md:grid-cols-2'>
+                        {availableVehiclesForInvoice.map((vehicle) => {
+                          const isSelected = selectedVehicles.some((v) => v.id === vehicle.id)
+                          return (
+                            <div
+                              key={vehicle.id}
+                              onClick={() => handleToggleVehicle(vehicle)}
+                              className={`cursor-pointer rounded-lg border p-4 transition-all ${
+                                isSelected
+                                  ? 'border-primary bg-primary/5 ring-2 ring-primary'
+                                  : 'hover:border-primary/50 hover:bg-muted/50'
+                              }`}
+                            >
+                              <div className='flex items-start justify-between'>
+                                <div>
+                                  <p className='font-medium'>
+                                    {vehicle.year} {vehicle.make} {vehicle.model}
+                                  </p>
+                                  <p className='text-muted-foreground text-sm'>{vehicle.stockNumber}</p>
+                                </div>
+                                <div className='text-right'>
+                                  <p className='font-semibold'>¥{vehicle.price.toLocaleString()}</p>
+                                  <p className='text-muted-foreground text-xs'>
+                                    +¥{(vehicle.price * 0.05).toLocaleString()} fee
+                                  </p>
+                                </div>
+                              </div>
+                              {isSelected && (
+                                <div className='mt-2'>
+                                  <Badge variant='default' className='text-xs'>
+                                    <CheckCircle className='mr-1 h-3 w-3' />
+                                    Selected
+                                  </Badge>
+                                </div>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Additional Info */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Additional Information</CardTitle>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      <div>
+                        <Label>Notes</Label>
+                        <Textarea
+                          placeholder='Additional notes or instructions...'
+                          value={sharedInvoiceForm.notes}
+                          onChange={(e) => setSharedInvoiceForm({ ...sharedInvoiceForm, notes: e.target.value })}
+                        />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Sidebar - Invoice Summary */}
+                <div className='space-y-6'>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Invoice Summary</CardTitle>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                      {/* Selected Vehicles Summary */}
+                      {selectedVehicles.length > 0 ? (
+                        <div className='space-y-2'>
+                          {selectedVehicles.map((vehicle) => (
+                            <div
+                              key={vehicle.id}
+                              className='flex items-center justify-between rounded-md border p-2 text-sm'
+                            >
+                              <div>
+                                <p className='font-medium'>
+                                  {vehicle.year} {vehicle.make} {vehicle.model}
+                                </p>
+                                <p className='text-muted-foreground text-xs'>{vehicle.stockNumber}</p>
+                              </div>
+                              <Button
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => handleToggleVehicle(vehicle)}
+                              >
+                                <X className='h-4 w-4' />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className='text-muted-foreground text-center text-sm py-4'>
+                          No vehicles selected
+                        </p>
+                      )}
+
+                      <Separator />
+
+                      {/* Totals */}
+                      <div className='space-y-2'>
+                        <div className='flex justify-between text-sm'>
+                          <span>Vehicles Total:</span>
+                          <span>¥{calculateSharedInvoiceTotal().vehicleTotal.toLocaleString()}</span>
+                        </div>
+                        <div className='flex justify-between text-sm'>
+                          <span>Service Fees (5%):</span>
+                          <span>¥{calculateSharedInvoiceTotal().serviceFees.toLocaleString()}</span>
+                        </div>
+                        <div className='flex justify-between text-sm'>
+                          <span>Tax (10%):</span>
+                          <span>¥{calculateSharedInvoiceTotal().tax.toLocaleString()}</span>
+                        </div>
+                        <div className='flex items-center justify-between text-sm'>
+                          <span>Shipping:</span>
+                          <Input
+                            type='number'
+                            min='0'
+                            className='w-28'
+                            value={sharedInvoiceForm.shipping}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, shipping: Number(e.target.value) })
+                            }
+                          />
+                        </div>
+                        <div className='flex items-center justify-between text-sm'>
+                          <span>Discount:</span>
+                          <Input
+                            type='number'
+                            min='0'
+                            className='w-28'
+                            value={sharedInvoiceForm.discount}
+                            onChange={(e) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, discount: Number(e.target.value) })
+                            }
+                          />
+                        </div>
+                        <Separator />
+                        <div className='flex justify-between text-lg font-bold'>
+                          <span>Total:</span>
+                          <span>¥{calculateSharedInvoiceTotal().total.toLocaleString()}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              </div>
+            </div>
           </div>
         </DialogContent>
       </Dialog>
