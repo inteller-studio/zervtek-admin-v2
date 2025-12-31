@@ -324,6 +324,7 @@ export function AddVehicleDrawer({
 
     return {
       auctionId: `MAN-${Date.now()}`,
+      source: 'stock',
       vehicleInfo: {
         make,
         model,
