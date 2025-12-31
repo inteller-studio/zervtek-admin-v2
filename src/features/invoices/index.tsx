@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import {
   Table,
   TableBody,
@@ -46,33 +46,33 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  FileText,
-  Plus,
-  Eye,
-  Download,
-  Send,
-  MoreHorizontal,
-  Filter,
-  Calendar,
-  DollarSign,
-  Copy,
-  Trash2,
-  Save,
-  ArrowLeft,
-  Printer,
-  Link2,
-  Edit,
-  X,
-  Search as SearchIcon,
-  AlertCircle,
-  Clock,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react'
+  MdDescription,
+  MdAdd,
+  MdVisibility,
+  MdDownload,
+  MdSend,
+  MdMoreHoriz,
+  MdFilterList,
+  MdCalendarToday,
+  MdAttachMoney,
+  MdContentCopy,
+  MdDelete,
+  MdSave,
+  MdArrowBack,
+  MdPrint,
+  MdLink,
+  MdEdit,
+  MdClose,
+  MdSearch,
+  MdError,
+  MdAccessTime,
+  MdCheckCircle,
+  MdCancel,
+  MdDirectionsCar,
+  MdPeople,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
-
-import { Car, Users } from 'lucide-react'
 
 // Types
 interface InvoiceItem {
@@ -628,6 +628,12 @@ export function Invoices() {
     discount: 0,
   })
 
+  // Main tabs configuration
+  const mainTabs: TabItem[] = [
+    { id: 'single', label: 'Single Invoices', icon: MdDescription },
+    { id: 'shared', label: 'Shared Invoices', icon: MdPeople },
+  ]
+
   // Filter invoices
   const filteredInvoices = invoices.filter((invoice) => {
     const matchesSearch =
@@ -924,26 +930,20 @@ export function Invoices() {
             <p className='text-muted-foreground'>Manage and track all your invoices</p>
           </div>
           <Button onClick={() => mainTab === 'single' ? setCreateDialogOpen(true) : setCreateSharedDialogOpen(true)}>
-            <Plus className='mr-2 h-4 w-4' />
+            <MdAdd className='mr-2 h-4 w-4' />
             {mainTab === 'single' ? 'Create Invoice' : 'Create Shared Invoice'}
           </Button>
         </div>
 
         {/* Main Tabs */}
-        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'single' | 'shared')}>
-          <TabsList className='grid w-full max-w-md grid-cols-2'>
-            <TabsTrigger value='single' className='flex items-center gap-2'>
-              <FileText className='h-4 w-4' />
-              Single Invoices
-            </TabsTrigger>
-            <TabsTrigger value='shared' className='flex items-center gap-2'>
-              <Users className='h-4 w-4' />
-              Shared Invoices
-            </TabsTrigger>
-          </TabsList>
-
+        <AnimatedTabs
+          tabs={mainTabs}
+          value={mainTab}
+          onValueChange={(v) => setMainTab(v as 'single' | 'shared')}
+          variant='compact'
+        >
           {/* Single Invoices Tab */}
-          <TabsContent value='single' className='mt-4 space-y-4'>
+          <AnimatedTabsContent value='single' className='mt-4 space-y-4'>
             {/* Stats Cards */}
             <div className='grid gap-4 md:grid-cols-4'>
               <StatsCard
@@ -981,7 +981,7 @@ export function Invoices() {
               <CardTitle>All Invoices</CardTitle>
               <div className='flex gap-2'>
                 <div className='relative'>
-                  <SearchIcon className='text-muted-foreground absolute left-2 top-2.5 h-4 w-4' />
+                  <MdSearch className='text-muted-foreground absolute left-2 top-2.5 h-4 w-4' />
                   <Input
                     placeholder='Search invoices...'
                     value={searchTerm}
@@ -992,7 +992,7 @@ export function Invoices() {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='outline' size='icon'>
-                      <Filter className='h-4 w-4' />
+                      <MdFilterList className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
@@ -1042,37 +1042,37 @@ export function Invoices() {
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant='ghost' size='icon'>
-                            <MoreHorizontal className='h-4 w-4' />
+                            <MdMoreHoriz className='h-4 w-4' />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
                           <DropdownMenuItem onClick={() => handleViewInvoice(invoice)}>
-                            <Eye className='mr-2 h-4 w-4' />
+                            <MdVisibility className='mr-2 h-4 w-4' />
                             View
                           </DropdownMenuItem>
                           {(invoice.status === 'draft' || invoice.status === 'sent') && (
                             <DropdownMenuItem onClick={() => handleSendInvoice(invoice)}>
-                              <Send className='mr-2 h-4 w-4' />
+                              <MdSend className='mr-2 h-4 w-4' />
                               {invoice.status === 'draft' ? 'Send' : 'Resend'}
                             </DropdownMenuItem>
                           )}
                           {invoice.status === 'sent' && (
                             <DropdownMenuItem onClick={() => handleMarkPaid(invoice)}>
-                              <CheckCircle className='mr-2 h-4 w-4' />
+                              <MdCheckCircle className='mr-2 h-4 w-4' />
                               Mark as Paid
                             </DropdownMenuItem>
                           )}
                           <DropdownMenuItem onClick={() => handleDownloadPDF(invoice)}>
-                            <Download className='mr-2 h-4 w-4' />
+                            <MdDownload className='mr-2 h-4 w-4' />
                             Download PDF
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => handleDuplicateInvoice(invoice)}>
-                            <Copy className='mr-2 h-4 w-4' />
+                            <MdContentCopy className='mr-2 h-4 w-4' />
                             Duplicate
                           </DropdownMenuItem>
                           {invoice.status === 'draft' && (
                             <DropdownMenuItem onClick={() => handleDeleteInvoice(invoice.id)} className='text-destructive'>
-                              <Trash2 className='mr-2 h-4 w-4' />
+                              <MdDelete className='mr-2 h-4 w-4' />
                               Delete
                             </DropdownMenuItem>
                           )}
@@ -1090,10 +1090,10 @@ export function Invoices() {
             )}
           </CardContent>
         </Card>
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Shared Invoices Tab */}
-          <TabsContent value='shared' className='mt-4 space-y-4'>
+          <AnimatedTabsContent value='shared' className='mt-4 space-y-4'>
             {/* Stats Cards */}
             <div className='grid gap-4 md:grid-cols-4'>
               <StatsCard
@@ -1130,14 +1130,14 @@ export function Invoices() {
                 <div className='flex items-center justify-between'>
                   <div>
                     <CardTitle className='flex items-center gap-2'>
-                      <Car className='h-5 w-5' />
+                      <MdDirectionsCar className='h-5 w-5' />
                       Shared Invoices
                     </CardTitle>
                     <CardDescription>Invoices with multiple vehicles per customer</CardDescription>
                   </div>
                   <div className='flex gap-2'>
                     <div className='relative'>
-                      <SearchIcon className='text-muted-foreground absolute left-2 top-2.5 h-4 w-4' />
+                      <MdSearch className='text-muted-foreground absolute left-2 top-2.5 h-4 w-4' />
                       <Input
                         placeholder='Search shared invoices...'
                         value={searchTerm}
@@ -1148,7 +1148,7 @@ export function Invoices() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant='outline' size='icon'>
-                          <Filter className='h-4 w-4' />
+                          <MdFilterList className='h-4 w-4' />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align='end'>
@@ -1188,7 +1188,7 @@ export function Invoices() {
                         <TableCell>
                           <div className='flex items-center gap-2'>
                             <Badge variant='secondary' className='flex items-center gap-1'>
-                              <Car className='h-3 w-3' />
+                              <MdDirectionsCar className='h-3 w-3' />
                               {invoice.vehicles.length} vehicles
                             </Badge>
                           </div>
@@ -1204,34 +1204,34 @@ export function Invoices() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant='ghost' size='icon'>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <MdMoreHoriz className='h-4 w-4' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                               <DropdownMenuItem onClick={() => handleViewSharedInvoice(invoice)}>
-                                <Eye className='mr-2 h-4 w-4' />
+                                <MdVisibility className='mr-2 h-4 w-4' />
                                 View Details
                               </DropdownMenuItem>
                               {invoice.status === 'draft' && (
                                 <DropdownMenuItem onClick={() => handleSendSharedInvoice(invoice)}>
-                                  <Send className='mr-2 h-4 w-4' />
+                                  <MdSend className='mr-2 h-4 w-4' />
                                   Send
                                 </DropdownMenuItem>
                               )}
                               {invoice.status === 'sent' && (
                                 <>
                                   <DropdownMenuItem onClick={() => handleSendSharedInvoice(invoice)}>
-                                    <Send className='mr-2 h-4 w-4' />
+                                    <MdSend className='mr-2 h-4 w-4' />
                                     Resend
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => handleMarkSharedPaid(invoice)}>
-                                    <CheckCircle className='mr-2 h-4 w-4' />
+                                    <MdCheckCircle className='mr-2 h-4 w-4' />
                                     Mark as Paid
                                   </DropdownMenuItem>
                                 </>
                               )}
                               <DropdownMenuItem onClick={() => toast.success(`Downloading ${invoice.invoiceNumber}.pdf`)}>
-                                <Download className='mr-2 h-4 w-4' />
+                                <MdDownload className='mr-2 h-4 w-4' />
                                 Download PDF
                               </DropdownMenuItem>
                               {invoice.status === 'draft' && (
@@ -1239,7 +1239,7 @@ export function Invoices() {
                                   onClick={() => handleDeleteSharedInvoice(invoice.id)}
                                   className='text-destructive'
                                 >
-                                  <Trash2 className='mr-2 h-4 w-4' />
+                                  <MdDelete className='mr-2 h-4 w-4' />
                                   Delete
                                 </DropdownMenuItem>
                               )}
@@ -1257,8 +1257,8 @@ export function Invoices() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </Main>
 
       {/* View Invoice Dialog */}
@@ -1275,12 +1275,12 @@ export function Invoices() {
                   <div className='flex gap-2'>
                     {selectedInvoice.status === 'draft' && (
                       <Button size='sm' onClick={() => handleSendInvoice(selectedInvoice)}>
-                        <Send className='mr-2 h-4 w-4' />
+                        <MdSend className='mr-2 h-4 w-4' />
                         Send
                       </Button>
                     )}
                     <Button size='sm' variant='outline' onClick={() => handleDownloadPDF(selectedInvoice)}>
-                      <Download className='mr-2 h-4 w-4' />
+                      <MdDownload className='mr-2 h-4 w-4' />
                       Download
                     </Button>
                     <Button
@@ -1291,7 +1291,7 @@ export function Invoices() {
                         toast.success('Invoice link copied')
                       }}
                     >
-                      <Link2 className='mr-2 h-4 w-4' />
+                      <MdLink className='mr-2 h-4 w-4' />
                       Copy Link
                     </Button>
                   </div>
@@ -1504,15 +1504,15 @@ export function Invoices() {
             <div className='space-y-6'>
               <div className='flex justify-end gap-2'>
                 <Button variant='outline' onClick={() => setPreviewMode(false)}>
-                  <ArrowLeft className='mr-2 h-4 w-4' />
+                  <MdArrowBack className='mr-2 h-4 w-4' />
                   Back to Edit
                 </Button>
                 <Button variant='outline' onClick={handleSaveInvoice}>
-                  <Save className='mr-2 h-4 w-4' />
+                  <MdSave className='mr-2 h-4 w-4' />
                   Save Draft
                 </Button>
                 <Button onClick={handleSendNewInvoice}>
-                  <Send className='mr-2 h-4 w-4' />
+                  <MdSend className='mr-2 h-4 w-4' />
                   Send Invoice
                 </Button>
               </div>
@@ -1688,15 +1688,15 @@ export function Invoices() {
             <div className='space-y-6'>
               <div className='flex justify-end gap-2'>
                 <Button variant='outline' onClick={() => setPreviewMode(true)}>
-                  <Eye className='mr-2 h-4 w-4' />
+                  <MdVisibility className='mr-2 h-4 w-4' />
                   Preview
                 </Button>
                 <Button variant='outline' onClick={handleSaveInvoice}>
-                  <Save className='mr-2 h-4 w-4' />
+                  <MdSave className='mr-2 h-4 w-4' />
                   Save Draft
                 </Button>
                 <Button onClick={handleSendNewInvoice}>
-                  <Send className='mr-2 h-4 w-4' />
+                  <MdSend className='mr-2 h-4 w-4' />
                   Send Invoice
                 </Button>
               </div>
@@ -1839,7 +1839,7 @@ export function Invoices() {
                       <div className='flex items-center justify-between'>
                         <CardTitle>Invoice Items</CardTitle>
                         <Button size='sm' onClick={addItem}>
-                          <Plus className='mr-1 h-4 w-4' />
+                          <MdAdd className='mr-1 h-4 w-4' />
                           Add Item
                         </Button>
                       </div>
@@ -1887,7 +1887,7 @@ export function Invoices() {
                               </TableCell>
                               <TableCell>
                                 <Button size='sm' variant='ghost' onClick={() => removeItem(item.id)}>
-                                  <Trash2 className='h-4 w-4' />
+                                  <MdDelete className='h-4 w-4' />
                                 </Button>
                               </TableCell>
                             </TableRow>
@@ -2067,11 +2067,11 @@ export function Invoices() {
                     </CardHeader>
                     <CardContent className='space-y-2'>
                       <Button className='w-full' variant='outline' onClick={() => toast.success('PDF downloading...')}>
-                        <Download className='mr-2 h-4 w-4' />
+                        <MdDownload className='mr-2 h-4 w-4' />
                         Download PDF
                       </Button>
                       <Button className='w-full' variant='outline' onClick={() => window.print()}>
-                        <Printer className='mr-2 h-4 w-4' />
+                        <MdPrint className='mr-2 h-4 w-4' />
                         Print Invoice
                       </Button>
                       <Button
@@ -2082,7 +2082,7 @@ export function Invoices() {
                           toast.success('Link copied')
                         }}
                       >
-                        <Link2 className='mr-2 h-4 w-4' />
+                        <MdLink className='mr-2 h-4 w-4' />
                         Copy Link
                       </Button>
                     </CardContent>
@@ -2104,7 +2104,7 @@ export function Invoices() {
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-4'>
                     <DialogTitle className='flex items-center gap-2'>
-                      <Car className='h-5 w-5' />
+                      <MdDirectionsCar className='h-5 w-5' />
                       {selectedSharedInvoice.invoiceNumber}
                     </DialogTitle>
                     {getStatusBadge(selectedSharedInvoice.status)}
@@ -2112,7 +2112,7 @@ export function Invoices() {
                   <div className='flex gap-2'>
                     {selectedSharedInvoice.status === 'draft' && (
                       <Button size='sm' onClick={() => handleSendSharedInvoice(selectedSharedInvoice)}>
-                        <Send className='mr-2 h-4 w-4' />
+                        <MdSend className='mr-2 h-4 w-4' />
                         Send
                       </Button>
                     )}
@@ -2121,7 +2121,7 @@ export function Invoices() {
                       variant='outline'
                       onClick={() => toast.success(`Downloading ${selectedSharedInvoice.invoiceNumber}.pdf`)}
                     >
-                      <Download className='mr-2 h-4 w-4' />
+                      <MdDownload className='mr-2 h-4 w-4' />
                       Download
                     </Button>
                   </div>
@@ -2181,7 +2181,7 @@ export function Invoices() {
                   {/* Vehicles Table */}
                   <div>
                     <h4 className='mb-2 font-semibold flex items-center gap-2'>
-                      <Car className='h-4 w-4' />
+                      <MdDirectionsCar className='h-4 w-4' />
                       Vehicles ({selectedSharedInvoice.vehicles.length})
                     </h4>
                     <Table>
@@ -2291,7 +2291,7 @@ export function Invoices() {
         <DialogContent className='flex max-h-[90vh] w-full max-w-5xl flex-col overflow-hidden sm:max-w-5xl'>
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
-              <Car className='h-5 w-5' />
+              <MdDirectionsCar className='h-5 w-5' />
               Create Shared Invoice
             </DialogTitle>
             <DialogDescription>Create an invoice with multiple vehicles for a single customer</DialogDescription>
@@ -2301,11 +2301,11 @@ export function Invoices() {
             <div className='space-y-6'>
               <div className='flex justify-end gap-2'>
                 <Button variant='outline' onClick={() => handleCreateSharedInvoice(false)}>
-                  <Save className='mr-2 h-4 w-4' />
+                  <MdSave className='mr-2 h-4 w-4' />
                   Save Draft
                 </Button>
                 <Button onClick={() => handleCreateSharedInvoice(true)}>
-                  <Send className='mr-2 h-4 w-4' />
+                  <MdSend className='mr-2 h-4 w-4' />
                   Send Invoice
                 </Button>
               </div>
@@ -2391,7 +2391,7 @@ export function Invoices() {
                       <div className='flex items-center justify-between'>
                         <div>
                           <CardTitle className='flex items-center gap-2'>
-                            <Car className='h-5 w-5' />
+                            <MdDirectionsCar className='h-5 w-5' />
                             Select Vehicles
                           </CardTitle>
                           <CardDescription>Choose vehicles to include in this invoice</CardDescription>
@@ -2432,7 +2432,7 @@ export function Invoices() {
                               {isSelected && (
                                 <div className='mt-2'>
                                   <Badge variant='default' className='text-xs'>
-                                    <CheckCircle className='mr-1 h-3 w-3' />
+                                    <MdCheckCircle className='mr-1 h-3 w-3' />
                                     Selected
                                   </Badge>
                                 </div>
@@ -2488,7 +2488,7 @@ export function Invoices() {
                                 size='sm'
                                 onClick={() => handleToggleVehicle(vehicle)}
                               >
-                                <X className='h-4 w-4' />
+                                <MdClose className='h-4 w-4' />
                               </Button>
                             </div>
                           ))}

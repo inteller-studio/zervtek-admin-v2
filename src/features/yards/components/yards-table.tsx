@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { MoreHorizontal, Pencil, Trash2, MapPin, Phone, User } from 'lucide-react'
+import { MdMoreHoriz, MdEdit, MdDelete, MdLocationOn, MdPhone, MdPerson } from 'react-icons/md'
 import {
   Table,
   TableBody,
@@ -65,7 +65,7 @@ export function YardsTable({ yards, onEdit, onDelete }: YardsTableProps) {
             <TableRow>
               <TableCell colSpan={7} className='h-32 text-center'>
                 <div className='text-muted-foreground'>
-                  <MapPin className='h-8 w-8 mx-auto mb-2 opacity-50' />
+                  <MdLocationOn className='h-8 w-8 mx-auto mb-2 opacity-50' />
                   <p>No yards found</p>
                   <p className='text-sm'>Add a new yard to get started</p>
                 </div>
@@ -89,7 +89,7 @@ export function YardsTable({ yards, onEdit, onDelete }: YardsTableProps) {
                   {/* Location */}
                   <TableCell>
                     <div className='flex items-start gap-1.5'>
-                      <MapPin className='h-4 w-4 text-muted-foreground shrink-0 mt-0.5' />
+                      <MdLocationOn className='h-4 w-4 text-muted-foreground shrink-0 mt-0.5' />
                       <div className='text-sm'>
                         <p>{yard.city}, {yard.prefecture}</p>
                         <p className='text-xs text-muted-foreground'>{yard.address}</p>
@@ -104,11 +104,11 @@ export function YardsTable({ yards, onEdit, onDelete }: YardsTableProps) {
                         <TooltipTrigger asChild>
                           <div className='space-y-1 cursor-default'>
                             <div className='flex items-center gap-1.5 text-sm'>
-                              <User className='h-3.5 w-3.5 text-muted-foreground' />
+                              <MdPerson className='h-3.5 w-3.5 text-muted-foreground' />
                               {yard.contactPerson}
                             </div>
                             <div className='flex items-center gap-1.5 text-xs text-muted-foreground'>
-                              <Phone className='h-3 w-3' />
+                              <MdPhone className='h-3 w-3' />
                               {yard.contactPhone}
                             </div>
                           </div>
@@ -162,12 +162,12 @@ export function YardsTable({ yards, onEdit, onDelete }: YardsTableProps) {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant='ghost' size='icon' className='h-8 w-8'>
-                          <MoreHorizontal className='h-4 w-4' />
+                          <MdMoreHoriz className='h-4 w-4' />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align='end'>
                         <DropdownMenuItem onClick={() => onEdit(yard)}>
-                          <Pencil className='h-4 w-4 mr-2' />
+                          <MdEdit className='h-4 w-4 mr-2' />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
@@ -175,7 +175,7 @@ export function YardsTable({ yards, onEdit, onDelete }: YardsTableProps) {
                           onClick={() => onDelete(yard)}
                           className='text-destructive focus:text-destructive'
                         >
-                          <Trash2 className='h-4 w-4 mr-2' />
+                          <MdDelete className='h-4 w-4 mr-2' />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>

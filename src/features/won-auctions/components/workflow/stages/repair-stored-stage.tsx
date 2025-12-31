@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { Wrench, Plus, MessageSquare, Image, FileText, Check } from 'lucide-react'
+import { MdBuild, MdAdd, MdChat, MdImage, MdDescription, MdSkipNext, MdUndo } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import {
   type PurchaseWorkflow,
   type RepairUpdate,
@@ -36,16 +36,16 @@ import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 import { WorkflowFileUpload } from '../shared/workflow-file-upload'
 
 interface RepairStoredStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
 }
 
-const UPDATE_TYPES: { value: RepairUpdateType; label: string; icon: typeof MessageSquare }[] = [
-  { value: 'comment', label: 'Comment', icon: MessageSquare },
-  { value: 'photo', label: 'Photo', icon: Image },
-  { value: 'invoice', label: 'Invoice', icon: FileText },
+const UPDATE_TYPES: { value: RepairUpdateType; label: string; icon: typeof MdChat }[] = [
+  { value: 'comment', label: 'Comment', icon: MdChat },
+  { value: 'photo', label: 'Photo', icon: MdImage },
+  { value: 'invoice', label: 'Invoice', icon: MdDescription },
 ]
 
 export function RepairStoredStage({
@@ -56,6 +56,8 @@ export function RepairStoredStage({
 }: RepairStoredStageProps) {
   const stage = workflow.stages.repairStored
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [skipDialogOpen, setSkipDialogOpen] = useState(false)
+  const [skipReason, setSkipReason] = useState('')
   const [updateType, setUpdateType] = useState<RepairUpdateType>('comment')
   const [content, setContent] = useState('')
   const [files, setFiles] = useState<{ id: string; name: string; size: number; type: string; file: File }[]>([])
@@ -102,101 +104,218 @@ export function RepairStoredStage({
     onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
   }
 
+  const handleSkipStage = () => {
+    const updatedStage = {
+      ...stage,
+      skipped: true,
+      skippedBy: currentUser,
+      skippedAt: new Date(),
+      skipReason: skipReason.trim() || undefined,
+      status: 'skipped' as const,
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
+    setSkipDialogOpen(false)
+    setSkipReason('')
+  }
+
+  const handleUndoSkip = () => {
+    const updatedStage = {
+      ...stage,
+      skipped: false,
+      skippedBy: undefined,
+      skippedAt: undefined,
+      skipReason: undefined,
+      status: 'pending' as const,
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
+  }
+
   const getUpdateIcon = (type: RepairUpdateType) => {
     const updateType = UPDATE_TYPES.find((t) => t.value === type)
-    return updateType?.icon || MessageSquare
+    return updateType?.icon || MdChat
+  }
+
+  // If stage is skipped, show skipped state
+  if (stage.skipped) {
+    return (
+      <div className='space-y-4'>
+        {/* Skipped State */}
+        <div className='rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 p-4'>
+          <div className='flex items-start gap-3'>
+            <div className='h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0'>
+              <MdSkipNext className='h-5 w-5 text-amber-600 dark:text-amber-400' />
+            </div>
+            <div className='flex-1 min-w-0'>
+              <h3 className='font-semibold text-amber-800 dark:text-amber-200'>Stage Skipped</h3>
+              <p className='text-sm text-amber-700 dark:text-amber-300 mt-0.5'>
+                This stage was skipped and no repair/storage work was needed.
+              </p>
+              {stage.skipReason && (
+                <p className='text-sm text-amber-600 dark:text-amber-400 mt-2 italic'>
+                  "{stage.skipReason}"
+                </p>
+              )}
+              <p className='text-xs text-amber-600 dark:text-amber-400 mt-2'>
+                Skipped by {stage.skippedBy} on {stage.skippedAt ? format(new Date(stage.skippedAt), 'MMM d, yyyy h:mm a') : 'unknown'}
+              </p>
+            </div>
+          </div>
+          <div className='mt-4 pt-3 border-t border-amber-200 dark:border-amber-800'>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={handleUndoSkip}
+              className='gap-2 border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50'
+            >
+              <MdUndo className='h-4 w-4' />
+              Undo Skip
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
     <div className='space-y-4'>
-      {/* Info Alert */}
-      <Alert>
-        <Wrench className='h-4 w-4' />
-        <AlertDescription>
-          Add comments, photos, or invoices related to repairs or storage of the vehicle.
-        </AlertDescription>
-      </Alert>
+      {/* Header with Skip Button */}
+      <div className='flex items-center justify-between gap-3'>
+        <div className='flex items-center gap-2'>
+          <div className='h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+            <MdBuild className='h-4 w-4 text-primary' />
+          </div>
+          <div>
+            <p className='text-sm font-medium'>Repair & Storage</p>
+            <p className='text-xs text-muted-foreground'>Track repairs or skip if not needed</p>
+          </div>
+        </div>
+
+        {/* Skip Stage Button - Prominent placement */}
+        <Dialog open={skipDialogOpen} onOpenChange={setSkipDialogOpen}>
+          <DialogTrigger asChild>
+            <Button
+              variant='outline'
+              size='sm'
+              className='gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-400 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950 dark:hover:text-amber-300'
+            >
+              <MdSkipNext className='h-4 w-4' />
+              Skip Stage
+            </Button>
+          </DialogTrigger>
+          <DialogContent className='max-w-md'>
+            <DialogHeader>
+              <DialogTitle>Skip Repair/Storage Stage?</DialogTitle>
+              <DialogDescription>
+                If no repairs or storage documentation is needed for this vehicle, you can skip this stage.
+              </DialogDescription>
+            </DialogHeader>
+            <div className='space-y-4 py-4'>
+              <div className='space-y-2'>
+                <Label>Reason (optional)</Label>
+                <Textarea
+                  placeholder='e.g., Vehicle in perfect condition, no repairs needed...'
+                  value={skipReason}
+                  onChange={(e) => setSkipReason(e.target.value)}
+                  rows={2}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant='outline' onClick={() => setSkipDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSkipStage}
+                className='bg-amber-500 hover:bg-amber-600 text-white'
+              >
+                <MdSkipNext className='h-4 w-4 mr-2' />
+                Skip Stage
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
 
       {/* Add Update Button */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
           <Button variant='outline' className='w-full'>
-            <Plus className='h-4 w-4 mr-2' />
+            <MdAdd className='h-4 w-4 mr-2' />
             Add Update
           </Button>
         </DialogTrigger>
-        <DialogContent className='max-w-lg'>
-          <DialogHeader>
-            <DialogTitle>Add Repair/Storage Update</DialogTitle>
-            <DialogDescription>
-              Record comments, photos, or invoices for this vehicle.
-            </DialogDescription>
-          </DialogHeader>
-          <div className='space-y-4 py-4'>
-            <div className='space-y-2'>
-              <Label>Update Type</Label>
-              <Select
-                value={updateType}
-                onValueChange={(value) => setUpdateType(value as RepairUpdateType)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {UPDATE_TYPES.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      <div className='flex items-center gap-2'>
-                        <type.icon className='h-4 w-4' />
-                        {type.label}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='space-y-2'>
-              <Label>Description</Label>
-              <Textarea
-                placeholder='Enter details about the update...'
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                rows={3}
-              />
-            </div>
-            {(updateType === 'photo' || updateType === 'invoice') && (
+          <DialogContent className='max-w-lg'>
+            <DialogHeader>
+              <DialogTitle>Add Repair/Storage Update</DialogTitle>
+              <DialogDescription>
+                Record comments, photos, or invoices for this vehicle.
+              </DialogDescription>
+            </DialogHeader>
+            <div className='space-y-4 py-4'>
               <div className='space-y-2'>
-                <Label>Attachments</Label>
-                <WorkflowFileUpload
-                  onFilesSelected={setFiles}
-                  accept={updateType === 'photo' ? '.png,.jpg,.jpeg,.webp' : '.pdf,.doc,.docx,.png,.jpg'}
-                  maxFiles={5}
-                  maxSize={10 * 1024 * 1024}
-                  label={`Drop ${updateType === 'photo' ? 'photos' : 'files'} here`}
-                  description={updateType === 'photo' ? 'PNG, JPG up to 10MB' : 'PDF, DOC, images up to 10MB'}
+                <Label>Update Type</Label>
+                <Select
+                  value={updateType}
+                  onValueChange={(value) => setUpdateType(value as RepairUpdateType)}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UPDATE_TYPES.map((type) => (
+                      <SelectItem key={type.value} value={type.value}>
+                        <div className='flex items-center gap-2'>
+                          <type.icon className='h-4 w-4' />
+                          {type.label}
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className='space-y-2'>
+                <Label>Description</Label>
+                <Textarea
+                  placeholder='Enter details about the update...'
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  rows={3}
                 />
               </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button variant='outline' onClick={() => setDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddUpdate}
-              disabled={!content.trim() && files.length === 0}
-            >
-              Add Update
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {(updateType === 'photo' || updateType === 'invoice') && (
+                <div className='space-y-2'>
+                  <Label>Attachments</Label>
+                  <WorkflowFileUpload
+                    onFilesSelected={setFiles}
+                    accept={updateType === 'photo' ? '.png,.jpg,.jpeg,.webp' : '.pdf,.doc,.docx,.png,.jpg'}
+                    maxFiles={5}
+                    maxSize={10 * 1024 * 1024}
+                    label={`Drop ${updateType === 'photo' ? 'photos' : 'files'} here`}
+                    description={updateType === 'photo' ? 'PNG, JPG up to 10MB' : 'PDF, DOC, images up to 10MB'}
+                  />
+                </div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant='outline' onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAddUpdate}
+                disabled={!content.trim() && files.length === 0}
+              >
+                Add Update
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
       {/* Updates Timeline */}
       <div className='space-y-2'>
         <Label className='text-sm font-medium'>Updates Timeline</Label>
         {stage.updates.length === 0 ? (
           <div className='text-center py-6 border rounded-lg bg-muted/30'>
-            <Wrench className='h-8 w-8 mx-auto text-muted-foreground mb-2' />
+            <MdBuild className='h-8 w-8 mx-auto text-muted-foreground mb-2' />
             <p className='text-sm text-muted-foreground'>No updates recorded yet</p>
           </div>
         ) : (
@@ -246,9 +365,9 @@ export function RepairStoredStage({
                             className='text-xs text-primary hover:underline flex items-center gap-1'
                           >
                             {att.type === 'image' ? (
-                              <Image className='h-3 w-3' />
+                              <MdImage className='h-3 w-3' />
                             ) : (
-                              <FileText className='h-3 w-3' />
+                              <MdDescription className='h-3 w-3' />
                             )}
                             {att.name}
                           </a>

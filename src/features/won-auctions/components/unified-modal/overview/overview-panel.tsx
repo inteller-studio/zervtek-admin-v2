@@ -1,43 +1,44 @@
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
 import {
-  Car,
-  User,
-  CreditCard,
-  Ship,
-  MapPin,
-  CheckCircle2,
-  FileText,
-  Download,
-  Clock,
-} from 'lucide-react'
+  MdDirectionsCar,
+  MdPerson,
+  MdCreditCard,
+  MdDirectionsBoat,
+  MdLocationOn,
+  MdCheckCircle,
+  MdDescription,
+  MdDownload,
+  MdAccessTime,
+} from 'react-icons/md'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import { InfoCard } from '../shared/info-card'
 import { InfoRow } from '../shared/info-row'
 
 interface OverviewPanelProps {
-  auction: WonAuction
+  auction: Purchase
   onRecordPayment?: () => void
   onUpdateShipping?: () => void
   onGenerateInvoice?: () => void
 }
 
 // Payment status styles
-const paymentStatusStyles: Record<WonAuction['paymentStatus'], string> = {
+const paymentStatusStyles: Record<Purchase['paymentStatus'], string> = {
   pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   partial: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   completed: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
 }
 
-function PaymentBreakdown({ auction }: { auction: WonAuction }) {
+function PaymentBreakdown({ auction }: { auction: Purchase }) {
   const total = auction.totalAmount
   const bidPercent = (auction.winningBid / total) * 100
   const shippingPercent = (auction.shippingCost / total) * 100
@@ -103,7 +104,7 @@ function PaymentBreakdown({ auction }: { auction: WonAuction }) {
               auction.paymentStatus === 'completed' ? 'text-emerald-600' : 'text-foreground'
             )}
           >
-            {auction.paymentStatus === 'completed' && <CheckCircle2 className='h-4 w-4' />}
+            {auction.paymentStatus === 'completed' && <MdCheckCircle className='h-4 w-4' />}
             ¥{auction.paidAmount.toLocaleString()}
           </span>
         </div>
@@ -138,7 +139,7 @@ function PaymentBreakdown({ auction }: { auction: WonAuction }) {
                 className='flex items-center justify-between text-sm bg-muted/30 rounded-lg p-2'
               >
                 <div className='flex items-center gap-2'>
-                  <CreditCard className='h-3.5 w-3.5 text-muted-foreground' />
+                  <MdCreditCard className='h-3.5 w-3.5 text-muted-foreground' />
                   <span className='text-muted-foreground'>
                     {format(new Date(payment.date), 'MMM d, yyyy')}
                   </span>
@@ -159,6 +160,8 @@ export function OverviewPanel({
   onUpdateShipping,
   onGenerateInvoice,
 }: OverviewPanelProps) {
+  const [activeTab, setActiveTab] = useState('vehicle')
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -168,32 +171,25 @@ export function OverviewPanel({
       .slice(0, 2)
   }
 
+  const overviewTabs: TabItem[] = [
+    { id: 'vehicle', label: 'Vehicle', icon: MdDirectionsCar },
+    { id: 'customer', label: 'Customer', icon: MdPerson },
+    { id: 'payments', label: 'Payments', icon: MdCreditCard },
+    { id: 'shipping', label: 'Shipping', icon: MdDirectionsBoat },
+  ]
+
   return (
     <ScrollArea className='h-full'>
       <div className='p-4'>
-        <Tabs defaultValue='vehicle' className='w-full'>
-          <TabsList className='mb-4 bg-muted/50 w-full justify-start'>
-            <TabsTrigger value='vehicle' className='text-xs'>
-              <Car className='h-3.5 w-3.5 mr-1.5' />
-              Vehicle
-            </TabsTrigger>
-            <TabsTrigger value='customer' className='text-xs'>
-              <User className='h-3.5 w-3.5 mr-1.5' />
-              Customer
-            </TabsTrigger>
-            <TabsTrigger value='payments' className='text-xs'>
-              <CreditCard className='h-3.5 w-3.5 mr-1.5' />
-              Payments
-            </TabsTrigger>
-            <TabsTrigger value='shipping' className='text-xs'>
-              <Ship className='h-3.5 w-3.5 mr-1.5' />
-              Shipping
-            </TabsTrigger>
-          </TabsList>
-
+        <AnimatedTabs
+          tabs={overviewTabs}
+          value={activeTab}
+          onValueChange={setActiveTab}
+          variant='compact'
+        >
           {/* Vehicle Tab */}
-          <TabsContent value='vehicle' className='mt-0 space-y-4'>
-            <InfoCard title='Vehicle Information' icon={<Car className='h-4 w-4' />}>
+          <AnimatedTabsContent value='vehicle' className='mt-4 space-y-4'>
+            <InfoCard title='Vehicle Information' icon={<MdDirectionsCar className='h-4 w-4' />}>
               <div className='space-y-1 divide-y divide-border/50'>
                 <InfoRow
                   label='Make/Model'
@@ -209,11 +205,11 @@ export function OverviewPanel({
               </div>
             </InfoCard>
 
-            <InfoCard title='Auction Details' icon={<FileText className='h-4 w-4' />}>
+            <InfoCard title='Purchase Details' icon={<MdDescription className='h-4 w-4' />}>
               <div className='space-y-1 divide-y divide-border/50'>
-                <InfoRow label='Auction ID' value={auction.auctionId} copyable />
+                <InfoRow label='Purchase ID' value={auction.auctionId} copyable />
                 <InfoRow
-                  label='Auction Date'
+                  label='Purchase Date'
                   value={format(new Date(auction.auctionEndDate), 'MMM d, yyyy')}
                 />
                 <InfoRow
@@ -228,11 +224,11 @@ export function OverviewPanel({
                 <p className='text-sm text-muted-foreground'>{auction.notes}</p>
               </InfoCard>
             )}
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Customer Tab */}
-          <TabsContent value='customer' className='mt-0 space-y-4'>
-            <InfoCard title='Customer Information' icon={<User className='h-4 w-4' />}>
+          <AnimatedTabsContent value='customer' className='mt-4 space-y-4'>
+            <InfoCard title='Customer Information' icon={<MdPerson className='h-4 w-4' />}>
               <div className='flex items-center gap-3 mb-4'>
                 <Avatar className='h-12 w-12'>
                   <AvatarFallback className='bg-primary/10 text-primary text-sm font-medium'>
@@ -261,7 +257,7 @@ export function OverviewPanel({
                   label='Destination'
                   value={
                     <span className='flex items-center gap-1'>
-                      <MapPin className='h-3 w-3' />
+                      <MdLocationOn className='h-3 w-3' />
                       {auction.destinationPort || '—'}
                     </span>
                   }
@@ -274,13 +270,13 @@ export function OverviewPanel({
                 </div>
               )}
             </InfoCard>
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Payments Tab */}
-          <TabsContent value='payments' className='mt-0 space-y-4'>
+          <AnimatedTabsContent value='payments' className='mt-4 space-y-4'>
             <InfoCard
               title='Payment Overview'
-              icon={<CreditCard className='h-4 w-4' />}
+              icon={<MdCreditCard className='h-4 w-4' />}
               action={
                 <Badge
                   variant='outline'
@@ -296,15 +292,15 @@ export function OverviewPanel({
 
             {onRecordPayment && auction.paymentStatus !== 'completed' && (
               <Button onClick={onRecordPayment} className='w-full'>
-                <CreditCard className='h-4 w-4 mr-2' />
+                <MdCreditCard className='h-4 w-4 mr-2' />
                 Record Payment
               </Button>
             )}
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Shipping Tab */}
-          <TabsContent value='shipping' className='mt-0 space-y-4'>
-            <InfoCard title='Shipping Information' icon={<Ship className='h-4 w-4' />}>
+          <AnimatedTabsContent value='shipping' className='mt-4 space-y-4'>
+            <InfoCard title='Shipping Information' icon={<MdDirectionsBoat className='h-4 w-4' />}>
               {auction.shipment ? (
                 <div className='space-y-4'>
                   <div className='space-y-1 divide-y divide-border/50'>
@@ -353,7 +349,7 @@ export function OverviewPanel({
               ) : (
                 <div className='flex flex-col items-center justify-center py-8 text-center'>
                   <div className='flex h-16 w-16 items-center justify-center rounded-full bg-muted/50 mb-4'>
-                    <Ship className='h-8 w-8 text-muted-foreground/50' />
+                    <MdDirectionsBoat className='h-8 w-8 text-muted-foreground/50' />
                   </div>
                   <h4 className='font-medium text-muted-foreground mb-1'>
                     No Shipping Info Yet
@@ -366,7 +362,7 @@ export function OverviewPanel({
             </InfoCard>
 
             {/* Invoice Preview */}
-            <InfoCard title='Invoice' icon={<FileText className='h-4 w-4' />}>
+            <InfoCard title='Invoice' icon={<MdDescription className='h-4 w-4' />}>
               <div className='space-y-3'>
                 <div className='flex items-center justify-between pb-2 border-b border-border/50'>
                   <div>
@@ -416,14 +412,14 @@ export function OverviewPanel({
                     className='w-full mt-2'
                     onClick={onGenerateInvoice}
                   >
-                    <Download className='h-4 w-4 mr-2' />
+                    <MdDownload className='h-4 w-4 mr-2' />
                     Download Invoice PDF
                   </Button>
                 )}
               </div>
             </InfoCard>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </div>
     </ScrollArea>
   )

@@ -5,19 +5,6 @@
 // Base Types
 // ============================================
 
-/** Audit trail for task completions */
-export interface TaskCompletion {
-  completedBy: string
-  completedAt: Date
-  notes?: string
-}
-
-/** Task with completion tracking */
-export interface WorkflowTask {
-  completed: boolean
-  completion?: TaskCompletion
-}
-
 /** Stage status */
 export type WorkflowStageStatus = 'pending' | 'in_progress' | 'completed' | 'skipped'
 
@@ -32,26 +19,84 @@ export interface WorkflowAttachment {
   uploadedAt: Date
 }
 
+/** Audit trail for task completions */
+export interface TaskCompletion {
+  completedBy: string
+  completedAt: Date
+  notes?: string
+  attachments?: WorkflowAttachment[]
+}
+
+/** Task with completion tracking */
+export interface WorkflowTask {
+  completed: boolean
+  completion?: TaskCompletion
+}
+
 // ============================================
 // Stage 1: After Purchase
 // ============================================
 
+export type CostType = 'tax' | 'auction_fee' | 'transport' | 'inspection' | 'storage' | 'other'
+
+export interface CostInvoice {
+  id: string
+  costType: CostType
+  description: string
+  amount: number
+  currency: string
+  attachment?: WorkflowAttachment
+  createdBy: string
+  createdAt: Date
+}
+
 export interface AfterPurchaseStage {
   status: WorkflowStageStatus
   paymentToAuctionHouse: WorkflowTask
+  paymentAmount?: number
+  paymentCurrency?: string
+  invoiceAttachments?: WorkflowAttachment[]
+  costInvoices?: CostInvoice[]
 }
+
+export const COST_TYPES: { value: CostType; label: string }[] = [
+  { value: 'tax', label: 'Tax' },
+  { value: 'auction_fee', label: 'Auction Fee' },
+  { value: 'transport', label: 'Transport' },
+  { value: 'inspection', label: 'Inspection' },
+  { value: 'storage', label: 'Storage' },
+  { value: 'other', label: 'Other' },
+]
 
 // ============================================
 // Stage 2: Transport
 // ============================================
+
+export interface TransportCost {
+  id: string
+  taskKey: 'transportArranged' | 'photosRequested'
+  description: string
+  amount: number
+  currency: string
+  attachment?: WorkflowAttachment
+  createdBy: string
+  createdAt: Date
+}
 
 export interface TransportStage {
   status: WorkflowStageStatus
   yardId: string | null
   yardName?: string
   transportArranged: WorkflowTask
+  transportArrangedAmount?: number
+  transportArrangedCurrency?: string
+  transportArrangedInvoices?: WorkflowAttachment[]
   yardNotified: WorkflowTask
   photosRequested: WorkflowTask
+  photosRequestedAmount?: number
+  photosRequestedCurrency?: string
+  photosRequestedInvoices?: WorkflowAttachment[]
+  costs?: TransportCost[]
 }
 
 // ============================================
@@ -93,6 +138,10 @@ export interface RepairStoredStage {
   status: WorkflowStageStatus
   updates: RepairUpdate[]
   markedComplete: WorkflowTask
+  skipped?: boolean
+  skippedBy?: string
+  skippedAt?: Date
+  skipReason?: string
 }
 
 // ============================================

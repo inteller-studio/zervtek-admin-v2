@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Send, Download, Copy, Trash2 } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdSend, MdDownload, MdContentCopy, MdDelete } from 'react-icons/md'
 import { type Invoice } from '../data/invoices'
 import { format } from 'date-fns'
 
@@ -75,33 +75,33 @@ export function InvoicesTable({ data }: InvoicesTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Invoice
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Download className='mr-2 h-4 w-4' />
+                      <MdDownload className='mr-2 h-4 w-4' />
                       Download PDF
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Copy className='mr-2 h-4 w-4' />
+                      <MdContentCopy className='mr-2 h-4 w-4' />
                       Duplicate
                     </DropdownMenuItem>
                     {invoice.status === 'draft' && (
                       <DropdownMenuItem>
-                        <Send className='mr-2 h-4 w-4' />
+                        <MdSend className='mr-2 h-4 w-4' />
                         Send to Customer
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

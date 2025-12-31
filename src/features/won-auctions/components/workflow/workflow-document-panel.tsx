@@ -3,16 +3,16 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import {
-  Check,
-  Circle,
-  FileText,
-  Upload,
-  Download,
-  Trash2,
-  Eye,
-  ChevronDown,
-  ChevronUp,
-} from 'lucide-react'
+  MdCheck,
+  MdRadioButtonUnchecked,
+  MdDescription,
+  MdUpload,
+  MdDownload,
+  MdDelete,
+  MdVisibility,
+  MdExpandMore,
+  MdExpandLess,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -23,12 +23,12 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
 import { cn } from '@/lib/utils'
-import { type WonAuction, type Document } from '../../data/won-auctions'
+import { type Purchase, type Document } from '../../data/won-auctions'
 import { type PurchaseWorkflow, DOCUMENT_TYPES } from '../../types/workflow'
 import { WorkflowFileUpload } from './shared/workflow-file-upload'
 
 interface WorkflowDocumentPanelProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onDocumentUpload: (documents: Document[]) => void
   onDocumentDelete?: (documentId: string) => void
@@ -114,10 +114,10 @@ export function WorkflowDocumentPanel({
                   >
                     {isPresent ? (
                       <div className='h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center'>
-                        <Check className='h-3 w-3 text-white' />
+                        <MdCheck className='h-3 w-3 text-white' />
                       </div>
                     ) : (
-                      <Circle className='h-5 w-5 text-muted-foreground/40' />
+                      <MdRadioButtonUnchecked className='h-5 w-5 text-muted-foreground/40' />
                     )}
                     <span
                       className={cn(
@@ -146,13 +146,13 @@ export function WorkflowDocumentPanel({
               <CollapsibleTrigger asChild>
                 <button className='flex items-center justify-between w-full p-3 text-left'>
                   <div className='flex items-center gap-2'>
-                    <Upload className='h-4 w-4 text-muted-foreground' />
+                    <MdUpload className='h-4 w-4 text-muted-foreground' />
                     <span className='text-sm font-medium'>Upload Documents</span>
                   </div>
                   {uploadOpen ? (
-                    <ChevronUp className='h-4 w-4 text-muted-foreground' />
+                    <MdExpandLess className='h-4 w-4 text-muted-foreground' />
                   ) : (
-                    <ChevronDown className='h-4 w-4 text-muted-foreground' />
+                    <MdExpandMore className='h-4 w-4 text-muted-foreground' />
                   )}
                 </button>
               </CollapsibleTrigger>
@@ -178,15 +178,15 @@ export function WorkflowDocumentPanel({
               <CollapsibleTrigger asChild>
                 <button className='flex items-center justify-between w-full p-3 text-left'>
                   <div className='flex items-center gap-2'>
-                    <FileText className='h-4 w-4 text-muted-foreground' />
+                    <MdDescription className='h-4 w-4 text-muted-foreground' />
                     <span className='text-sm font-medium'>
                       Uploaded ({auction.documents.length})
                     </span>
                   </div>
                   {documentsOpen ? (
-                    <ChevronUp className='h-4 w-4 text-muted-foreground' />
+                    <MdExpandLess className='h-4 w-4 text-muted-foreground' />
                   ) : (
-                    <ChevronDown className='h-4 w-4 text-muted-foreground' />
+                    <MdExpandMore className='h-4 w-4 text-muted-foreground' />
                   )}
                 </button>
               </CollapsibleTrigger>
@@ -203,7 +203,7 @@ export function WorkflowDocumentPanel({
                           key={doc.id}
                           className='flex items-center gap-2 p-2 rounded-md bg-muted/50 group'
                         >
-                          <FileText className='h-4 w-4 text-muted-foreground shrink-0' />
+                          <MdDescription className='h-4 w-4 text-muted-foreground shrink-0' />
                           <div className='flex-1 min-w-0'>
                             <p className='text-sm font-medium truncate'>
                               {doc.name}
@@ -220,14 +220,14 @@ export function WorkflowDocumentPanel({
                               className='h-7 w-7'
                               onClick={() => window.open(doc.url, '_blank')}
                             >
-                              <Eye className='h-3.5 w-3.5' />
+                              <MdVisibility className='h-3.5 w-3.5' />
                             </Button>
                             <Button
                               variant='ghost'
                               size='icon'
                               className='h-7 w-7'
                             >
-                              <Download className='h-3.5 w-3.5' />
+                              <MdDownload className='h-3.5 w-3.5' />
                             </Button>
                             {onDocumentDelete && (
                               <Button
@@ -236,7 +236,7 @@ export function WorkflowDocumentPanel({
                                 className='h-7 w-7 text-destructive hover:text-destructive'
                                 onClick={() => onDocumentDelete(doc.id)}
                               >
-                                <Trash2 className='h-3.5 w-3.5' />
+                                <MdDelete className='h-3.5 w-3.5' />
                               </Button>
                             )}
                           </div>

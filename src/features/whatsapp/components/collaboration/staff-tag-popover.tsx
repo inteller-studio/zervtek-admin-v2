@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, UserPlus } from 'lucide-react'
+import { MdCheck, MdPersonAdd } from 'react-icons/md'
 import {
   Command,
   CommandEmpty,
@@ -178,7 +178,7 @@ function StaffItem({ staff, isSelected, onSelect }: StaffItemProps) {
           {staff.role.replace('_', ' ')}
         </p>
       </div>
-      {isSelected && <Check className='h-4 w-4 text-primary shrink-0' />}
+      {isSelected && <MdCheck className='h-4 w-4 text-primary shrink-0' />}
     </CommandItem>
   )
 }

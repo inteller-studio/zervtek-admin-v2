@@ -1,6 +1,6 @@
 'use client'
 
-import { Lock, MessageSquare } from 'lucide-react'
+import { MdLock, MdMessage } from 'react-icons/md'
 
 export function EmptyState() {
   return (
@@ -8,7 +8,7 @@ export function EmptyState() {
       <div className='flex flex-col items-center text-center'>
         {/* WhatsApp Web illustration */}
         <div className='mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-[#00A884]/10'>
-          <MessageSquare className='h-12 w-12 text-[#00A884]' />
+          <MdMessage className='h-12 w-12 text-[#00A884]' />
         </div>
 
         <h2 className='mb-2 text-3xl font-light text-[#41525D] dark:text-[#E9EDEF]'>
@@ -23,7 +23,7 @@ export function EmptyState() {
 
         {/* End-to-end encryption notice */}
         <div className='flex items-center gap-2 text-xs text-[#8696A0]'>
-          <Lock className='h-3 w-3' />
+          <MdLock className='h-3 w-3' />
           <span>End-to-end encrypted</span>
         </div>
       </div>

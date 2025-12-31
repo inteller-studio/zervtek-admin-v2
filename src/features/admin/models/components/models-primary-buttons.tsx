@@ -1,19 +1,19 @@
 import { Button } from '@/components/ui/button'
-import { Plus, Download, RefreshCw } from 'lucide-react'
+import { MdAdd, MdDownload, MdRefresh } from 'react-icons/md'
 
 export function ModelsPrimaryButtons() {
   return (
     <div className='flex gap-2'>
       <Button variant='outline' size='sm'>
-        <RefreshCw className='mr-2 h-4 w-4' />
+        <MdRefresh className='mr-2 h-4 w-4' />
         Refresh SEO
       </Button>
       <Button variant='outline' size='sm'>
-        <Download className='mr-2 h-4 w-4' />
+        <MdDownload className='mr-2 h-4 w-4' />
         Export
       </Button>
       <Button size='sm'>
-        <Plus className='mr-2 h-4 w-4' />
+        <MdAdd className='mr-2 h-4 w-4' />
         Add Model
       </Button>
     </div>

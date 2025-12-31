@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Archive, Filter, MessageSquare, MoreVertical, Plus, Search, X } from 'lucide-react'
+import { MdArchive, MdFilterList, MdMessage, MdMoreVert, MdAdd, MdSearch, MdClose } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -122,7 +122,7 @@ export function ConversationList({
             onClick={onNewConversation}
             className='size-10 text-muted-foreground hover:text-foreground'
           >
-            <Plus className='h-5 w-5' />
+            <MdAdd className='h-5 w-5' />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -131,7 +131,7 @@ export function ConversationList({
                 size='icon'
                 className='size-10 text-muted-foreground hover:text-foreground'
               >
-                <MoreVertical className='h-5 w-5' />
+                <MdMoreVert className='h-5 w-5' />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align='end'>
@@ -146,7 +146,7 @@ export function ConversationList({
       {/* Search */}
       <div className='flex-shrink-0 bg-muted/50 px-3 py-2'>
         <div className='relative'>
-          <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+          <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
           <Input
             placeholder='Search or start new chat'
             value={searchTerm}
@@ -158,7 +158,7 @@ export function ConversationList({
               onClick={() => setSearchTerm('')}
               className='absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-muted-foreground transition-colors hover:text-foreground'
             >
-              <X className='h-4 w-4' />
+              <MdClose className='h-4 w-4' />
             </button>
           )}
         </div>
@@ -197,9 +197,9 @@ export function ConversationList({
           <div className='flex flex-col items-center justify-center px-4 py-16 text-center'>
             <div className='mb-4 flex size-20 items-center justify-center rounded-full bg-muted'>
               {activeTab === 'active' ? (
-                <MessageSquare className='size-10 text-muted-foreground' />
+                <MdMessage className='size-10 text-muted-foreground' />
               ) : (
-                <Archive className='size-10 text-muted-foreground' />
+                <MdArchive className='size-10 text-muted-foreground' />
               )}
             </div>
             <h3 className='font-medium text-foreground'>

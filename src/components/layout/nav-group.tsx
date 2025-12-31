@@ -3,7 +3,7 @@
 import { type ReactNode } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { ChevronRight } from 'lucide-react'
+import { MdChevronRight } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import {
   Collapsible,
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/collapsible'
 import {
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -41,9 +40,6 @@ export function NavGroup({ title, items }: NavGroupProps) {
   const pathname = usePathname()
   return (
     <SidebarGroup>
-      <SidebarGroupLabel className='uppercase tracking-wider text-[10px] font-semibold text-muted-foreground/60 mb-1'>
-        {title}
-      </SidebarGroupLabel>
       <SidebarMenu className='gap-0.5'>
         {items.map((item) => {
           const key = `${item.title}-${item.url}`
@@ -108,8 +104,12 @@ function SidebarMenuLink({ item, pathname }: { item: NavLink; pathname: string }
         tooltip={item.title}
         className={cn(
           'group/nav-item relative transition-all duration-200',
-          'hover:bg-accent/50',
-          isActive && 'bg-accent font-medium'
+          'hover:bg-muted/40',
+          isActive && [
+            'bg-muted/60 font-medium',
+            'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
+            'before:h-6 before:w-[3px] before:rounded-full before:bg-primary'
+          ]
         )}
       >
         <Link href={item.url} onClick={handleClick}>
@@ -166,7 +166,7 @@ function SidebarMenuCollapsible({
             tooltip={item.title}
             className={cn(
               'group/nav-item transition-all duration-200',
-              'hover:bg-accent/50'
+              'hover:bg-muted/40'
             )}
           >
             {item.icon && (
@@ -181,7 +181,7 @@ function SidebarMenuCollapsible({
               {item.title}
             </span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            <ChevronRight className='ms-auto h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
+            <MdChevronRight className='ms-auto h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90 rtl:rotate-180' />
           </SidebarMenuButton>
         </CollapsibleTrigger>
         <CollapsibleContent className='CollapsibleContent'>
@@ -194,9 +194,13 @@ function SidebarMenuCollapsible({
                     asChild
                     isActive={isSubActive}
                     className={cn(
-                      'group/sub-item transition-all duration-200',
-                      'hover:bg-accent/50',
-                      isSubActive && 'bg-accent font-medium text-foreground'
+                      'group/sub-item relative transition-all duration-200',
+                      'hover:bg-muted/40',
+                      isSubActive && [
+                        'bg-muted/60 font-medium text-foreground',
+                        'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
+                        'before:h-5 before:w-[2px] before:rounded-full before:bg-primary'
+                      ]
                     )}
                   >
                     <Link href={subItem.url} onClick={() => handleSubItemClick(subItem.url)}>
@@ -254,9 +258,13 @@ function SidebarMenuCollapsedDropdown({
             tooltip={item.title}
             isActive={isActive}
             className={cn(
-              'group/nav-item transition-all duration-200',
-              'hover:bg-accent/50',
-              isActive && 'bg-accent'
+              'group/nav-item relative transition-all duration-200',
+              'hover:bg-muted/40',
+              isActive && [
+                'bg-muted/60',
+                'before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2',
+                'before:h-6 before:w-[3px] before:rounded-full before:bg-primary'
+              ]
             )}
           >
             {item.icon && (
@@ -276,7 +284,7 @@ function SidebarMenuCollapsedDropdown({
               {item.title}
             </span>
             {item.badge && <NavBadge>{item.badge}</NavBadge>}
-            <ChevronRight className='ms-auto h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
+            <MdChevronRight className='ms-auto h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
           </SidebarMenuButton>
         </DropdownMenuTrigger>
         <DropdownMenuContent side='right' align='start' sideOffset={4} className='min-w-48'>
@@ -293,7 +301,7 @@ function SidebarMenuCollapsedDropdown({
                   onClick={() => handleSubItemClick(sub.url)}
                   className={cn(
                     'flex items-center gap-2 transition-colors',
-                    isSubActive && 'bg-accent font-medium'
+                    isSubActive && 'bg-muted/60 font-medium'
                   )}
                 >
                   {sub.icon && (

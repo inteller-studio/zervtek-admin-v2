@@ -1,5 +1,5 @@
 import { type Root, type Content, type Trigger } from '@radix-ui/react-popover'
-import { CircleQuestionMark } from 'lucide-react'
+import { MdHelp } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -28,7 +28,7 @@ export function LearnMore({
       >
         <Button variant='outline' size='icon'>
           <span className='sr-only'>Learn more</span>
-          <CircleQuestionMark className='size-4 [&>circle]:hidden' />
+          <MdHelp className='size-4' />
         </Button>
       </PopoverTrigger>
       <PopoverContent

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { MessageSquare, Plus, Send, User } from 'lucide-react'
+import { MdMessage, MdAdd, MdSend, MdPerson } from 'react-icons/md'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
@@ -62,7 +62,7 @@ export function InspectionNotes({
               >
                 <p className='text-sm'>{note.note}</p>
                 <div className='flex items-center gap-2 mt-2 text-xs text-muted-foreground'>
-                  <User className='h-3 w-3' />
+                  <MdPerson className='h-3 w-3' />
                   <span>{note.addedBy}</span>
                   <span>•</span>
                   <span>{format(new Date(note.addedAt), 'MMM dd, yyyy HH:mm')}</span>
@@ -72,7 +72,7 @@ export function InspectionNotes({
           </div>
         ) : (
           <div className='flex flex-col items-center justify-center py-8 text-center'>
-            <MessageSquare className='h-8 w-8 text-muted-foreground mb-2' />
+            <MdMessage className='h-8 w-8 text-muted-foreground mb-2' />
             <p className='text-sm text-muted-foreground'>No notes yet</p>
           </div>
         )}
@@ -101,7 +101,7 @@ export function InspectionNotes({
               onClick={handleAddNote}
               disabled={!newNote.trim() || isAdding}
             >
-              <Send className='h-4 w-4 mr-1.5' />
+              <MdSend className='h-4 w-4 mr-1.5' />
               Add Note
             </Button>
           </div>

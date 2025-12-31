@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { LayoutGrid, LayoutList, RefreshCw } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import { MdGridView, MdViewList, MdRefresh } from 'react-icons/md'
 import { toast } from 'sonner'
 
 import { ConfigDrawer } from '@/components/config-drawer'
@@ -10,20 +11,20 @@ import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 
 import {
-  wonAuctions as initialWonAuctions,
-  type WonAuction,
+  purchases as initialWonAuctions,
+  type Purchase,
   type Document,
   type ShipmentTracking,
   type Payment,
 } from './data/won-auctions'
-import { type PurchaseWorkflow } from './types/workflow'
+import { type PurchaseWorkflow, type DocumentChecklist } from './types/workflow'
+import { createDefaultWorkflow } from './utils/workflow'
 import { WonAuctionsProvider, useWonAuctions } from './components/won-auctions-provider'
 import { WonAuctionsDialogs } from './components/won-auctions-dialogs'
 import { WonAuctionsFilters } from './components/won-auctions-filters'
-import { WonAuctionsStats } from './components/won-auctions-stats'
 import { WonAuctionsPagination } from './components/won-auctions-pagination'
 import { VehicleCard } from './components/vehicle-card'
 import { WonAuctionsTableView } from './components/won-auctions-table-view'
@@ -31,9 +32,10 @@ import { useWonAuctionsFilters } from './hooks/use-won-auctions-filters'
 import { type ViewMode, type WonAuctionsDialogType } from './types'
 
 function WonAuctionsContent() {
-  const [auctions, setAuctions] = useState<WonAuction[]>(initialWonAuctions)
+  const router = useRouter()
+  const [auctions, setAuctions] = useState<Purchase[]>(initialWonAuctions)
   const [viewMode, setViewMode] = useState<ViewMode>('card')
-  const [activeTab, setActiveTab] = useState<WonAuction['status']>('payment_pending')
+  const [activeTab, setActiveTab] = useState<Purchase['status']>('payment_pending')
 
   const { setOpen, setCurrentRow, setInitialMode } = useWonAuctions()
 
@@ -64,16 +66,14 @@ function WonAuctionsContent() {
   }, [auctions])
 
   // Dialog handlers
-  const openDialog = (type: WonAuctionsDialogType, auction: WonAuction) => {
+  const openDialog = (type: WonAuctionsDialogType, auction: Purchase) => {
     setCurrentRow(auction)
     setOpen(type)
   }
 
-  // Open unified purchase modal with specific mode
-  const openPurchaseModal = (auction: WonAuction, mode: 'overview' | 'workflow') => {
-    setCurrentRow(auction)
-    setInitialMode(mode)
-    setOpen('purchase')
+  // Navigate to purchase detail page
+  const navigateToPurchase = (auction: Purchase) => {
+    router.push(`/purchases/${auction.id}`)
   }
 
   // Payment handler
@@ -115,15 +115,45 @@ function WonAuctionsContent() {
     )
   }
 
-  // Document upload handler
-  const handleUploadDocuments = (auctionId: string, documents: Document[]) => {
+  // Document upload handler with workflow checklist sync
+  const handleUploadDocuments = (auctionId: string, documents: Document[], checklistKey?: keyof DocumentChecklist) => {
     setAuctions((prev) =>
       prev.map((a) => {
         if (a.id !== auctionId) return a
+
+        // Get or create workflow
+        const workflow = a.workflow || createDefaultWorkflow()
+
+        // If a checklist key is provided, update the workflow checklist
+        let updatedWorkflow = workflow
+        if (checklistKey) {
+          updatedWorkflow = {
+            ...workflow,
+            stages: {
+              ...workflow.stages,
+              documentsReceived: {
+                ...workflow.stages.documentsReceived,
+                checklist: {
+                  ...workflow.stages.documentsReceived.checklist,
+                  [checklistKey]: {
+                    received: true,
+                    receivedAt: new Date(),
+                    receivedBy: 'Current Admin',
+                    documentId: documents[0]?.id,
+                  },
+                },
+              },
+            },
+            updatedAt: new Date(),
+          }
+          toast.success(`${checklistKey} marked as received in workflow`)
+        }
+
         return {
           ...a,
           documents: [...a.documents, ...documents],
           status: a.status === 'documents_pending' ? 'processing' : a.status,
+          workflow: updatedWorkflow,
           timeline: {
             ...a.timeline,
             documentsUploaded: new Date(),
@@ -152,7 +182,7 @@ function WonAuctionsContent() {
   }
 
   // Mark as delivered handler
-  const handleMarkDelivered = (auction: WonAuction) => {
+  const handleMarkDelivered = (auction: Purchase) => {
     setAuctions((prev) =>
       prev.map((a) => {
         if (a.id !== auction.id) return a
@@ -170,7 +200,7 @@ function WonAuctionsContent() {
   }
 
   // Mark as completed handler
-  const handleMarkCompleted = (auction: WonAuction) => {
+  const handleMarkCompleted = (auction: Purchase) => {
     setAuctions((prev) =>
       prev.map((a) => {
         if (a.id !== auction.id) return a
@@ -250,13 +280,10 @@ function WonAuctionsContent() {
               size='sm'
               onClick={() => setAuctions([...initialWonAuctions])}
             >
-              <RefreshCw className='mr-2 h-4 w-4' />
+              <MdRefresh className='mr-2 h-4 w-4' />
               Refresh
             </Button>
         </div>
-
-        {/* Stats */}
-        <WonAuctionsStats auctions={auctions} />
 
         {/* Filters */}
         <WonAuctionsFilters
@@ -270,84 +297,83 @@ function WonAuctionsContent() {
         />
 
         {/* Status Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as WonAuction['status'])} className='w-full'>
-          <div className='flex items-center justify-between'>
-            <TabsList className='bg-muted/50'>
-              <TabsTrigger value='payment_pending' className='text-xs'>
-                Payment Pending ({statusCounts.payment_pending})
-              </TabsTrigger>
-              <TabsTrigger value='processing' className='text-xs'>
-                Processing ({statusCounts.processing})
-              </TabsTrigger>
-              <TabsTrigger value='documents_pending' className='text-xs'>
-                Docs Pending ({statusCounts.documents_pending})
-              </TabsTrigger>
-              <TabsTrigger value='shipping' className='text-xs'>
-                Shipping ({statusCounts.shipping})
-              </TabsTrigger>
-              <TabsTrigger value='delivered' className='text-xs'>
-                Delivered ({statusCounts.delivered})
-              </TabsTrigger>
-              <TabsTrigger value='completed' className='text-xs'>
-                Completed ({statusCounts.completed})
-              </TabsTrigger>
-            </TabsList>
+        {(() => {
+          const statusTabs: TabItem[] = [
+            { id: 'payment_pending', label: 'Payment Pending', badge: statusCounts.payment_pending, badgeColor: 'amber' },
+            { id: 'processing', label: 'Processing', badge: statusCounts.processing, badgeColor: 'primary' },
+            { id: 'documents_pending', label: 'Docs Pending', badge: statusCounts.documents_pending },
+            { id: 'shipping', label: 'Shipping', badge: statusCounts.shipping, badgeColor: 'primary' },
+            { id: 'delivered', label: 'Delivered', badge: statusCounts.delivered, badgeColor: 'emerald' },
+            { id: 'completed', label: 'Completed', badge: statusCounts.completed, badgeColor: 'emerald' },
+          ]
 
-            <div className='flex items-center gap-4'>
-              <p className='text-sm text-muted-foreground'>{totalItems} vehicles</p>
-              <div className='flex gap-1 rounded-md border p-1'>
-                <Button
-                  variant={viewMode === 'card' ? 'secondary' : 'ghost'}
-                  size='sm'
-                  onClick={() => setViewMode('card')}
-                >
-                  <LayoutGrid className='h-4 w-4' />
-                </Button>
-                <Button
-                  variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-                  size='sm'
-                  onClick={() => setViewMode('table')}
-                >
-                  <LayoutList className='h-4 w-4' />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Vehicle List */}
-          {viewMode === 'card' ? (
-            <div className='mt-4 space-y-4'>
-              {paginatedData.map((auction) => (
-                <VehicleCard
-                  key={auction.id}
-                  auction={auction}
-                  onViewDetails={() => openPurchaseModal(auction, 'overview')}
-                  onManageWorkflow={() => openPurchaseModal(auction, 'workflow')}
-                  onRecordPayment={() => openDialog('payment', auction)}
-                  onUploadDocuments={() => openDialog('document-upload', auction)}
-                  onManageDocuments={() => openDialog('documents', auction)}
-                  onUpdateShipping={() => openDialog('shipping', auction)}
-                  onGenerateInvoice={() => openDialog('invoice', auction)}
-                  onMarkDelivered={() => handleMarkDelivered(auction)}
-                  onMarkCompleted={() => handleMarkCompleted(auction)}
+          return (
+            <div className='flex flex-col gap-4'>
+              <div className='flex items-center justify-between'>
+                <AnimatedTabs
+                  tabs={statusTabs}
+                  value={activeTab}
+                  onValueChange={(v) => setActiveTab(v as Purchase['status'])}
+                  variant='compact'
                 />
-              ))}
-              {paginatedData.length === 0 && (
-                <div className='py-12 text-center text-muted-foreground'>
-                  No vehicles found matching your criteria
+
+                <div className='flex items-center gap-4'>
+                  <p className='text-sm text-muted-foreground'>{totalItems} vehicles</p>
+                  <div className='flex gap-1 rounded-md border p-1'>
+                    <Button
+                      variant={viewMode === 'card' ? 'secondary' : 'ghost'}
+                      size='sm'
+                      onClick={() => setViewMode('card')}
+                    >
+                      <MdGridView className='h-4 w-4' />
+                    </Button>
+                    <Button
+                      variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+                      size='sm'
+                      onClick={() => setViewMode('table')}
+                    >
+                      <MdViewList className='h-4 w-4' />
+                    </Button>
+                  </div>
                 </div>
+              </div>
+
+              {/* Vehicle List */}
+              {viewMode === 'card' ? (
+                <div className='space-y-4'>
+                  {paginatedData.map((auction) => (
+                    <VehicleCard
+                      key={auction.id}
+                      auction={auction}
+                      onViewDetails={() => navigateToPurchase(auction)}
+                      onManageWorkflow={() => navigateToPurchase(auction)}
+                      onRecordPayment={() => openDialog('payment', auction)}
+                      onUploadDocuments={() => openDialog('document-upload', auction)}
+                      onManageDocuments={() => openDialog('documents', auction)}
+                      onUpdateShipping={() => openDialog('shipping', auction)}
+                      onGenerateInvoice={() => openDialog('invoice', auction)}
+                      onMarkDelivered={() => handleMarkDelivered(auction)}
+                      onMarkCompleted={() => handleMarkCompleted(auction)}
+                    />
+                  ))}
+                  {paginatedData.length === 0 && (
+                    <div className='py-12 text-center text-muted-foreground'>
+                      No vehicles found matching your criteria
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <WonAuctionsTableView
+                  data={paginatedData}
+                  onOpenDialog={openDialog}
+                  onViewDetails={navigateToPurchase}
+                  onMarkDelivered={handleMarkDelivered}
+                  onMarkCompleted={handleMarkCompleted}
+                />
               )}
             </div>
-          ) : (
-            <WonAuctionsTableView
-              data={paginatedData}
-              onOpenDialog={openDialog}
-              onOpenPurchaseModal={openPurchaseModal}
-              onMarkDelivered={handleMarkDelivered}
-              onMarkCompleted={handleMarkCompleted}
-            />
-          )}
-        </Tabs>
+          )
+        })()}
 
         {/* Pagination */}
         <WonAuctionsPagination
@@ -374,10 +400,13 @@ function WonAuctionsContent() {
   )
 }
 
-export function WonAuctions() {
+export function Purchases() {
   return (
     <WonAuctionsProvider>
       <WonAuctionsContent />
     </WonAuctionsProvider>
   )
 }
+
+/** @deprecated Use Purchases instead */
+export const WonAuctions = Purchases

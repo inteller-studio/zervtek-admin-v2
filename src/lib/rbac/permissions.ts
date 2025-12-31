@@ -6,6 +6,7 @@ const SALES_ROLES: Role[] = [ROLES.ADMIN, ROLES.MANAGER, ROLES.SALES_STAFF]
 const FINANCE_ROLES: Role[] = [ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTANT]
 const CONTENT_ROLES: Role[] = [ROLES.ADMIN, ROLES.MANAGER, ROLES.CONTENT_MANAGER]
 const BACKOFFICE_ROLES: Role[] = [ROLES.ADMIN, ROLES.MANAGER, ROLES.BACKOFFICE_STAFF]
+const TV_DISPLAY_ROLES: Role[] = [ROLES.ADMIN, ROLES.TV_DISPLAY]
 const MANAGEMENT_ROLES: Role[] = [ROLES.ADMIN, ROLES.MANAGER]
 const ADMIN_ONLY: Role[] = [ROLES.ADMIN]
 
@@ -24,7 +25,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Services/Finance section
   { path: '/invoices', roles: FINANCE_ROLES },
   { path: '/requests', roles: FINANCE_ROLES },
-  { path: '/tv-display', roles: FINANCE_ROLES },
+  { path: '/tv-display', roles: TV_DISPLAY_ROLES },
   { path: '/payments', roles: FINANCE_ROLES },
 
   // Content section
@@ -35,7 +36,7 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Backoffice section
   { path: '/translations', roles: BACKOFFICE_ROLES },
   { path: '/inspections', roles: BACKOFFICE_ROLES },
-  { path: '/inquiries', roles: BACKOFFICE_ROLES },
+  { path: '/leads', roles: BACKOFFICE_ROLES },
 
   // Communication section
   { path: '/whatsapp', roles: MANAGEMENT_ROLES },
@@ -110,6 +111,7 @@ export {
   FINANCE_ROLES,
   CONTENT_ROLES,
   BACKOFFICE_ROLES,
+  TV_DISPLAY_ROLES,
   MANAGEMENT_ROLES,
   ADMIN_ONLY,
 }

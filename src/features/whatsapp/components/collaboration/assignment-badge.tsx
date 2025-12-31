@@ -1,6 +1,6 @@
 'use client'
 
-import { X } from 'lucide-react'
+import { MdClose } from 'react-icons/md'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
@@ -75,7 +75,7 @@ export function AssignmentBadge({
             }}
             className='ml-0.5 rounded-full p-0.5 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
           >
-            <X className='h-2.5 w-2.5' />
+            <MdClose className='h-2.5 w-2.5' />
           </button>
         )}
       </div>
@@ -114,7 +114,7 @@ export function AssignmentBadge({
           className='h-7'
           onClick={onRemove}
         >
-          <X className='mr-1 h-3 w-3' />
+          <MdClose className='mr-1 h-3 w-3' />
           Unassign
         </Button>
       )}

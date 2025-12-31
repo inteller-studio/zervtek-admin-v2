@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, Plus } from 'lucide-react'
+import { MdCheck, MdAdd } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -73,7 +73,7 @@ export function LabelPopover({
                         isSelected ? 'border-primary bg-primary' : 'border-muted-foreground/30'
                       )}
                     >
-                      {isSelected && <Check className='h-3 w-3 text-primary-foreground' />}
+                      {isSelected && <MdCheck className='h-3 w-3 text-primary-foreground' />}
                     </div>
                     <span className={cn('h-2.5 w-2.5 rounded-full', colorConfig.dotClass)} />
                     <span className='flex-1 truncate'>{label.name}</span>
@@ -87,7 +87,7 @@ export function LabelPopover({
                 onSelect={onCreateNew}
                 className='flex items-center gap-2 text-primary'
               >
-                <Plus className='h-4 w-4' />
+                <MdAdd className='h-4 w-4' />
                 <span>Create new label</span>
               </CommandItem>
             </CommandGroup>

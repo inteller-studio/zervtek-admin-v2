@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -30,9 +30,9 @@ const PasswordInput = React.forwardRef<HTMLInputElement, PasswordInputProps>(
           aria-label={showPassword ? 'Hide password' : 'Show password'}
         >
           {showPassword ? (
-            <EyeOff className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
+            <MdVisibilityOff className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
           ) : (
-            <Eye className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
+            <MdVisibility className='h-4 w-4 text-muted-foreground' aria-hidden='true' />
           )}
         </Button>
       </div>

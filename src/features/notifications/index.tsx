@@ -3,20 +3,20 @@
 import { useState, useMemo } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import {
-  Bell,
-  CheckCircle,
-  ClipboardCheck,
-  CreditCard,
-  Gavel,
-  Languages,
-  AlertTriangle,
-  UserPlus,
-  Check,
-  Filter,
-  Trash2,
-  MailOpen,
-  Mail,
-} from 'lucide-react'
+  MdNotifications,
+  MdCheckCircle,
+  MdAssignmentTurnedIn,
+  MdCreditCard,
+  MdGavel,
+  MdTranslate,
+  MdWarning,
+  MdPersonAdd,
+  MdCheck,
+  MdFilterList,
+  MdDelete,
+  MdDrafts,
+  MdEmail,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -26,7 +26,7 @@ import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, type TabItem } from '@/components/ui/animated-tabs'
 import {
   Select,
   SelectContent,
@@ -48,13 +48,13 @@ import {
 const CURRENT_USER_ROLE: 'superadmin' | 'admin' | 'manager' | 'cashier' = 'admin'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  ClipboardCheck,
-  Languages,
-  Gavel,
-  CreditCard,
-  UserPlus,
-  CheckCircle,
-  AlertTriangle,
+  ClipboardCheck: MdAssignmentTurnedIn,
+  Languages: MdTranslate,
+  Gavel: MdGavel,
+  CreditCard: MdCreditCard,
+  UserPlus: MdPersonAdd,
+  CheckCircle: MdCheckCircle,
+  AlertTriangle: MdWarning,
 }
 
 const colorMap: Record<string, string> = {
@@ -97,7 +97,7 @@ export function Notifications() {
 
   const getIcon = (type: NotificationType) => {
     const config = notificationTypeConfig[type]
-    const Icon = iconMap[config.icon] || Bell
+    const Icon = iconMap[config.icon] || MdNotifications
     return Icon
   }
 
@@ -178,7 +178,7 @@ export function Notifications() {
           </div>
           {counts.unread > 0 && (
             <Button variant='outline' size='sm' onClick={markAllAsRead}>
-              <Check className='mr-1.5 h-4 w-4' />
+              <MdCheck className='mr-1.5 h-4 w-4' />
               Mark all as read
             </Button>
           )}
@@ -186,18 +186,16 @@ export function Notifications() {
 
         {/* Filters */}
         <div className='flex flex-wrap items-center gap-3'>
-          <Tabs
+          <AnimatedTabs
+            tabs={[
+              { id: 'all', label: 'All', badge: counts.all },
+              { id: 'unread', label: 'Unread', badge: counts.unread, badgeColor: 'primary' },
+              { id: 'read', label: 'Read', badge: counts.read },
+            ] as TabItem[]}
             value={filterStatus}
             onValueChange={(v) => setFilterStatus(v as FilterStatus)}
-          >
-            <TabsList>
-              <TabsTrigger value='all'>All ({counts.all})</TabsTrigger>
-              <TabsTrigger value='unread'>
-                Unread ({counts.unread})
-              </TabsTrigger>
-              <TabsTrigger value='read'>Read ({counts.read})</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            variant='compact'
+          />
 
           <div className='flex items-center gap-2 ml-auto'>
             <Select
@@ -205,7 +203,7 @@ export function Notifications() {
               onValueChange={(v) => setFilterType(v as NotificationType | 'all')}
             >
               <SelectTrigger className='w-[180px] h-9'>
-                <Filter className='mr-2 h-4 w-4' />
+                <MdFilterList className='mr-2 h-4 w-4' />
                 <SelectValue placeholder='Filter by type' />
               </SelectTrigger>
               <SelectContent>
@@ -228,11 +226,11 @@ export function Notifications() {
             </span>
             <div className='flex items-center gap-1 ml-auto'>
               <Button variant='ghost' size='sm' onClick={markSelectedAsRead}>
-                <MailOpen className='mr-1.5 h-4 w-4' />
+                <MdDrafts className='mr-1.5 h-4 w-4' />
                 Mark read
               </Button>
               <Button variant='ghost' size='sm' onClick={markSelectedAsUnread}>
-                <Mail className='mr-1.5 h-4 w-4' />
+                <MdEmail className='mr-1.5 h-4 w-4' />
                 Mark unread
               </Button>
               <Button
@@ -241,7 +239,7 @@ export function Notifications() {
                 className='text-destructive hover:text-destructive'
                 onClick={deleteSelected}
               >
-                <Trash2 className='mr-1.5 h-4 w-4' />
+                <MdDelete className='mr-1.5 h-4 w-4' />
                 Delete
               </Button>
             </div>
@@ -357,7 +355,7 @@ export function Notifications() {
               </>
             ) : (
               <EmptyState
-                icon={Bell}
+                icon={MdNotifications}
                 title='No notifications'
                 description={
                   filterStatus !== 'all' || filterType !== 'all'

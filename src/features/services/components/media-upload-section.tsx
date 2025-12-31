@@ -4,15 +4,15 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { format } from 'date-fns'
 import {
-  Image as ImageIcon,
-  Video,
-  Upload,
-  X,
-  Play,
-  Maximize2,
-  Trash2,
-  Plus,
-} from 'lucide-react'
+  MdImage,
+  MdVideocam,
+  MdUpload,
+  MdClose,
+  MdPlayArrow,
+  MdFullscreen,
+  MdDelete,
+  MdAdd,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -87,7 +87,7 @@ export function MediaUploadSection({
           <input {...getInputProps()} />
           <div className='flex flex-col items-center gap-2'>
             <div className='flex h-12 w-12 items-center justify-center rounded-full bg-muted'>
-              <Upload className='h-6 w-6 text-muted-foreground' />
+              <MdUpload className='h-6 w-6 text-muted-foreground' />
             </div>
             <div>
               <p className='font-medium'>
@@ -108,7 +108,7 @@ export function MediaUploadSection({
           {images.length > 0 && (
             <div>
               <div className='flex items-center gap-2 mb-2'>
-                <ImageIcon className='h-4 w-4 text-muted-foreground' />
+                <MdImage className='h-4 w-4 text-muted-foreground' />
                 <span className='text-sm font-medium'>Images ({images.length})</span>
               </div>
               <div className='grid grid-cols-4 gap-2'>
@@ -130,7 +130,7 @@ export function MediaUploadSection({
                         className='h-7 w-7'
                         onClick={() => setPreviewMedia(item)}
                       >
-                        <Maximize2 className='h-3.5 w-3.5' />
+                        <MdFullscreen className='h-3.5 w-3.5' />
                       </Button>
                       {!disabled && (
                         <Button
@@ -139,7 +139,7 @@ export function MediaUploadSection({
                           className='h-7 w-7'
                           onClick={() => handleDelete(item.id)}
                         >
-                          <Trash2 className='h-3.5 w-3.5' />
+                          <MdDelete className='h-3.5 w-3.5' />
                         </Button>
                       )}
                     </div>
@@ -156,7 +156,7 @@ export function MediaUploadSection({
                     {...getRootProps()}
                     className='aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors'
                   >
-                    <Plus className='h-6 w-6 text-muted-foreground' />
+                    <MdAdd className='h-6 w-6 text-muted-foreground' />
                   </div>
                 )}
               </div>
@@ -167,7 +167,7 @@ export function MediaUploadSection({
           {videos.length > 0 && (
             <div>
               <div className='flex items-center gap-2 mb-2'>
-                <Video className='h-4 w-4 text-muted-foreground' />
+                <MdVideocam className='h-4 w-4 text-muted-foreground' />
                 <span className='text-sm font-medium'>Videos ({videos.length})</span>
               </div>
               <div className='grid grid-cols-3 gap-2'>
@@ -183,7 +183,7 @@ export function MediaUploadSection({
                     {/* Play overlay */}
                     <div className='absolute inset-0 flex items-center justify-center'>
                       <div className='h-10 w-10 rounded-full bg-black/60 flex items-center justify-center'>
-                        <Play className='h-5 w-5 text-white fill-white' />
+                        <MdPlayArrow className='h-5 w-5 text-white fill-white' />
                       </div>
                     </div>
                     {/* Hover overlay */}
@@ -194,7 +194,7 @@ export function MediaUploadSection({
                         className='h-7 w-7'
                         onClick={() => setPreviewMedia(item)}
                       >
-                        <Maximize2 className='h-3.5 w-3.5' />
+                        <MdFullscreen className='h-3.5 w-3.5' />
                       </Button>
                       {!disabled && (
                         <Button
@@ -203,7 +203,7 @@ export function MediaUploadSection({
                           className='h-7 w-7'
                           onClick={() => handleDelete(item.id)}
                         >
-                          <Trash2 className='h-3.5 w-3.5' />
+                          <MdDelete className='h-3.5 w-3.5' />
                         </Button>
                       )}
                     </div>
@@ -218,7 +218,7 @@ export function MediaUploadSection({
       {/* Empty State */}
       {media.length === 0 && disabled && (
         <div className='flex flex-col items-center justify-center py-8 text-center border rounded-lg bg-muted/20'>
-          <ImageIcon className='h-8 w-8 text-muted-foreground mb-2' />
+          <MdImage className='h-8 w-8 text-muted-foreground mb-2' />
           <p className='text-sm text-muted-foreground'>No media uploaded yet</p>
         </div>
       )}
@@ -261,7 +261,7 @@ export function MediaUploadSection({
                   className='text-white hover:text-white hover:bg-white/20'
                   onClick={() => setPreviewMedia(null)}
                 >
-                  <X className='h-4 w-4' />
+                  <MdClose className='h-4 w-4' />
                 </Button>
               </div>
               {/* Note */}

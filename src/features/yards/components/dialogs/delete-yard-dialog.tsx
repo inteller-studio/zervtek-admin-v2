@@ -1,6 +1,6 @@
 'use client'
 
-import { AlertTriangle } from 'lucide-react'
+import { MdWarning } from 'react-icons/md'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,7 +37,7 @@ export function DeleteYardDialog({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle className='flex items-center gap-2'>
-            <AlertTriangle className='h-5 w-5 text-destructive' />
+            <MdWarning className='h-5 w-5 text-destructive' />
             Delete Yard
           </AlertDialogTitle>
           <AlertDialogDescription asChild>

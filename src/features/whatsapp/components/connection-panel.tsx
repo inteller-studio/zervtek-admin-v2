@@ -3,19 +3,19 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Wifi,
-  WifiOff,
-  QrCode,
-  RefreshCw,
-  Settings,
-  Power,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Smartphone,
-  Copy,
-  Check,
-} from 'lucide-react'
+  MdWifi,
+  MdWifiOff,
+  MdQrCode2,
+  MdRefresh,
+  MdSettings,
+  MdPowerSettingsNew,
+  MdCheckCircle,
+  MdError,
+  MdLoop,
+  MdSmartphone,
+  MdContentCopy,
+  MdCheck,
+} from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -69,7 +69,7 @@ export function ConnectionPanel() {
           color: 'bg-green-500',
           textColor: 'text-green-600',
           bgColor: 'bg-green-50 dark:bg-green-950',
-          icon: CheckCircle2,
+          icon: MdCheckCircle,
         }
       case 'connecting':
         return {
@@ -77,7 +77,7 @@ export function ConnectionPanel() {
           color: 'bg-yellow-500',
           textColor: 'text-yellow-600',
           bgColor: 'bg-yellow-50 dark:bg-yellow-950',
-          icon: Loader2,
+          icon: MdLoop,
         }
       default:
         return {
@@ -85,7 +85,7 @@ export function ConnectionPanel() {
           color: 'bg-red-500',
           textColor: 'text-red-600',
           bgColor: 'bg-red-50 dark:bg-red-950',
-          icon: AlertCircle,
+          icon: MdError,
         }
     }
   }
@@ -94,7 +94,7 @@ export function ConnectionPanel() {
     return (
       <Card>
         <CardContent className='flex items-center justify-center py-10'>
-          <Loader2 className='h-8 w-8 animate-spin text-muted-foreground' />
+          <MdLoop className='h-8 w-8 animate-spin text-muted-foreground' />
         </CardContent>
       </Card>
     )
@@ -109,7 +109,7 @@ export function ConnectionPanel() {
         <div className='flex items-center justify-between'>
           <div>
             <CardTitle className='flex items-center gap-2'>
-              <Smartphone className='h-5 w-5' />
+              <MdSmartphone className='h-5 w-5' />
               WhatsApp Connection
             </CardTitle>
             <CardDescription>Manage your WhatsApp Business connection</CardDescription>
@@ -149,7 +149,7 @@ export function ConnectionPanel() {
             {instance?.status === 'open' ? (
               <>
                 <Button variant='outline' size='sm'>
-                  <Settings className='mr-2 h-4 w-4' />
+                  <MdSettings className='mr-2 h-4 w-4' />
                   Settings
                 </Button>
                 <Button
@@ -159,9 +159,9 @@ export function ConnectionPanel() {
                   disabled={disconnectMutation.isPending}
                 >
                   {disconnectMutation.isPending ? (
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    <MdLoop className='mr-2 h-4 w-4 animate-spin' />
                   ) : (
-                    <Power className='mr-2 h-4 w-4' />
+                    <MdPowerSettingsNew className='mr-2 h-4 w-4' />
                   )}
                   Disconnect
                 </Button>
@@ -170,7 +170,7 @@ export function ConnectionPanel() {
               <Dialog open={showQR} onOpenChange={setShowQR}>
                 <DialogTrigger asChild>
                   <Button>
-                    <QrCode className='mr-2 h-4 w-4' />
+                    <MdQrCode2 className='mr-2 h-4 w-4' />
                     Connect WhatsApp
                   </Button>
                 </DialogTrigger>
@@ -196,7 +196,7 @@ export function ConnectionPanel() {
                         />
                       ) : (
                         <div className='flex h-64 w-64 items-center justify-center'>
-                          <Loader2 className='h-8 w-8 animate-spin' />
+                          <MdLoop className='h-8 w-8 animate-spin' />
                         </div>
                       )}
                     </motion.div>
@@ -217,9 +217,9 @@ export function ConnectionPanel() {
                             onClick={copyPairingCode}
                           >
                             {copied ? (
-                              <Check className='h-4 w-4 text-green-500' />
+                              <MdCheck className='h-4 w-4 text-green-500' />
                             ) : (
-                              <Copy className='h-4 w-4' />
+                              <MdContentCopy className='h-4 w-4' />
                             )}
                           </Button>
                         </div>
@@ -231,7 +231,7 @@ export function ConnectionPanel() {
                       onClick={() => refetchQR()}
                       className='mt-2'
                     >
-                      <RefreshCw className='mr-2 h-4 w-4' />
+                      <MdRefresh className='mr-2 h-4 w-4' />
                       Refresh QR Code
                     </Button>
 

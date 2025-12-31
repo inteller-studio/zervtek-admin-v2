@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, ExternalLink, Copy } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdEdit, MdDelete, MdOpenInNew, MdContentCopy } from 'react-icons/md'
 import { type Blog } from '../data/blogs'
 import { format } from 'date-fns'
 
@@ -83,33 +83,33 @@ export function BlogsTable({ data }: BlogsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       Preview
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
+                      <MdEdit className='mr-2 h-4 w-4' />
                       Edit Post
                     </DropdownMenuItem>
                     {blog.status === 'published' && (
                       <DropdownMenuItem>
-                        <ExternalLink className='mr-2 h-4 w-4' />
+                        <MdOpenInNew className='mr-2 h-4 w-4' />
                         View Live
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem>
-                      <Copy className='mr-2 h-4 w-4' />
+                      <MdContentCopy className='mr-2 h-4 w-4' />
                       Duplicate
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
-import { AlertTriangle } from 'lucide-react'
+import { MdWarning } from 'react-icons/md'
 import { toast } from 'sonner'
 import { sleep } from '@/lib/utils'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
@@ -55,8 +55,8 @@ export function UsersMultiDeleteDialog<TData>({
       disabled={value.trim() !== CONFIRM_WORD}
       title={
         <span className='text-destructive'>
-          <AlertTriangle
-            className='stroke-destructive me-1 inline-block'
+          <MdWarning
+            className='text-destructive me-1 inline-block'
             size={18}
           />{' '}
           Delete {selectedRows.length}{' '}

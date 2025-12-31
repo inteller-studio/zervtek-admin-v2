@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, Gavel, Wrench } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdEdit, MdDelete, MdGavel, MdBuild } from 'react-icons/md'
 import { type Vehicle } from '../data/vehicles'
 
 interface VehiclesTableProps {
@@ -90,33 +90,33 @@ export function VehiclesTable({ data }: VehiclesTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
+                      <MdEdit className='mr-2 h-4 w-4' />
                       Edit Vehicle
                     </DropdownMenuItem>
                     {vehicle.status === 'available' && (
                       <DropdownMenuItem>
-                        <Gavel className='mr-2 h-4 w-4' />
+                        <MdGavel className='mr-2 h-4 w-4' />
                         Create Auction
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem>
-                      <Wrench className='mr-2 h-4 w-4' />
+                      <MdBuild className='mr-2 h-4 w-4' />
                       Mark for Maintenance
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

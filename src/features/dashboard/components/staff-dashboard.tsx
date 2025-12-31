@@ -2,22 +2,22 @@
 
 import { motion } from 'framer-motion'
 import {
-  ClipboardList,
-  FileText,
-  Clock,
-  AlertCircle,
-  Users,
-  Languages,
-  Search,
-  Calendar,
-  Gavel,
-  Car,
-  Info,
-  CheckCircle,
-  AlertTriangle,
-  ArrowRight,
-  Megaphone,
-} from 'lucide-react'
+  MdDescription,
+  MdAccessTime,
+  MdError,
+  MdPeople,
+  MdCalendarToday,
+  MdGavel,
+  MdDirectionsCar,
+  MdCheckCircle,
+  MdAssignment,
+  MdTranslate,
+  MdSearch,
+  MdInfo,
+  MdWarning,
+  MdArrowForward,
+  MdCampaign,
+} from 'react-icons/md'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -147,11 +147,11 @@ export function StaffDashboard() {
   const getTypeIcon = (type: string) => {
     switch (type) {
       case 'translation':
-        return <Languages className='h-4 w-4 text-blue-500' />
+        return <MdTranslate className='h-4 w-4 text-blue-500' />
       case 'inspection':
-        return <Search className='h-4 w-4 text-purple-500' />
+        return <MdSearch className='h-4 w-4 text-purple-500' />
       default:
-        return <FileText className='h-4 w-4 text-gray-500' />
+        return <MdDescription className='h-4 w-4 text-gray-500' />
     }
   }
 
@@ -194,7 +194,7 @@ export function StaffDashboard() {
             <div className='flex items-center justify-between'>
               <div>
                 <CardTitle className='flex items-center gap-2'>
-                  <ClipboardList className='h-5 w-5 text-purple-500' />
+                  <MdAssignment className='h-5 w-5 text-purple-500' />
                   My Assigned Tasks
                 </CardTitle>
                 <CardDescription>Tasks assigned to you that need attention</CardDescription>
@@ -218,14 +218,14 @@ export function StaffDashboard() {
                   <div className='flex-1 space-y-1'>
                     <p className='text-sm font-medium'>{task.title}</p>
                     <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                      <Users className='h-3 w-3' />
+                      <MdPeople className='h-3 w-3' />
                       <span>{task.customer}</span>
                     </div>
                   </div>
                   <div className='text-right'>
                     {getPriorityBadge(task.priority)}
                     <p className='mt-1 flex items-center gap-1 text-xs text-muted-foreground'>
-                      <Clock className='h-3 w-3' />
+                      <MdAccessTime className='h-3 w-3' />
                       {task.dueIn}
                     </p>
                   </div>
@@ -241,7 +241,7 @@ export function StaffDashboard() {
             <div className='flex items-center justify-between'>
               <div>
                 <CardTitle className='flex items-center gap-2'>
-                  <AlertCircle className='h-5 w-5 text-orange-500' />
+                  <MdError className='h-5 w-5 text-orange-500' />
                   Unassigned Requests
                 </CardTitle>
                 <CardDescription>New requests waiting to be picked up</CardDescription>
@@ -278,7 +278,7 @@ export function StaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <ArrowRight className='h-5 w-5 text-blue-500' />
+              <MdArrowForward className='h-5 w-5 text-blue-500' />
               Quick Actions
             </CardTitle>
             <CardDescription>Common shortcuts to get things done</CardDescription>
@@ -286,7 +286,7 @@ export function StaffDashboard() {
           <CardContent>
             <div className='grid grid-cols-2 gap-3'>
               {quickActions.map((action, index) => {
-                const IconComponent = action.icon === 'gavel' ? Gavel : action.icon === 'car' ? Car : action.icon === 'users' ? Users : Calendar
+                const IconComponent = action.icon === 'gavel' ? MdGavel : action.icon === 'car' ? MdDirectionsCar : action.icon === 'users' ? MdPeople : MdCalendarToday
                 return (
                   <motion.div
                     key={action.id}
@@ -314,7 +314,7 @@ export function StaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className='flex items-center gap-2'>
-              <Megaphone className='h-5 w-5 text-orange-500' />
+              <MdCampaign className='h-5 w-5 text-orange-500' />
               Announcements
             </CardTitle>
             <CardDescription>Important updates and notices</CardDescription>
@@ -322,7 +322,7 @@ export function StaffDashboard() {
           <CardContent>
             <div className='space-y-3'>
               {systemAnnouncements.map((announcement, index) => {
-                const TypeIcon = announcement.type === 'info' ? Info : announcement.type === 'success' ? CheckCircle : AlertTriangle
+                const TypeIcon = announcement.type === 'info' ? MdInfo : announcement.type === 'success' ? MdCheckCircle : MdWarning
                 const typeColors = announcement.type === 'info'
                   ? 'text-blue-500 bg-blue-100 dark:bg-blue-950'
                   : announcement.type === 'success'

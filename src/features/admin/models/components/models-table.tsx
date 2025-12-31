@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, ExternalLink, Link } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdEdit, MdDelete, MdOpenInNew, MdLink } from 'react-icons/md'
 import { type ModelSEO } from '../data/models'
 import { format } from 'date-fns'
 
@@ -101,7 +101,7 @@ export function ModelsTable({ data }: ModelsTableProps) {
               <TableCell>
                 {model.linkedBlogs.length > 0 ? (
                   <Badge variant='secondary' className='text-xs'>
-                    <Link className='mr-1 h-3 w-3' />
+                    <MdLink className='mr-1 h-3 w-3' />
                     {model.linkedBlogs.length} blogs
                   </Badge>
                 ) : (
@@ -114,33 +114,33 @@ export function ModelsTable({ data }: ModelsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
+                      <MdEdit className='mr-2 h-4 w-4' />
                       Edit SEO
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link className='mr-2 h-4 w-4' />
+                      <MdLink className='mr-2 h-4 w-4' />
                       Link Blogs
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       Preview
                     </DropdownMenuItem>
                     {model.status === 'published' && (
                       <DropdownMenuItem>
-                        <ExternalLink className='mr-2 h-4 w-4' />
+                        <MdOpenInNew className='mr-2 h-4 w-4' />
                         View Live
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

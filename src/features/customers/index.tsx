@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
@@ -44,45 +45,44 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent } from '@/components/ui/animated-tabs'
 import {
-  Users,
-  UserCheck,
-  DollarSign,
-  Search as SearchIcon,
-  Plus,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  Calendar,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  Upload,
-  Eye,
-  Trash2,
-  Ban,
-  CheckCircle,
-  Clock,
-  XCircle,
-  MapPin,
-  ShoppingBag,
-  Gavel,
-  Award,
-  Building2,
-  Globe,
-  Wallet,
-  AlertCircle,
-  ShieldCheck,
-  FileQuestion,
-  UserCircle,
-} from 'lucide-react'
+  MdPeople,
+  MdSearch,
+  MdAdd,
+  MdMoreHoriz,
+  MdEmail,
+  MdPhone,
+  MdCalendarToday,
+  MdChevronLeft,
+  MdChevronRight,
+  MdDownload,
+  MdUpload,
+  MdVisibility,
+  MdDelete,
+  MdCheckCircle,
+  MdAccessTime,
+  MdCancel,
+  MdLocationOn,
+  MdShoppingCart,
+  MdBusiness,
+  MdPublic,
+  MdError,
+  MdAccountCircle,
+  MdVerifiedUser,
+  MdBlock,
+  MdGavel,
+  MdWorkspacePremium,
+  MdAccountBalanceWallet,
+  MdSecurity,
+  MdHelpOutline,
+  MdSwapVert,
+} from 'react-icons/md'
+import { Award, CheckCircle, Clock, UserCheck, XCircle } from 'lucide-react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 
 import { customers as initialCustomers, type Customer, type UserLevel } from './data/customers'
-import { CustomerProfileModal } from './components/customer-profile-modal'
 import { VerificationApprovalModal } from './components/verification-approval-modal'
 
 type SortField = 'name' | 'totalSpent' | 'createdAt' | 'lastActivity' | 'wonAuctions' | 'depositAmount'
@@ -99,6 +99,7 @@ const countries = [
 ]
 
 export function Customers() {
+  const router = useRouter()
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers)
   const [activeTab, setActiveTab] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
@@ -108,8 +109,6 @@ export function Customers() {
   const [levelFilter, setLevelFilter] = useState<string>('all')
   const [sortField, setSortField] = useState<SortField>('lastActivity')
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc')
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
-  const [viewDialogOpen, setViewDialogOpen] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)
   const [approvalModalOpen, setApprovalModalOpen] = useState(false)
   const [customerToApprove, setCustomerToApprove] = useState<Customer | null>(null)
@@ -217,17 +216,18 @@ export function Customers() {
       active: { label: 'Active', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
       inactive: { label: 'Inactive', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20' },
       pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-      suspended: { label: 'Suspended', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
+      suspended: { label: 'Suspended', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+      banned: { label: 'Banned', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
     }
     return <Badge variant='outline' className={config[status].className}>{config[status].label}</Badge>
   }
 
   const getVerificationBadge = (status: Customer['verificationStatus']) => {
     const config = {
-      verified: { label: 'Verified', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
-      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
-      unverified: { label: 'Unverified', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20', icon: XCircle },
-      documents_requested: { label: 'Docs Requested', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: FileQuestion },
+      verified: { label: 'Verified', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: MdCheckCircle },
+      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: MdAccessTime },
+      unverified: { label: 'Unverified', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20', icon: MdCancel },
+      documents_requested: { label: 'Docs Requested', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: MdHelpOutline },
     }
     const Icon = config[status].icon
     return (
@@ -248,7 +248,7 @@ export function Customers() {
     }
     return (
       <Badge variant='outline' className={config[level].className}>
-        <Award className='mr-1 h-3 w-3' />
+        <MdWorkspacePremium className='mr-1 h-3 w-3' />
         {config[level].label}
       </Badge>
     )
@@ -264,8 +264,7 @@ export function Customers() {
   }
 
   const handleViewCustomer = (customer: Customer) => {
-    setSelectedCustomer(customer)
-    setViewDialogOpen(true)
+    router.push(`/customers/${customer.id}`)
   }
 
   const handleSendEmail = (customer: Customer) => {
@@ -297,10 +296,6 @@ export function Customers() {
     setCustomers(customers.map((c) =>
       c.id === customer.id ? { ...c, assignedTo: CURRENT_USER_ID, assignedToName: CURRENT_USER_NAME } : c
     ))
-    // Update selected customer if viewing in modal
-    if (selectedCustomer?.id === customer.id) {
-      setSelectedCustomer({ ...customer, assignedTo: CURRENT_USER_ID, assignedToName: CURRENT_USER_NAME })
-    }
     toast.success(`${customer.name} has been assigned to you`)
   }
 
@@ -337,9 +332,6 @@ export function Customers() {
 
   const handleChangeUserLevel = (customer: Customer, newLevel: UserLevel) => {
     setCustomers(customers.map((c) => (c.id === customer.id ? { ...c, userLevel: newLevel } : c)))
-    if (selectedCustomer?.id === customer.id) {
-      setSelectedCustomer({ ...customer, userLevel: newLevel })
-    }
     toast.success(`${customer.name}'s level changed to ${newLevel.charAt(0).toUpperCase() + newLevel.slice(1)}`)
   }
 
@@ -368,45 +360,36 @@ export function Customers() {
           </div>
           <div className='flex gap-2'>
             <Button variant='outline' size='sm'>
-              <Upload className='mr-2 h-4 w-4' />
+              <MdUpload className='mr-2 h-4 w-4' />
               Import
             </Button>
             <Button variant='outline' size='sm'>
-              <Download className='mr-2 h-4 w-4' />
+              <MdDownload className='mr-2 h-4 w-4' />
               Export
             </Button>
             <Button size='sm' onClick={() => setAddDialogOpen(true)}>
-              <Plus className='mr-2 h-4 w-4' />
+              <MdAdd className='mr-2 h-4 w-4' />
               Add Customer
             </Button>
           </div>
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-4'>
-          <TabsList>
-            <TabsTrigger value='all' className='gap-2'>
-              <Users className='h-4 w-4' />
-              All Customers
-            </TabsTrigger>
-            <TabsTrigger value='verification' className='gap-2'>
-              <ShieldCheck className='h-4 w-4' />
-              Verification Requests
-              {verificationRequests.length > 0 && (
-                <Badge variant='secondary' className='ml-1 h-5 px-1.5'>
-                  {verificationRequests.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value='all' className='space-y-4'>
+        <AnimatedTabs
+          tabs={[
+            { id: 'all', label: 'All Customers', icon: MdPeople },
+            { id: 'verification', label: 'Verification Requests', icon: MdVerifiedUser, badge: verificationRequests.length > 0 ? verificationRequests.length : undefined, badgeColor: 'amber' },
+          ]}
+          value={activeTab}
+          onValueChange={setActiveTab}
+        >
+          <AnimatedTabsContent value='all' className='space-y-4'>
         {/* Search and Filters */}
         <Card>
           <CardContent className='p-4'>
             <div className='flex flex-wrap items-center gap-3'>
               <div className='relative flex-1 min-w-[200px]'>
-                <SearchIcon className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
+                <MdSearch className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
                 <Input
                   placeholder='Search by name, email, phone, or company...'
                   value={searchTerm}
@@ -474,19 +457,19 @@ export function Customers() {
                   <TableRow>
                     <TableHead className='w-[280px]'>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('name')}>
-                        Customer <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Customer <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>Assigned To</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('totalSpent')}>
-                        Total Spent <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Total Spent <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('depositAmount')}>
-                        Deposit <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Deposit <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>Purchases</TableHead>
@@ -514,7 +497,7 @@ export function Customers() {
                               <div className='text-muted-foreground text-sm truncate'>{customer.email}</div>
                               {customer.company && (
                                 <div className='text-muted-foreground text-xs flex items-center gap-1'>
-                                  <Building2 className='h-3 w-3' />
+                                  <MdBusiness className='h-3 w-3' />
                                   {customer.company}
                                 </div>
                               )}
@@ -524,7 +507,7 @@ export function Customers() {
                         <TableCell>
                           {customer.assignedToName ? (
                             <div className='flex items-center gap-2'>
-                              <UserCircle className='h-4 w-4 text-muted-foreground' />
+                              <MdAccountCircle className='h-4 w-4 text-muted-foreground' />
                               <span className='text-sm'>{customer.assignedToName}</span>
                             </div>
                           ) : (
@@ -541,7 +524,7 @@ export function Customers() {
                           <div className='font-medium'>¥{customer.totalSpent.toLocaleString()}</div>
                           {customer.outstandingBalance > 0 && (
                             <div className='text-orange-600 text-xs flex items-center gap-1'>
-                              <AlertCircle className='h-3 w-3' />
+                              <MdError className='h-3 w-3' />
                               Due: ¥{customer.outstandingBalance.toLocaleString()}
                             </div>
                           )}
@@ -570,44 +553,44 @@ export function Customers() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant='ghost' size='icon'>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <MdMoreHoriz className='h-4 w-4' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleViewCustomer(customer)}>
-                                <Eye className='mr-2 h-4 w-4' />
+                                <MdVisibility className='mr-2 h-4 w-4' />
                                 View Profile
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleSendEmail(customer)}>
-                                <Mail className='mr-2 h-4 w-4' />
+                                <MdEmail className='mr-2 h-4 w-4' />
                                 Send Email
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleCallCustomer(customer)}>
-                                <Phone className='mr-2 h-4 w-4' />
+                                <MdPhone className='mr-2 h-4 w-4' />
                                 Call
                               </DropdownMenuItem>
                               {customer.verificationStatus !== 'verified' && (
                                 <DropdownMenuItem onClick={() => handleVerifyCustomer(customer)}>
-                                  <CheckCircle className='mr-2 h-4 w-4' />
+                                  <MdCheckCircle className='mr-2 h-4 w-4' />
                                   Verify
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {customer.status === 'suspended' ? (
                                 <DropdownMenuItem onClick={() => handleActivateCustomer(customer)}>
-                                  <UserCheck className='mr-2 h-4 w-4' />
+                                  <MdVerifiedUser className='mr-2 h-4 w-4' />
                                   Activate
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem onClick={() => handleSuspendCustomer(customer)} className='text-orange-600'>
-                                  <Ban className='mr-2 h-4 w-4' />
+                                  <MdBlock className='mr-2 h-4 w-4' />
                                   Suspend
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={() => handleDeleteCustomer(customer)} className='text-destructive'>
-                                <Trash2 className='mr-2 h-4 w-4' />
+                                <MdDelete className='mr-2 h-4 w-4' />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -643,23 +626,23 @@ export function Customers() {
               </div>
               <div className='flex items-center gap-2'>
                 <Button variant='outline' size='sm' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                  <ChevronLeft className='h-4 w-4' />
+                  <MdChevronLeft className='h-4 w-4' />
                 </Button>
                 <span className='text-sm'>Page {currentPage} of {totalPages}</span>
                 <Button variant='outline' size='sm' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages}>
-                  <ChevronRight className='h-4 w-4' />
+                  <MdChevronRight className='h-4 w-4' />
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-          </TabsContent>
+          </AnimatedTabsContent>
 
-          <TabsContent value='verification' className='space-y-4'>
+          <AnimatedTabsContent value='verification' className='space-y-4'>
             <Card>
               <CardHeader>
                 <CardTitle className='flex items-center gap-2'>
-                  <ShieldCheck className='h-5 w-5' />
+                  <MdVerifiedUser className='h-5 w-5' />
                   Pending Verification Requests
                 </CardTitle>
                 <CardDescription>
@@ -685,16 +668,16 @@ export function Customers() {
                             <div className='text-muted-foreground text-sm'>{customer.email}</div>
                             <div className='text-muted-foreground mt-1 flex items-center gap-4 text-xs'>
                               <span className='flex items-center gap-1'>
-                                <Phone className='h-3 w-3' />
+                                <MdPhone className='h-3 w-3' />
                                 {customer.phone}
                               </span>
                               <span className='flex items-center gap-1'>
-                                <MapPin className='h-3 w-3' />
+                                <MdLocationOn className='h-3 w-3' />
                                 {customer.city}, {customer.country}
                               </span>
                               {customer.company && (
                                 <span className='flex items-center gap-1'>
-                                  <Building2 className='h-3 w-3' />
+                                  <MdBusiness className='h-3 w-3' />
                                   {customer.company}
                                 </span>
                               )}
@@ -706,11 +689,11 @@ export function Customers() {
                         </div>
                         <div className='flex items-center gap-2'>
                           <Button variant='outline' size='sm' onClick={() => handleViewCustomer(customer)}>
-                            <Eye className='mr-2 h-4 w-4' />
+                            <MdVisibility className='mr-2 h-4 w-4' />
                             View Details
                           </Button>
                           <Button size='sm' onClick={() => handleOpenApprovalModal(customer)}>
-                            <CheckCircle className='mr-2 h-4 w-4' />
+                            <MdCheckCircle className='mr-2 h-4 w-4' />
                             Approve
                           </Button>
                           <Button variant='destructive' size='sm' onClick={() => {
@@ -719,7 +702,7 @@ export function Customers() {
                             ))
                             toast.success(`Verification request for ${customer.name} has been rejected`)
                           }}>
-                            <XCircle className='mr-2 h-4 w-4' />
+                            <MdCancel className='mr-2 h-4 w-4' />
                             Reject
                           </Button>
                         </div>
@@ -728,7 +711,7 @@ export function Customers() {
                   </div>
                 ) : (
                   <div className='flex flex-col items-center justify-center py-12 text-center'>
-                    <ShieldCheck className='text-muted-foreground mb-4 h-12 w-12' />
+                    <MdVerifiedUser className='text-muted-foreground mb-4 h-12 w-12' />
                     <h3 className='text-lg font-medium'>No Pending Requests</h3>
                     <p className='text-muted-foreground text-sm'>
                       All verification requests have been processed.
@@ -737,21 +720,9 @@ export function Customers() {
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </Main>
-
-      {/* View Customer Modal - Improved */}
-      <CustomerProfileModal
-        customer={selectedCustomer}
-        open={viewDialogOpen}
-        onClose={() => setViewDialogOpen(false)}
-        onSendEmail={handleSendEmail}
-        onCallCustomer={handleCallCustomer}
-        onVerifyCustomer={handleVerifyCustomer}
-        onChangeUserLevel={handleChangeUserLevel}
-        onClaimCustomer={handleClaimCustomer}
-      />
 
       {/* Verification Approval Modal */}
       <VerificationApprovalModal

@@ -1,6 +1,6 @@
 'use client'
 
-import { Copy, ExternalLink, Check } from 'lucide-react'
+import { MdContentCopy, MdOpenInNew, MdCheck } from 'react-icons/md'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
@@ -45,7 +45,7 @@ export function InfoRow({
             onClick={(e) => e.stopPropagation()}
           >
             {value}
-            <ExternalLink className='h-3 w-3' />
+            <MdOpenInNew className='h-3 w-3' />
           </a>
         ) : (
           <span className={cn('font-medium', monospace && 'font-mono text-sm')}>
@@ -59,9 +59,9 @@ export function InfoRow({
             aria-label={`Copy ${label}`}
           >
             {copied ? (
-              <Check className='h-3.5 w-3.5 text-emerald-500' />
+              <MdCheck className='h-3.5 w-3.5 text-emerald-500' />
             ) : (
-              <Copy className='h-3.5 w-3.5' />
+              <MdContentCopy className='h-3.5 w-3.5' />
             )}
           </button>
         )}

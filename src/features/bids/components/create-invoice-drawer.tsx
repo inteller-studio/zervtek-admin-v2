@@ -3,16 +3,16 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  Calculator,
-  Car,
-  Check,
-  FileText,
-  Loader2,
-  Mail,
-  MapPin,
-  Phone,
-  User,
-} from 'lucide-react'
+  MdCalculate,
+  MdDirectionsCar,
+  MdCheck,
+  MdDescription,
+  MdAutorenew,
+  MdEmail,
+  MdLocationOn,
+  MdPhone,
+  MdPerson,
+} from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -108,7 +108,7 @@ export function CreateInvoiceDrawer({
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4 pb-0'>
             <SheetTitle className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
+              <MdDescription className='h-5 w-5' />
               Create Invoice
             </SheetTitle>
             <SheetDescription>
@@ -120,7 +120,7 @@ export function CreateInvoiceDrawer({
           <div className='p-4'>
             <div className='flex gap-3 rounded-lg border bg-background p-3'>
               <div className='flex h-16 w-24 items-center justify-center rounded-md bg-muted'>
-                <Car className='h-6 w-6 text-muted-foreground' />
+                <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
               </div>
               <div className='flex-1'>
                 <p className='font-semibold'>
@@ -134,7 +134,7 @@ export function CreateInvoiceDrawer({
                     Won: {formatPrice(bid.amount)}
                   </Badge>
                   <Badge variant='outline' className='bg-emerald-50 text-xs text-emerald-700'>
-                    <Check className='mr-1 h-3 w-3' />
+                    <MdCheck className='mr-1 h-3 w-3' />
                     Won
                   </Badge>
                 </div>
@@ -153,19 +153,19 @@ export function CreateInvoiceDrawer({
               </Label>
               <div className='flex items-center gap-3 rounded-lg border p-3'>
                 <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10'>
-                  <User className='h-5 w-5 text-primary' />
+                  <MdPerson className='h-5 w-5 text-primary' />
                 </div>
                 <div className='flex-1'>
                   <p className='font-medium'>{bid.bidder.name}</p>
                   <div className='flex items-center gap-3 text-sm text-muted-foreground'>
                     <span className='flex items-center gap-1'>
-                      <Mail className='h-3 w-3' />
+                      <MdEmail className='h-3 w-3' />
                       {bid.bidder.email}
                     </span>
                   </div>
                   <div className='flex items-center gap-3 text-sm text-muted-foreground'>
                     <span className='flex items-center gap-1'>
-                      <MapPin className='h-3 w-3' />
+                      <MdLocationOn className='h-3 w-3' />
                       {bid.bidder.location}
                     </span>
                   </div>
@@ -281,7 +281,7 @@ export function CreateInvoiceDrawer({
 
             {/* Invoice Preview Indicator */}
             <div className='flex items-center gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground'>
-              <Calculator className='h-4 w-4 shrink-0' />
+              <MdCalculate className='h-4 w-4 shrink-0' />
               <span>
                 Invoice will be sent to <span className='font-medium text-foreground'>{bid.bidder.email}</span>
               </span>
@@ -306,12 +306,12 @@ export function CreateInvoiceDrawer({
           >
             {isSubmitting ? (
               <>
-                <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                <MdAutorenew className='mr-2 h-4 w-4 animate-spin' />
                 Creating...
               </>
             ) : (
               <>
-                <FileText className='mr-2 h-4 w-4' />
+                <MdDescription className='mr-2 h-4 w-4' />
                 Create Invoice
               </>
             )}

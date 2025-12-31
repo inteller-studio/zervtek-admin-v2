@@ -7,15 +7,15 @@ import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import {
-  Plus,
-  Search as SearchIcon,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  Eye,
-  EyeOff,
-  FileQuestion,
-} from 'lucide-react'
+  MdAdd,
+  MdSearch,
+  MdMoreHoriz,
+  MdEdit,
+  MdDelete,
+  MdVisibility,
+  MdVisibilityOff,
+  MdHelpOutline,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
@@ -197,7 +197,7 @@ export function FAQManagement() {
             </p>
           </div>
           <Button onClick={handleAddClick}>
-            <Plus className="mr-2 h-4 w-4" />
+            <MdAdd className="mr-2 h-4 w-4" />
             Add FAQ
           </Button>
         </div>
@@ -207,7 +207,7 @@ export function FAQManagement() {
           <CardContent className="p-4">
             <div className="flex flex-wrap items-center gap-3">
               <div className="relative flex-1 min-w-[200px]">
-                <SearchIcon className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
+                <MdSearch className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2" />
                 <Input
                   placeholder="Search FAQs..."
                   className="pl-10"
@@ -281,23 +281,23 @@ export function FAQManagement() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant="ghost" size="icon">
-                                <MoreHorizontal className="h-4 w-4" />
+                                <MdMoreHoriz className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuItem onClick={() => openEditDialog(faq)}>
-                                <Pencil className="mr-2 h-4 w-4" />
+                                <MdEdit className="mr-2 h-4 w-4" />
                                 Edit
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleToggleStatus(faq)}>
                                 {faq.status === 'published' ? (
                                   <>
-                                    <EyeOff className="mr-2 h-4 w-4" />
+                                    <MdVisibilityOff className="mr-2 h-4 w-4" />
                                     Unpublish
                                   </>
                                 ) : (
                                   <>
-                                    <Eye className="mr-2 h-4 w-4" />
+                                    <MdVisibility className="mr-2 h-4 w-4" />
                                     Publish
                                   </>
                                 )}
@@ -307,7 +307,7 @@ export function FAQManagement() {
                                 className="text-destructive"
                                 onClick={() => setDeletingFaq(faq)}
                               >
-                                <Trash2 className="mr-2 h-4 w-4" />
+                                <MdDelete className="mr-2 h-4 w-4" />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -324,10 +324,10 @@ export function FAQManagement() {
           {filteredFaqs.length === 0 && (
             <Card>
               <CardContent className="flex flex-col items-center justify-center py-12">
-                <FileQuestion className="h-12 w-12 text-muted-foreground/50 mb-4" />
+                <MdHelpOutline className="h-12 w-12 text-muted-foreground/50 mb-4" />
                 <p className="text-muted-foreground">No FAQs found</p>
                 <Button variant="outline" className="mt-4" onClick={handleAddClick}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <MdAdd className="mr-2 h-4 w-4" />
                   Add your first FAQ
                 </Button>
               </CardContent>

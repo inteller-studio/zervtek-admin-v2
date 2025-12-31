@@ -14,7 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Plus, MapPin, Building2, Warehouse, Search as SearchIcon } from 'lucide-react'
+import { MdAdd, MdLocationOn, MdBusiness, MdWarehouse, MdSearch } from 'react-icons/md'
 import { toast } from 'sonner'
 
 import { type Yard, type YardFormData, YARD_STATUSES } from './types'
@@ -143,7 +143,7 @@ export default function YardsPage() {
       <Header>
         <Search />
         <div className='ms-auto flex items-center gap-2'>
-          <Warehouse className='h-5 w-5' />
+          <MdWarehouse className='h-5 w-5' />
           <span className='font-semibold'>Yards</span>
         </div>
         <HeaderActions />
@@ -154,7 +154,7 @@ export default function YardsPage() {
         <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-6'>
           <div className='rounded-lg border bg-card p-4'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground mb-1'>
-              <Building2 className='h-4 w-4' />
+              <MdBusiness className='h-4 w-4' />
               Total Yards
             </div>
             <p className='text-2xl font-bold'>{stats.total}</p>
@@ -165,7 +165,7 @@ export default function YardsPage() {
 
           <div className='rounded-lg border bg-card p-4'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground mb-1'>
-              <Warehouse className='h-4 w-4' />
+              <MdWarehouse className='h-4 w-4' />
               Total Capacity
             </div>
             <p className='text-2xl font-bold'>{stats.totalCapacity}</p>
@@ -174,7 +174,7 @@ export default function YardsPage() {
 
           <div className='rounded-lg border bg-card p-4'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground mb-1'>
-              <MapPin className='h-4 w-4' />
+              <MdLocationOn className='h-4 w-4' />
               Vehicles Stored
             </div>
             <p className='text-2xl font-bold'>{stats.totalVehicles}</p>
@@ -183,7 +183,7 @@ export default function YardsPage() {
 
           <div className='rounded-lg border bg-card p-4'>
             <div className='flex items-center gap-2 text-sm text-muted-foreground mb-1'>
-              <Building2 className='h-4 w-4' />
+              <MdBusiness className='h-4 w-4' />
               Avg Utilization
             </div>
             <p className='text-2xl font-bold'>{stats.avgUtilization}%</p>
@@ -195,7 +195,7 @@ export default function YardsPage() {
         <div className='flex items-center justify-between gap-4 mb-4'>
           <div className='flex items-center gap-2'>
             <div className='relative'>
-              <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+              <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
               <Input
                 placeholder='Search yards...'
                 value={searchQuery}
@@ -219,7 +219,7 @@ export default function YardsPage() {
           </div>
 
           <Button onClick={handleAdd}>
-            <Plus className='h-4 w-4 mr-2' />
+            <MdAdd className='h-4 w-4 mr-2' />
             Add Yard
           </Button>
         </div>

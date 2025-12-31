@@ -87,7 +87,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible={collapsible} variant={variant}>
-      <SidebarHeader>
+      <SidebarHeader className='border-b border-border/50'>
         <TeamSwitcher teams={sidebarTeams} />
       </SidebarHeader>
       <SidebarContent>
@@ -95,7 +95,7 @@ export function AppSidebar() {
           <NavGroup key={props.title} {...props} />
         ))}
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter className='border-t border-border/50'>
         <NavUser user={sidebarUser} />
       </SidebarFooter>
       <SidebarRail />

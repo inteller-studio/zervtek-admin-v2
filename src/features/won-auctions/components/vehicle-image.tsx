@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { Car } from 'lucide-react'
+import { MdDirectionsCar } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 
 interface VehicleImageProps {
@@ -38,7 +38,7 @@ export function VehicleImage({
         fallbackClassName
       )}
     >
-      <Car className='h-8 w-8 text-muted-foreground' />
+      <MdDirectionsCar className='h-8 w-8 text-muted-foreground' />
     </div>
   )
 }

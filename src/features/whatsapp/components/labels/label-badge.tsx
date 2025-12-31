@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
+import { MdClose } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import type { ConversationLabel } from '../../types'
 import { getLabelColorConfig } from '../../data/label-colors'
@@ -36,7 +36,7 @@ export function LabelBadge({ label, size = 'default', onRemove, className }: Lab
           }}
           className='ml-0.5 rounded-full p-0.5 transition-colors hover:opacity-70 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
         >
-          <X className='h-2.5 w-2.5' />
+          <MdClose className='h-2.5 w-2.5' />
         </button>
       )}
     </span>

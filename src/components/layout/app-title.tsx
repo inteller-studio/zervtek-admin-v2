@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, X } from 'lucide-react'
+import { MdMenu, MdClose } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import {
   SidebarMenu,
@@ -58,8 +58,8 @@ function ToggleSidebar({
       }}
       {...props}
     >
-      <X className='md:hidden' />
-      <Menu className='max-md:hidden' />
+      <MdClose className='md:hidden' />
+      <MdMenu className='max-md:hidden' />
       <span className='sr-only'>Toggle Sidebar</span>
     </Button>
   )

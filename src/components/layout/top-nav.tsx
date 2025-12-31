@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu } from 'lucide-react'
+import { MdMenu } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -27,7 +27,7 @@ export function TopNav({ className, links, ...props }: TopNavProps) {
         <DropdownMenu modal={false}>
           <DropdownMenuTrigger asChild>
             <Button size='icon' variant='outline' className='md:size-7'>
-              <Menu />
+              <MdMenu />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent side='bottom' align='start'>

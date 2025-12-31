@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { CreditCard, Plus, Trash2, Receipt } from 'lucide-react'
+import { MdCreditCard, MdAdd, MdDelete, MdReceipt } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -25,7 +25,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Textarea } from '@/components/ui/textarea'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import {
   type PurchaseWorkflow,
   type WorkflowPayment,
@@ -34,7 +34,7 @@ import {
 import { updateWorkflowStage } from '../../../utils/workflow'
 
 interface PaymentProcessingStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
@@ -118,7 +118,7 @@ export function PaymentProcessingStage({
     <div className='space-y-4'>
       {/* Info Alert */}
       <Alert>
-        <CreditCard className='h-4 w-4' />
+        <MdCreditCard className='h-4 w-4' />
         <AlertDescription>
           Record all payments received from the customer for this vehicle.
         </AlertDescription>
@@ -161,7 +161,7 @@ export function PaymentProcessingStage({
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
               <Button variant='outline' size='sm'>
-                <Plus className='h-4 w-4 mr-1' />
+                <MdAdd className='h-4 w-4 mr-1' />
                 Add Payment
               </Button>
             </DialogTrigger>
@@ -245,7 +245,7 @@ export function PaymentProcessingStage({
 
         {stage.payments.length === 0 ? (
           <div className='text-center py-6 border rounded-lg bg-muted/30'>
-            <Receipt className='h-8 w-8 mx-auto text-muted-foreground mb-2' />
+            <MdReceipt className='h-8 w-8 mx-auto text-muted-foreground mb-2' />
             <p className='text-sm text-muted-foreground'>No payments recorded yet</p>
           </div>
         ) : (
@@ -278,7 +278,7 @@ export function PaymentProcessingStage({
                   className='h-8 w-8 opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive'
                   onClick={() => handleRemovePayment(payment.id)}
                 >
-                  <Trash2 className='h-4 w-4' />
+                  <MdDelete className='h-4 w-4' />
                 </Button>
               </div>
             ))}

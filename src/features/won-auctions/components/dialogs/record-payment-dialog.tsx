@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { DollarSign } from 'lucide-react'
+import { MdAttachMoney } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -35,7 +35,7 @@ import { DatePicker } from '@/components/date-picker'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
 import { toast } from 'sonner'
-import { type WonAuction, type Payment } from '../../data/won-auctions'
+import { type Purchase, type Payment } from '../../data/won-auctions'
 import { PaymentHistoryTimeline } from '../payment-history-timeline'
 import { PAYMENT_METHODS } from '../../types'
 
@@ -54,7 +54,7 @@ type PaymentForm = z.infer<typeof paymentFormSchema>
 interface RecordPaymentDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  auction: WonAuction | null
+  auction: Purchase | null
   onSubmit: (auctionId: string, payment: Omit<Payment, 'id' | 'auctionId' | 'recordedBy' | 'recordedAt'>) => void
 }
 
@@ -123,7 +123,7 @@ export function RecordPaymentDialog({
       <DialogContent className='max-h-[90vh] max-w-2xl overflow-y-auto'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
-            <DollarSign className='h-5 w-5' />
+            <MdAttachMoney className='h-5 w-5' />
             Record Payment
           </DialogTitle>
           <DialogDescription>
@@ -281,7 +281,7 @@ export function RecordPaymentDialog({
                 Cancel
               </Button>
               <Button type='submit' disabled={outstandingBalance <= 0}>
-                <DollarSign className='mr-2 h-4 w-4' />
+                <MdAttachMoney className='mr-2 h-4 w-4' />
                 Record Payment
               </Button>
             </DialogFooter>

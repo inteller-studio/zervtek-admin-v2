@@ -43,32 +43,32 @@ import { AuctionCard } from './components/auction-card'
 import { AssistBuyerDrawer } from './components/assist-buyer-drawer'
 import { auctions, type Auction } from './data/auctions'
 import {
-  Search as SearchIcon,
-  Gavel,
-  ChevronLeft,
-  ChevronRight,
-  ChevronDown,
-  Hand,
-  Clipboard,
-  SlidersHorizontal,
-  X,
-  HelpCircle,
-  Car,
-  Cog,
-  Camera,
-  Copy,
-  Check,
-  Link,
-  ZoomIn,
-  Maximize2,
-  CalendarDays,
-  Landmark,
-  Tag,
-  GaugeCircle,
-  Wrench,
-  Zap,
-  Clock,
-} from 'lucide-react'
+  MdSearch,
+  MdGavel,
+  MdChevronLeft,
+  MdChevronRight,
+  MdExpandMore,
+  MdPanTool,
+  MdContentPaste,
+  MdTune,
+  MdClose,
+  MdHelp,
+  MdDirectionsCar,
+  MdSettings,
+  MdCameraAlt,
+  MdContentCopy,
+  MdCheck,
+  MdLink,
+  MdZoomIn,
+  MdFullscreen,
+  MdCalendarToday,
+  MdAccountBalance,
+  MdLocalOffer,
+  MdSpeed,
+  MdBuild,
+  MdBolt,
+  MdAccessTime,
+} from 'react-icons/md'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
@@ -457,7 +457,7 @@ export function Auctions() {
         <div className='flex flex-wrap items-center gap-3'>
           <div className='flex min-w-[200px] flex-1 gap-2'>
             <div className='relative flex-1'>
-              <SearchIcon className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
+              <MdSearch className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
               <Input
                 placeholder='Search lot numbers (comma separated)...'
                 value={searchTerm}
@@ -474,7 +474,7 @@ export function Auctions() {
               onClick={handlePasteFromClipboard}
               title='Paste from clipboard'
             >
-              <Clipboard className='h-4 w-4' />
+              <MdContentPaste className='h-4 w-4' />
             </Button>
           </div>
 
@@ -485,7 +485,7 @@ export function Auctions() {
             setCurrentPage(1)
           }}>
             <SelectTrigger className='w-[140px]'>
-              <Car className='mr-2 h-4 w-4 text-muted-foreground' />
+              <MdDirectionsCar className='mr-2 h-4 w-4 text-muted-foreground' />
               <SelectValue placeholder='Make' />
             </SelectTrigger>
             <SelectContent>
@@ -506,7 +506,7 @@ export function Auctions() {
             disabled={!make}
           >
             <SelectTrigger className={cn('w-[140px]', !make && 'opacity-50')}>
-              <Cog className='mr-2 h-4 w-4 text-muted-foreground' />
+              <MdSettings className='mr-2 h-4 w-4 text-muted-foreground' />
               <SelectValue placeholder={make ? 'Model' : 'Select make'} />
             </SelectTrigger>
             <SelectContent>
@@ -523,7 +523,7 @@ export function Auctions() {
             onClick={() => setIsAdvancedOpen(true)}
             className='gap-2'
           >
-            <SlidersHorizontal className='h-4 w-4' />
+            <MdTune className='h-4 w-4' />
             Advanced
             {activeFilterCount > 0 && (
               <Badge variant='secondary' className='ml-1 h-5 w-5 rounded-full p-0 text-xs'>
@@ -548,7 +548,7 @@ export function Auctions() {
                 }}
                 className='text-muted-foreground hover:text-foreground'
               >
-                <X className='mr-1 h-4 w-4' />
+                <MdClose className='mr-1 h-4 w-4' />
                 Clear filters
               </Button>
             )}
@@ -581,7 +581,7 @@ export function Auctions() {
           </div>
         ) : (
           <div className='flex flex-col items-center justify-center rounded-lg border border-dashed py-12'>
-            <Gavel className='h-12 w-12 text-muted-foreground' />
+            <MdGavel className='h-12 w-12 text-muted-foreground' />
             <h3 className='mt-4 text-lg font-semibold'>No auctions found</h3>
             <p className='text-muted-foreground'>Try adjusting your search or filter criteria</p>
           </div>
@@ -602,7 +602,7 @@ export function Auctions() {
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className='h-4 w-4' />
+                <MdChevronLeft className='h-4 w-4' />
                 Previous
               </Button>
               <span className='text-sm'>
@@ -615,7 +615,7 @@ export function Auctions() {
                 disabled={currentPage === totalPages}
               >
                 Next
-                <ChevronRight className='h-4 w-4' />
+                <MdChevronRight className='h-4 w-4' />
               </Button>
             </div>
           </div>
@@ -680,7 +680,7 @@ export function Auctions() {
                       {/* Zoom hint overlay */}
                       <div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center'>
                         <div className='opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3 backdrop-blur-sm'>
-                          <ZoomIn className='h-6 w-6 text-white' />
+                          <MdZoomIn className='h-6 w-6 text-white' />
                         </div>
                       </div>
 
@@ -696,7 +696,7 @@ export function Auctions() {
                             }}
                             className='absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
                           >
-                            <ChevronLeft className='h-6 w-6' />
+                            <MdChevronLeft className='h-6 w-6' />
                           </button>
                           <button
                             onClick={(e) => {
@@ -707,7 +707,7 @@ export function Auctions() {
                             }}
                             className='absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
                           >
-                            <ChevronRight className='h-6 w-6' />
+                            <MdChevronRight className='h-6 w-6' />
                           </button>
                         </>
                       )}
@@ -736,14 +736,14 @@ export function Auctions() {
                       {/* Fullscreen hint */}
                       <div className='absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity'>
                         <div className='flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm'>
-                          <Maximize2 className='h-3.5 w-3.5' />
+                          <MdFullscreen className='h-3.5 w-3.5' />
                           <span>Click to expand</span>
                         </div>
                       </div>
                     </>
                   ) : (
                     <div className='flex h-full w-full items-center justify-center'>
-                      <Car className='h-20 w-20 text-muted-foreground/30' />
+                      <MdDirectionsCar className='h-20 w-20 text-muted-foreground/30' />
                     </div>
                   )}
                 </div>
@@ -778,7 +778,7 @@ export function Auctions() {
                   }}
                   className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40'
                 >
-                  <X className='h-5 w-5' />
+                  <MdClose className='h-5 w-5' />
                 </button>
               </div>
 
@@ -812,7 +812,7 @@ export function Auctions() {
                   {/* Vehicle Title Card */}
                   <div className='flex items-center gap-4 rounded-xl bg-muted/30 p-4'>
                     <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center'>
-                      <Car className='h-6 w-6 text-primary' />
+                      <MdDirectionsCar className='h-6 w-6 text-primary' />
                     </div>
                     <div className='flex-1 min-w-0'>
                       <div className='flex items-center gap-2'>
@@ -849,9 +849,9 @@ export function Auctions() {
                           className='p-2 rounded-lg hover:bg-muted transition-colors'
                         >
                           {copiedLink ? (
-                            <Check className='w-4 h-4 text-emerald-500' />
+                            <MdCheck className='w-4 h-4 text-emerald-500' />
                           ) : (
-                            <Link className='w-4 h-4 text-muted-foreground' />
+                            <MdLink className='w-4 h-4 text-muted-foreground' />
                           )}
                         </button>
                       </TooltipTrigger>
@@ -871,14 +871,14 @@ export function Auctions() {
                       <div className='space-y-0.5'>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <Landmark className='h-3.5 w-3.5' />
+                            <MdAccountBalance className='h-3.5 w-3.5' />
                             House
                           </span>
                           <span className='text-sm font-medium'>{selectedAuction.auctionHouse}</span>
                         </div>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <Tag className='h-3.5 w-3.5' />
+                            <MdLocalOffer className='h-3.5 w-3.5' />
                             Lot No.
                           </span>
                           <div className='flex items-center gap-1.5'>
@@ -893,23 +893,23 @@ export function Auctions() {
                               className='p-1 rounded hover:bg-muted transition-colors'
                             >
                               {copiedLot ? (
-                                <Check className='h-3 w-3 text-emerald-500' />
+                                <MdCheck className='h-3 w-3 text-emerald-500' />
                               ) : (
-                                <Copy className='h-3 w-3 text-muted-foreground' />
+                                <MdContentCopy className='h-3 w-3 text-muted-foreground' />
                               )}
                             </button>
                           </div>
                         </div>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <CalendarDays className='h-3.5 w-3.5' />
+                            <MdCalendarToday className='h-3.5 w-3.5' />
                             Date
                           </span>
                           <span className='text-sm font-medium'>{format(new Date(selectedAuction.startTime), 'MMM d, yyyy')}</span>
                         </div>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <Clock className='h-3.5 w-3.5' />
+                            <MdAccessTime className='h-3.5 w-3.5' />
                             End Time
                           </span>
                           <span className='text-sm font-medium'>{format(new Date(selectedAuction.endTime), 'HH:mm')}</span>
@@ -925,7 +925,7 @@ export function Auctions() {
                       <div className='space-y-0.5'>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <GaugeCircle className='h-3.5 w-3.5' />
+                            <MdSpeed className='h-3.5 w-3.5' />
                             Mileage
                           </span>
                           <span className={cn(
@@ -937,14 +937,14 @@ export function Auctions() {
                         </div>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <Wrench className='h-3.5 w-3.5' />
+                            <MdBuild className='h-3.5 w-3.5' />
                             Trans
                           </span>
                           <span className='text-sm font-medium'>{selectedAuction.vehicleInfo.transmission}</span>
                         </div>
                         <div className='flex justify-between items-center py-2.5'>
                           <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                            <Zap className='h-3.5 w-3.5' />
+                            <MdBolt className='h-3.5 w-3.5' />
                             Engine
                           </span>
                           <span className='text-sm font-medium'>{selectedAuction.vehicleInfo.displacement || '—'}</span>
@@ -971,7 +971,7 @@ export function Auctions() {
                       className='h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white'
                       onClick={() => setIsAssistBuyerOpen(true)}
                     >
-                      <Hand className='mr-2 h-4 w-4' />
+                      <MdPanTool className='mr-2 h-4 w-4' />
                       Assist Buyer
                     </Button>
                   )}
@@ -1232,7 +1232,7 @@ export function Auctions() {
                 <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Auction Score</h3>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <HelpCircle className='w-3.5 h-3.5 text-muted-foreground/70 cursor-help hover:text-muted-foreground transition-colors' />
+                    <MdHelp className='w-3.5 h-3.5 text-muted-foreground/70 cursor-help hover:text-muted-foreground transition-colors' />
                   </TooltipTrigger>
                   <TooltipContent side='right' className='max-w-[220px] p-3'>
                     <p className='text-xs leading-relaxed'>Japanese auction grades: S is best, lower numbers indicate more wear. R means repaired.</p>
@@ -1280,7 +1280,7 @@ export function Auctions() {
                   type='button'
                   className='flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-150'
                 >
-                  <ChevronDown className={cn('w-4 h-4 transition-transform duration-150', showMoreFilters && 'rotate-180')} />
+                  <MdExpandMore className={cn('w-4 h-4 transition-transform duration-150', showMoreFilters && 'rotate-180')} />
                   {showMoreFilters ? 'Show less' : 'Show more filters'}
                 </button>
               </CollapsibleTrigger>
@@ -1360,7 +1360,7 @@ export function Auctions() {
                 <div className='space-y-2'>
                   <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Lot Number</h3>
                   <div className='relative'>
-                    <SearchIcon className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
+                    <MdSearch className='absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground' />
                     <Input
                       value={lotNumber}
                       onChange={(e) => setLotNumber(e.target.value)}
@@ -1389,7 +1389,7 @@ export function Auctions() {
                       onClick={() => removeFilterTag(tag.key)}
                     >
                       {tag.label}
-                      <X className='w-3 h-3' />
+                      <MdClose className='w-3 h-3' />
                     </Badge>
                   ))}
                   {getActiveFilterTags().length > 10 && (
@@ -1446,7 +1446,7 @@ export function Auctions() {
                     )}
                     className='absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white'
                   >
-                    <ChevronLeft className='w-6 h-6' />
+                    <MdChevronLeft className='w-6 h-6' />
                   </button>
                   <button
                     onClick={() => setSelectedImageIndex((prev) =>
@@ -1454,7 +1454,7 @@ export function Auctions() {
                     )}
                     className='absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white'
                   >
-                    <ChevronRight className='w-6 h-6' />
+                    <MdChevronRight className='w-6 h-6' />
                   </button>
                 </>
               )}

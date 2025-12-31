@@ -1,7 +1,7 @@
 'use client'
 
-import { type WonAuction, type Document, type ShipmentTracking, type Payment } from '../data/won-auctions'
-import { type PurchaseWorkflow } from '../types/workflow'
+import { type Purchase, type Document, type ShipmentTracking, type Payment } from '../data/won-auctions'
+import { type PurchaseWorkflow, type DocumentChecklist } from '../types/workflow'
 import { useWonAuctions } from './won-auctions-provider'
 import { RecordPaymentDialog } from './dialogs/record-payment-dialog'
 import { DocumentUploadDialog } from './dialogs/document-upload-dialog'
@@ -9,15 +9,16 @@ import { DocumentManagementDialog } from './dialogs/document-management-dialog'
 import { ShippingUpdateDialog } from './dialogs/shipping-update-dialog'
 import { InvoiceDialog } from './dialogs/invoice-dialog'
 import { UnifiedPurchaseModal } from './unified-modal/unified-purchase-modal'
+import { createDefaultWorkflow } from '../utils/workflow'
 
 interface WonAuctionsDialogsProps {
   onRecordPayment: (auctionId: string, payment: Omit<Payment, 'id' | 'auctionId' | 'recordedBy' | 'recordedAt'>) => void
-  onUploadDocuments: (auctionId: string, documents: Document[]) => void
+  onUploadDocuments: (auctionId: string, documents: Document[], checklistKey?: keyof DocumentChecklist) => void
   onUpdateShipping: (auctionId: string, shipment: ShipmentTracking) => void
   onDeleteDocument?: (auctionId: string, documentId: string) => void
   onWorkflowUpdate?: (auctionId: string, workflow: PurchaseWorkflow) => void
-  onMarkDelivered?: (auction: WonAuction) => void
-  onMarkCompleted?: (auction: WonAuction) => void
+  onMarkDelivered?: (auction: Purchase) => void
+  onMarkCompleted?: (auction: Purchase) => void
 }
 
 export function WonAuctionsDialogs({
@@ -30,6 +31,10 @@ export function WonAuctionsDialogs({
   onMarkCompleted,
 }: WonAuctionsDialogsProps) {
   const { open, setOpen, currentRow } = useWonAuctions()
+
+  // Get the document checklist from workflow
+  const workflow = currentRow?.workflow || createDefaultWorkflow()
+  const documentChecklist = workflow.stages.documentsReceived.checklist
 
   return (
     <>
@@ -60,6 +65,7 @@ export function WonAuctionsDialogs({
         onOpenChange={() => setOpen(open === 'document-upload' ? null : 'document-upload')}
         auction={currentRow}
         onUpload={onUploadDocuments}
+        documentChecklist={documentChecklist}
       />
 
       <DocumentManagementDialog

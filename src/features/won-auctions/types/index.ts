@@ -1,7 +1,7 @@
 import { type Document } from '../data/won-auctions'
 
 // Type without null for the hook, the hook manages null internally
-export type WonAuctionsDialogTypeBase =
+export type PurchasesDialogTypeBase =
   | 'purchase' // Unified modal (replaces 'detail' and 'workflow')
   | 'documents'
   | 'document-upload'
@@ -9,7 +9,12 @@ export type WonAuctionsDialogTypeBase =
   | 'payment'
   | 'invoice'
 
-export type WonAuctionsDialogType = WonAuctionsDialogTypeBase | null
+export type PurchasesDialogType = PurchasesDialogTypeBase | null
+
+/** @deprecated Use PurchasesDialogTypeBase instead */
+export type WonAuctionsDialogTypeBase = PurchasesDialogTypeBase
+/** @deprecated Use PurchasesDialogType instead */
+export type WonAuctionsDialogType = PurchasesDialogType
 
 // Initial mode for the unified purchase modal
 export type PurchaseModalMode = 'overview' | 'workflow'

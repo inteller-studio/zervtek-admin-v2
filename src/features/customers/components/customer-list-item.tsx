@@ -4,12 +4,12 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 import {
-  CheckCircle,
-  Clock,
-  XCircle,
-  FileQuestion,
-  Award,
-} from 'lucide-react'
+  MdCheckCircle,
+  MdAccessTime,
+  MdCancel,
+  MdHelpOutline,
+  MdWorkspacePremium,
+} from 'react-icons/md'
 import { type Customer, type UserLevel } from '../data/customers'
 
 interface CustomerListItemProps {
@@ -40,10 +40,10 @@ const levelConfig: Record<UserLevel, { label: string; className: string }> = {
 }
 
 const verificationConfig = {
-  verified: { className: 'bg-emerald-500', icon: CheckCircle },
-  pending: { className: 'bg-amber-500', icon: Clock },
-  unverified: { className: 'bg-red-500', icon: XCircle },
-  documents_requested: { className: 'bg-blue-500', icon: FileQuestion },
+  verified: { className: 'bg-emerald-500', icon: MdCheckCircle },
+  pending: { className: 'bg-amber-500', icon: MdAccessTime },
+  unverified: { className: 'bg-red-500', icon: MdCancel },
+  documents_requested: { className: 'bg-blue-500', icon: MdHelpOutline },
 }
 
 export function CustomerListItem({ customer, isSelected, onClick }: CustomerListItemProps) {
@@ -89,7 +89,7 @@ export function CustomerListItem({ customer, isSelected, onClick }: CustomerList
           </p>
           <div className='flex items-center gap-2 mt-1.5'>
             <Badge variant='outline' className={cn('text-[10px] px-1.5 py-0 h-5', levelInfo.className)}>
-              <Award className='mr-1 h-3 w-3' />
+              <MdWorkspacePremium className='mr-1 h-3 w-3' />
               {levelInfo.label}
             </Badge>
             <span className='text-[10px] text-muted-foreground font-medium'>

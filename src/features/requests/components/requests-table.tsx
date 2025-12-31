@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, UserPlus, CheckCircle, XCircle, Shield, Languages } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdPersonAdd, MdCheckCircle, MdCancel, MdSecurity, MdTranslate } from 'react-icons/md'
 import { type ServiceRequest } from '../data/requests'
 import { format } from 'date-fns'
 
@@ -87,9 +87,9 @@ export function RequestsTable({ data }: RequestsTableProps) {
               <TableCell>
                 <Badge variant='outline' className='flex items-center gap-1 w-fit'>
                   {request.type === 'inspection' ? (
-                    <Shield className='h-3 w-3' />
+                    <MdSecurity className='h-3 w-3' />
                   ) : (
-                    <Languages className='h-3 w-3' />
+                    <MdTranslate className='h-3 w-3' />
                   )}
                   {request.type === 'inspection' ? 'Inspection' : 'Translation'}
                 </Badge>
@@ -127,25 +127,25 @@ export function RequestsTable({ data }: RequestsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Details
                     </DropdownMenuItem>
                     {!request.assignedTo && (
                       <DropdownMenuItem>
-                        <UserPlus className='mr-2 h-4 w-4' />
+                        <MdPersonAdd className='mr-2 h-4 w-4' />
                         Assign
                       </DropdownMenuItem>
                     )}
                     {request.status !== 'completed' && request.status !== 'cancelled' && (
                       <DropdownMenuItem>
-                        <CheckCircle className='mr-2 h-4 w-4' />
+                        <MdCheckCircle className='mr-2 h-4 w-4' />
                         Mark Complete
                       </DropdownMenuItem>
                     )}
@@ -153,7 +153,7 @@ export function RequestsTable({ data }: RequestsTableProps) {
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='text-destructive'>
-                          <XCircle className='mr-2 h-4 w-4' />
+                          <MdCancel className='mr-2 h-4 w-4' />
                           Cancel Request
                         </DropdownMenuItem>
                       </>

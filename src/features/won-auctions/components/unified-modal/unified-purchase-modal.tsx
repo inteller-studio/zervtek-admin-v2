@@ -4,29 +4,29 @@ import { useState, useEffect, useCallback } from 'react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  X,
-  Car,
-  Copy,
-  Check,
-  User,
-  Calendar,
-  MapPin,
-  CreditCard,
-  FileText,
-  Ship,
-  ChevronLeft,
-  ChevronRight,
-  CheckCircle2,
-  DollarSign,
-} from 'lucide-react'
+  MdClose,
+  MdDirectionsCar,
+  MdContentCopy,
+  MdCheck,
+  MdPerson,
+  MdCalendarToday,
+  MdLocationOn,
+  MdCreditCard,
+  MdDescription,
+  MdDirectionsBoat,
+  MdChevronLeft,
+  MdChevronRight,
+  MdCheckCircle,
+  MdAttachMoney,
+} from 'react-icons/md'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
-import { type WonAuction, type Document } from '../../data/won-auctions'
+import { type Purchase, type Document } from '../../data/won-auctions'
 import { type PurchaseWorkflow, WORKFLOW_STAGES } from '../../types/workflow'
 import {
   createDefaultWorkflow,
@@ -42,7 +42,7 @@ import { UnifiedDocumentPanel } from './document-panel/unified-document-panel'
 import { OverviewPanel } from './overview/overview-panel'
 
 // Status styles
-const statusStyles: Record<WonAuction['status'], string> = {
+const statusStyles: Record<Purchase['status'], string> = {
   payment_pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   processing: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   documents_pending: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
@@ -51,7 +51,7 @@ const statusStyles: Record<WonAuction['status'], string> = {
   completed: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
 }
 
-const statusLabels: Record<WonAuction['status'], string> = {
+const statusLabels: Record<Purchase['status'], string> = {
   payment_pending: 'Payment Pending',
   processing: 'Processing',
   documents_pending: 'Docs Pending',
@@ -63,15 +63,15 @@ const statusLabels: Record<WonAuction['status'], string> = {
 interface UnifiedPurchaseModalProps {
   open: boolean
   onClose: () => void
-  auction: WonAuction | null
+  auction: Purchase | null
   onWorkflowUpdate: (auctionId: string, workflow: PurchaseWorkflow) => void
   onDocumentUpload: (auctionId: string, documents: Document[]) => void
   onDocumentDelete?: (auctionId: string, documentId: string) => void
   onRecordPayment?: () => void
   onUpdateShipping?: () => void
   onGenerateInvoice?: () => void
-  onMarkDelivered?: (auction: WonAuction) => void
-  onMarkCompleted?: (auction: WonAuction) => void
+  onMarkDelivered?: (auction: Purchase) => void
+  onMarkCompleted?: (auction: Purchase) => void
 }
 
 export function UnifiedPurchaseModal({
@@ -273,7 +273,7 @@ export function UnifiedPurchaseModal({
                       />
                     ) : (
                       <div className='h-full w-full flex items-center justify-center'>
-                        <Car className='h-6 w-6 text-muted-foreground' />
+                        <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
                       </div>
                     )}
                   </div>
@@ -300,25 +300,25 @@ export function UnifiedPurchaseModal({
                     >
                       <span className='truncate'>{auction.vehicleInfo.vin}</span>
                       {vinCopied ? (
-                        <Check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                        <MdCheck className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
                       ) : (
-                        <Copy className='h-3.5 w-3.5 shrink-0' />
+                        <MdContentCopy className='h-3.5 w-3.5 shrink-0' />
                       )}
                     </button>
 
                     {/* Meta info */}
                     <div className='flex items-center gap-3 text-xs text-muted-foreground flex-wrap'>
                       <span className='flex items-center gap-1'>
-                        <User className='h-3 w-3' />
+                        <MdPerson className='h-3 w-3' />
                         {auction.winnerName}
                       </span>
                       <span className='flex items-center gap-1'>
-                        <Calendar className='h-3 w-3' />
+                        <MdCalendarToday className='h-3 w-3' />
                         {format(new Date(auction.auctionEndDate), 'MMM d, yyyy')}
                       </span>
                       {auction.destinationPort && (
                         <span className='flex items-center gap-1'>
-                          <MapPin className='h-3 w-3' />
+                          <MdLocationOn className='h-3 w-3' />
                           {auction.destinationPort.split(',')[0]}
                         </span>
                       )}
@@ -333,7 +333,7 @@ export function UnifiedPurchaseModal({
                   onClick={onClose}
                   className='h-8 w-8 shrink-0 rounded-full'
                 >
-                  <X className='h-4 w-4' />
+                  <MdClose className='h-4 w-4' />
                 </Button>
               </div>
 
@@ -362,123 +362,108 @@ export function UnifiedPurchaseModal({
             </motion.div>
 
             {/* Tabs Content */}
-            <Tabs value={activeTab} onValueChange={setActiveTab} className='flex-1 flex flex-col overflow-hidden gap-0'>
-              <div className='px-6 py-3 border-b shrink-0'>
-                <TabsList className='h-9'>
-                  <TabsTrigger value='workflow' className='gap-2'>
-                    <CheckCircle2 className='h-4 w-4' />
-                    Workflow
-                  </TabsTrigger>
-                  <TabsTrigger value='documents' className='gap-2'>
-                    <FileText className='h-4 w-4' />
-                    Documents
-                    {auction.documents.length > 0 && (
-                      <Badge variant='secondary' className='ml-1 h-5 min-w-5 px-1.5'>
-                        {auction.documents.length}
-                      </Badge>
-                    )}
-                  </TabsTrigger>
-                  <TabsTrigger value='payments' className='gap-2'>
-                    <CreditCard className='h-4 w-4' />
-                    Payments
-                    <Badge
-                      variant={paymentProgress >= 100 ? 'emerald' : 'secondary'}
-                      className='ml-1 h-5 min-w-5 px-1.5'
-                    >
-                      {paymentProgress}%
-                    </Badge>
-                  </TabsTrigger>
-                  <TabsTrigger value='shipping' className='gap-2'>
-                    <Ship className='h-4 w-4' />
-                    Shipping
-                  </TabsTrigger>
-                </TabsList>
-              </div>
+            {(() => {
+              const modalTabs: TabItem[] = [
+                { id: 'workflow', label: 'Workflow', icon: MdCheckCircle },
+                { id: 'documents', label: 'Documents', icon: MdDescription, badge: auction.documents.length > 0 ? auction.documents.length : undefined },
+                { id: 'payments', label: 'Payments', icon: MdCreditCard, badge: `${paymentProgress}%`, badgeColor: paymentProgress >= 100 ? 'emerald' : 'primary' },
+                { id: 'shipping', label: 'Shipping', icon: MdDirectionsBoat },
+              ]
 
-              <div className='flex-1 overflow-y-auto min-h-0'>
-                <TabsContent value='workflow' className='mt-0 data-[state=active]:block'>
-                  <WorkflowSidebar
-                    auction={auction}
-                    workflow={localWorkflow}
-                    activeStage={activeStage}
-                    onStageChange={setActiveStage}
-                    onWorkflowUpdate={handleWorkflowUpdate}
-                    currentUser={currentUser}
-                    yards={activeYards}
-                  />
-                </TabsContent>
+              return (
+                <AnimatedTabs
+                  tabs={modalTabs}
+                  value={activeTab}
+                  onValueChange={setActiveTab}
+                  className='flex-1 flex flex-col overflow-hidden'
+                  variant='compact'
+                >
+                  <div className='flex-1 overflow-y-auto min-h-0'>
+                    <AnimatedTabsContent value='workflow' className='data-[state=active]:block'>
+                      <WorkflowSidebar
+                        auction={auction}
+                        workflow={localWorkflow}
+                        activeStage={activeStage}
+                        onStageChange={setActiveStage}
+                        onWorkflowUpdate={handleWorkflowUpdate}
+                        currentUser={currentUser}
+                        yards={activeYards}
+                      />
+                    </AnimatedTabsContent>
 
-                <TabsContent value='documents' className='mt-0'>
-                  <UnifiedDocumentPanel
-                    auction={auction}
-                    workflow={localWorkflow}
-                    isCollapsed={false}
-                    onToggleCollapse={() => {}}
-                    onDocumentUpload={handleDocumentUpload}
-                    onDocumentDelete={onDocumentDelete ? handleDocumentDelete : undefined}
-                  />
-                </TabsContent>
+                    <AnimatedTabsContent value='documents'>
+                      <UnifiedDocumentPanel
+                        auction={auction}
+                        workflow={localWorkflow}
+                        isCollapsed={false}
+                        onToggleCollapse={() => {}}
+                        onDocumentUpload={handleDocumentUpload}
+                        onDocumentDelete={onDocumentDelete ? handleDocumentDelete : undefined}
+                      />
+                    </AnimatedTabsContent>
 
-                <TabsContent value='payments' className='mt-0'>
-                  <OverviewPanel
-                    auction={auction}
-                    onRecordPayment={onRecordPayment}
-                    onUpdateShipping={onUpdateShipping}
-                    onGenerateInvoice={onGenerateInvoice}
-                  />
-                </TabsContent>
+                    <AnimatedTabsContent value='payments'>
+                      <OverviewPanel
+                        auction={auction}
+                        onRecordPayment={onRecordPayment}
+                        onUpdateShipping={onUpdateShipping}
+                        onGenerateInvoice={onGenerateInvoice}
+                      />
+                    </AnimatedTabsContent>
 
-                <TabsContent value='shipping' className='mt-0 p-6'>
-                  <div className='rounded-xl border bg-card p-6'>
-                    <h3 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4'>
-                      Shipping Details
-                    </h3>
-                    {auction.shipment ? (
-                      <div className='space-y-4'>
-                        <div className='grid grid-cols-2 gap-4'>
-                          <div>
-                            <p className='text-xs text-muted-foreground'>Carrier</p>
-                            <p className='font-medium'>{auction.shipment.carrier}</p>
-                          </div>
-                          <div>
-                            <p className='text-xs text-muted-foreground'>Tracking Number</p>
-                            <p className='font-mono font-medium'>{auction.shipment.trackingNumber}</p>
-                          </div>
-                          <div>
-                            <p className='text-xs text-muted-foreground'>Status</p>
-                            <Badge variant='outline' className='capitalize'>
-                              {auction.shipment.status.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                          <div>
-                            <p className='text-xs text-muted-foreground'>Current Location</p>
-                            <p className='font-medium'>{auction.shipment.currentLocation}</p>
-                          </div>
-                          {auction.shipment.estimatedDelivery && (
-                            <div>
-                              <p className='text-xs text-muted-foreground'>Estimated Delivery</p>
-                              <p className='font-medium'>
-                                {format(new Date(auction.shipment.estimatedDelivery), 'MMM d, yyyy')}
-                              </p>
+                    <AnimatedTabsContent value='shipping' className='p-6'>
+                      <div className='rounded-xl border bg-card p-6'>
+                        <h3 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4'>
+                          Shipping Details
+                        </h3>
+                        {auction.shipment ? (
+                          <div className='space-y-4'>
+                            <div className='grid grid-cols-2 gap-4'>
+                              <div>
+                                <p className='text-xs text-muted-foreground'>Carrier</p>
+                                <p className='font-medium'>{auction.shipment.carrier}</p>
+                              </div>
+                              <div>
+                                <p className='text-xs text-muted-foreground'>Tracking Number</p>
+                                <p className='font-mono font-medium'>{auction.shipment.trackingNumber}</p>
+                              </div>
+                              <div>
+                                <p className='text-xs text-muted-foreground'>Status</p>
+                                <Badge variant='outline' className='capitalize'>
+                                  {auction.shipment.status.replace('_', ' ')}
+                                </Badge>
+                              </div>
+                              <div>
+                                <p className='text-xs text-muted-foreground'>Current Location</p>
+                                <p className='font-medium'>{auction.shipment.currentLocation}</p>
+                              </div>
+                              {auction.shipment.estimatedDelivery && (
+                                <div>
+                                  <p className='text-xs text-muted-foreground'>Estimated Delivery</p>
+                                  <p className='font-medium'>
+                                    {format(new Date(auction.shipment.estimatedDelivery), 'MMM d, yyyy')}
+                                  </p>
+                                </div>
+                              )}
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    ) : (
-                      <div className='text-center py-8'>
-                        <Ship className='h-12 w-12 text-muted-foreground/30 mx-auto mb-4' />
-                        <p className='text-muted-foreground'>No shipping information yet</p>
-                        {onUpdateShipping && (
-                          <Button variant='outline' size='sm' className='mt-4' onClick={onUpdateShipping}>
-                            Add Shipping Details
-                          </Button>
+                          </div>
+                        ) : (
+                          <div className='text-center py-8'>
+                            <MdDirectionsBoat className='h-12 w-12 text-muted-foreground/30 mx-auto mb-4' />
+                            <p className='text-muted-foreground'>No shipping information yet</p>
+                            {onUpdateShipping && (
+                              <Button variant='outline' size='sm' className='mt-4' onClick={onUpdateShipping}>
+                                Add Shipping Details
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
-                    )}
+                    </AnimatedTabsContent>
                   </div>
-                </TabsContent>
-              </div>
-            </Tabs>
+                </AnimatedTabs>
+              )
+            })()}
 
             {/* Footer */}
             <motion.div
@@ -495,7 +480,7 @@ export function UnifiedPurchaseModal({
                   onClick={goToPreviousStage}
                   disabled={localWorkflow.currentStage <= 1}
                 >
-                  <ChevronLeft className='h-4 w-4 mr-1' />
+                  <MdChevronLeft className='h-4 w-4 mr-1' />
                   Previous
                 </Button>
                 <div className='px-3 py-1.5 rounded-lg bg-muted text-sm'>
@@ -509,7 +494,7 @@ export function UnifiedPurchaseModal({
                   disabled={!canAccessStage(localWorkflow, localWorkflow.currentStage + 1)}
                 >
                   Next
-                  <ChevronRight className='h-4 w-4 ml-1' />
+                  <MdChevronRight className='h-4 w-4 ml-1' />
                 </Button>
               </div>
 
@@ -518,19 +503,19 @@ export function UnifiedPurchaseModal({
                 {/* Context-aware primary action */}
                 {auction.paymentStatus !== 'completed' && onRecordPayment && (
                   <Button size='sm' onClick={onRecordPayment}>
-                    <DollarSign className='h-4 w-4 mr-2' />
+                    <MdAttachMoney className='h-4 w-4 mr-2' />
                     Record Payment
                   </Button>
                 )}
                 {auction.status === 'shipping' && onMarkDelivered && (
                   <Button size='sm' onClick={() => onMarkDelivered(auction)}>
-                    <CheckCircle2 className='h-4 w-4 mr-2' />
+                    <MdCheckCircle className='h-4 w-4 mr-2' />
                     Mark Delivered
                   </Button>
                 )}
                 {auction.status === 'delivered' && onMarkCompleted && (
                   <Button size='sm' onClick={() => onMarkCompleted(auction)}>
-                    <CheckCircle2 className='h-4 w-4 mr-2' />
+                    <MdCheckCircle className='h-4 w-4 mr-2' />
                     Mark Completed
                   </Button>
                 )}

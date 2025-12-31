@@ -1,18 +1,18 @@
 'use client'
 
-import { FileCheck, AlertCircle, Car, CircleSlash } from 'lucide-react'
+import { MdFactCheck, MdError, MdDirectionsCar, MdBlock } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import { type PurchaseWorkflow } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 
 interface DocumentsReceivedStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
@@ -102,7 +102,7 @@ export function DocumentsReceivedStage({
     <div className='space-y-4'>
       {/* Info Alert */}
       <Alert>
-        <FileCheck className='h-4 w-4' />
+        <MdFactCheck className='h-4 w-4' />
         <AlertDescription>
           Complete document-related tasks based on the vehicle&apos;s registration status.
         </AlertDescription>
@@ -125,7 +125,7 @@ export function DocumentsReceivedStage({
           >
             <RadioGroupItem value='registered' id='registered' />
             <div className='flex items-center gap-2'>
-              <Car className='h-4 w-4 text-emerald-600' />
+              <MdDirectionsCar className='h-4 w-4 text-emerald-600' />
               <div>
                 <p className='text-sm font-medium'>Registered</p>
                 <p className='text-xs text-muted-foreground'>Has number plates</p>
@@ -141,7 +141,7 @@ export function DocumentsReceivedStage({
           >
             <RadioGroupItem value='unregistered' id='unregistered' />
             <div className='flex items-center gap-2'>
-              <CircleSlash className='h-4 w-4 text-muted-foreground' />
+              <MdBlock className='h-4 w-4 text-muted-foreground' />
               <div>
                 <p className='text-sm font-medium'>Not Registered</p>
                 <p className='text-xs text-muted-foreground'>No number plates</p>
@@ -153,7 +153,7 @@ export function DocumentsReceivedStage({
 
       {stage.isRegistered === null && (
         <Alert variant='default' className='bg-amber-50 border-amber-200'>
-          <AlertCircle className='h-4 w-4 text-amber-600' />
+          <MdError className='h-4 w-4 text-amber-600' />
           <AlertDescription className='text-amber-800'>
             Select the vehicle registration status to see available tasks.
           </AlertDescription>

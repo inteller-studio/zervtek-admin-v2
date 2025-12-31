@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Check, CheckCheck, Clock, MapPin } from 'lucide-react'
+import { MdCheck, MdDoneAll, MdAccessTime, MdLocationOn } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import type { Message } from '../../types'
 
@@ -60,15 +60,15 @@ export function MessageBubble({ message, showTail = false }: MessageBubbleProps)
     if (!isOwn) return null
     switch (message.status) {
       case 'pending':
-        return <Clock className='h-3 w-3 text-muted-foreground' />
+        return <MdAccessTime className='h-3 w-3 text-muted-foreground' />
       case 'sent':
-        return <Check className='h-3 w-3 text-muted-foreground' />
+        return <MdCheck className='h-3 w-3 text-muted-foreground' />
       case 'delivered':
-        return <CheckCheck className='h-3 w-3 text-muted-foreground' />
+        return <MdDoneAll className='h-3 w-3 text-muted-foreground' />
       case 'read':
-        return <CheckCheck className='h-3 w-3 text-blue-500' />
+        return <MdDoneAll className='h-3 w-3 text-blue-500' />
       default:
-        return <Check className='h-3 w-3 text-muted-foreground' />
+        return <MdCheck className='h-3 w-3 text-muted-foreground' />
     }
   }
 
@@ -103,7 +103,7 @@ export function MessageBubble({ message, showTail = false }: MessageBubbleProps)
 
         {content.type === 'location' && (
           <div className='mb-2 flex items-center gap-2 rounded-lg bg-muted p-2'>
-            <MapPin className='h-5 w-5 text-primary' />
+            <MdLocationOn className='h-5 w-5 text-primary' />
             <span className='text-sm'>{content.content}</span>
           </div>
         )}

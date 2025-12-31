@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowUpDown } from 'lucide-react'
+import { MdSwapVert } from 'react-icons/md'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
@@ -87,7 +87,7 @@ export function TeamPerformanceTable({ data, className }: TeamPerformanceTablePr
       onClick={() => handleSort(sortKeyName)}
     >
       {label}
-      <ArrowUpDown className='h-4 w-4' />
+      <MdSwapVert className='h-4 w-4' />
     </Button>
   )
 

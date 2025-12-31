@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Check, X, Loader2 } from 'lucide-react'
+import { MdCheck, MdClose, MdLoop } from 'react-icons/md'
 import { Input } from '@/components/ui/input'
 import { cn } from '@/lib/utils'
 import { getCountryByCode } from '../../data/country-codes'
@@ -72,13 +72,13 @@ export function PhoneInput({
         {/* Validation indicator */}
         <div className='absolute right-3 top-1/2 -translate-y-1/2'>
           {isValidating && (
-            <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+            <MdLoop className='h-4 w-4 animate-spin text-muted-foreground' />
           )}
           {!isValidating && isValid === true && (
-            <Check className='h-4 w-4 text-green-500' />
+            <MdCheck className='h-4 w-4 text-green-500' />
           )}
           {!isValidating && isValid === false && (
-            <X className='h-4 w-4 text-red-500' />
+            <MdClose className='h-4 w-4 text-red-500' />
           )}
         </div>
       </div>

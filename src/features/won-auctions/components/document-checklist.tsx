@@ -1,12 +1,12 @@
 'use client'
 
-import { CheckCircle2, Circle, Clock, AlertCircle } from 'lucide-react'
+import { MdCheckCircle, MdRadioButtonUnchecked, MdAccessTime, MdError } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
-import { type WonAuction, type Document } from '../data/won-auctions'
+import { type Purchase, type Document } from '../data/won-auctions'
 import { DOCUMENT_TYPE_LABELS } from '../types'
 
 // Required documents based on auction status
-const getRequiredDocuments = (status: WonAuction['status']): Document['type'][] => {
+const getRequiredDocuments = (status: Purchase['status']): Document['type'][] => {
   const baseDocuments: Document['type'][] = ['invoice']
 
   switch (status) {
@@ -38,7 +38,7 @@ const getRequiredDocuments = (status: WonAuction['status']): Document['type'][] 
 }
 
 interface DocumentChecklistProps {
-  auction: WonAuction
+  auction: Purchase
   compact?: boolean
 }
 
@@ -65,7 +65,7 @@ export function DocumentChecklist({ auction, compact = false }: DocumentChecklis
     <div className='space-y-2'>
       <div className='flex items-center justify-between'>
         <h4 className='flex items-center gap-2 text-sm font-medium'>
-          <AlertCircle className='h-4 w-4' />
+          <MdError className='h-4 w-4' />
           Required Documents
         </h4>
         <Badge variant={allComplete ? 'default' : 'secondary'}>
@@ -81,9 +81,9 @@ export function DocumentChecklist({ auction, compact = false }: DocumentChecklis
             <div key={docType} className='flex items-center justify-between py-1'>
               <div className='flex items-center gap-2'>
                 {hasDocument ? (
-                  <CheckCircle2 className='h-4 w-4 text-green-600' />
+                  <MdCheckCircle className='h-4 w-4 text-green-600' />
                 ) : (
-                  <Circle className='h-4 w-4 text-muted-foreground' />
+                  <MdRadioButtonUnchecked className='h-4 w-4 text-muted-foreground' />
                 )}
                 <span className='text-sm'>{DOCUMENT_TYPE_LABELS[docType]}</span>
               </div>
@@ -93,7 +93,7 @@ export function DocumentChecklist({ auction, compact = false }: DocumentChecklis
                 </Badge>
               ) : (
                 <Badge variant='outline' className='text-xs text-muted-foreground'>
-                  <Clock className='mr-1 h-3 w-3' />
+                  <MdAccessTime className='mr-1 h-3 w-3' />
                   Pending
                 </Badge>
               )}

@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { subDays, startOfDay, endOfDay } from 'date-fns'
-import { BarChart3, Lock, Users } from 'lucide-react'
+import { MdBarChart, MdLock, MdPeople } from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import { cn } from '@/lib/utils'
 import type { EnhancedWhatsAppStats, StaffPerformance, StatsDateRange, StaffRole } from '../../types'
 import { StatsDateRangeFilter } from './stats-date-range-filter'
@@ -76,21 +76,16 @@ export function StatsDashboard({
       </div>
 
       {/* Tabs for different views */}
-      <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'overview' | 'team')}>
-        <TabsList>
-          <TabsTrigger value='overview' className='gap-2'>
-            <BarChart3 className='h-4 w-4' />
-            Overview
-          </TabsTrigger>
-          {canSeeTeamStats && (
-            <TabsTrigger value='team' className='gap-2'>
-              <Users className='h-4 w-4' />
-              Team
-            </TabsTrigger>
-          )}
-        </TabsList>
-
-        <TabsContent value='overview' className='mt-4 space-y-6'>
+      <AnimatedTabs
+        tabs={[
+          { id: 'overview', label: 'Overview', icon: MdBarChart },
+          ...(canSeeTeamStats ? [{ id: 'team', label: 'Team', icon: MdPeople }] : []),
+        ] as TabItem[]}
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as 'overview' | 'team')}
+        variant='compact'
+      >
+        <AnimatedTabsContent value='overview' className='mt-4 space-y-6'>
           {/* Overview cards */}
           <StatsOverviewCards stats={stats} />
 
@@ -152,10 +147,10 @@ export function StatsDashboard({
               </CardContent>
             </Card>
           </div>
-        </TabsContent>
+        </AnimatedTabsContent>
 
         {canSeeTeamStats && (
-          <TabsContent value='team' className='mt-4 space-y-6'>
+          <AnimatedTabsContent value='team' className='mt-4 space-y-6'>
             {visibleTeamPerformance.length > 0 ? (
               <>
                 <Card>
@@ -194,7 +189,7 @@ export function StatsDashboard({
             ) : (
               <Card>
                 <CardContent className='flex flex-col items-center justify-center py-12'>
-                  <Lock className='h-12 w-12 text-muted-foreground/50' />
+                  <MdLock className='h-12 w-12 text-muted-foreground/50' />
                   <p className='mt-4 text-sm font-medium'>No team data available</p>
                   <p className='text-sm text-muted-foreground'>
                     Team performance data will appear here
@@ -202,9 +197,9 @@ export function StatsDashboard({
                 </CardContent>
               </Card>
             )}
-          </TabsContent>
+          </AnimatedTabsContent>
         )}
-      </Tabs>
+      </AnimatedTabs>
     </div>
   )
 }

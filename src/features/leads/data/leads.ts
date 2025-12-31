@@ -2,20 +2,20 @@ import { faker } from '@faker-js/faker'
 
 faker.seed(54321)
 
-export type InquiryStatus = 'new' | 'in_progress' | 'responded' | 'closed'
-export type InquiryType = 'price' | 'availability' | 'shipping' | 'inspection' | 'general'
+export type LeadStatus = 'new' | 'in_progress' | 'responded' | 'closed'
+export type LeadType = 'price' | 'availability' | 'shipping' | 'inspection' | 'general'
 
-export interface Inquiry {
+export interface Lead {
   id: string
-  inquiryNumber: string
+  leadNumber: string
   customerName: string
   customerEmail: string
   customerPhone: string
   customerId?: string
   vehicleName: string
   vehicleId?: string
-  type: InquiryType
-  status: InquiryStatus
+  type: LeadType
+  status: LeadStatus
   subject: string
   message: string
   assignedTo?: string
@@ -25,8 +25,8 @@ export interface Inquiry {
   respondedAt?: Date
 }
 
-const inquiryTypes: InquiryType[] = ['price', 'availability', 'shipping', 'inspection', 'general']
-const inquiryStatuses: InquiryStatus[] = ['new', 'in_progress', 'responded', 'closed']
+const leadTypes: LeadType[] = ['price', 'availability', 'shipping', 'inspection', 'general']
+const leadStatuses: LeadStatus[] = ['new', 'in_progress', 'responded', 'closed']
 
 const vehicles = [
   '2023 Toyota Supra GR',
@@ -53,7 +53,7 @@ const salesStaff = [
   { id: 'staff-004', name: 'Jessica Chen' },
 ]
 
-const subjects: Record<InquiryType, string[]> = {
+const subjects: Record<LeadType, string[]> = {
   price: ['Price inquiry', 'Best price request', 'Discount inquiry', 'Final price confirmation'],
   availability: ['Stock availability', 'Expected arrival date', 'Vehicle availability check'],
   shipping: ['Shipping cost estimate', 'Delivery time inquiry', 'Port shipping options'],
@@ -61,8 +61,8 @@ const subjects: Record<InquiryType, string[]> = {
   general: ['General inquiry', 'Information request', 'Question about vehicle'],
 }
 
-export const inquiries: Inquiry[] = Array.from({ length: 45 }, (_, i) => {
-  const type = faker.helpers.arrayElement(inquiryTypes)
+export const leads: Lead[] = Array.from({ length: 45 }, (_, i) => {
+  const type = faker.helpers.arrayElement(leadTypes)
   const status = faker.helpers.weightedArrayElement([
     { value: 'new' as const, weight: 4 },
     { value: 'in_progress' as const, weight: 3 },
@@ -76,7 +76,7 @@ export const inquiries: Inquiry[] = Array.from({ length: 45 }, (_, i) => {
 
   return {
     id: faker.string.uuid(),
-    inquiryNumber: `INQ-${String(1000 + i).padStart(5, '0')}`,
+    leadNumber: `LEAD-${String(1000 + i).padStart(5, '0')}`,
     customerName: faker.person.fullName(),
     customerEmail: faker.internet.email().toLowerCase(),
     customerPhone: faker.phone.number({ style: 'international' }),
@@ -95,7 +95,7 @@ export const inquiries: Inquiry[] = Array.from({ length: 45 }, (_, i) => {
   }
 }).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
 
-export const inquiryTypeLabels: Record<InquiryType, string> = {
+export const leadTypeLabels: Record<LeadType, string> = {
   price: 'Price',
   availability: 'Availability',
   shipping: 'Shipping',
@@ -103,20 +103,20 @@ export const inquiryTypeLabels: Record<InquiryType, string> = {
   general: 'General',
 }
 
-export const inquiryStatusLabels: Record<InquiryStatus, string> = {
+export const leadStatusLabels: Record<LeadStatus, string> = {
   new: 'New',
   in_progress: 'In Progress',
   responded: 'Responded',
   closed: 'Closed',
 }
 
-export function getInquiryStats() {
+export function getLeadStats() {
   return {
-    total: inquiries.length,
-    new: inquiries.filter(i => i.status === 'new').length,
-    inProgress: inquiries.filter(i => i.status === 'in_progress').length,
-    responded: inquiries.filter(i => i.status === 'responded').length,
-    closed: inquiries.filter(i => i.status === 'closed').length,
-    unassigned: inquiries.filter(i => !i.assignedTo).length,
+    total: leads.length,
+    new: leads.filter(i => i.status === 'new').length,
+    inProgress: leads.filter(i => i.status === 'in_progress').length,
+    responded: leads.filter(i => i.status === 'responded').length,
+    closed: leads.filter(i => i.status === 'closed').length,
+    unassigned: leads.filter(i => !i.assignedTo).length,
   }
 }

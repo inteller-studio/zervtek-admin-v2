@@ -3,18 +3,18 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Plus,
-  Search,
-  Edit,
-  Trash2,
-  Copy,
-  MoreHorizontal,
-  FileText,
-  Tag,
-  BarChart3,
-  Clock,
-  Variable,
-} from 'lucide-react'
+  MdAdd,
+  MdSearch,
+  MdEdit,
+  MdDelete,
+  MdContentCopy,
+  MdMoreHoriz,
+  MdDescription,
+  MdLocalOffer,
+  MdBarChart,
+  MdAccessTime,
+  MdCode,
+} from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -165,7 +165,7 @@ export function TemplatesPanel() {
           onClick={() => handleOpenDialog()}
           className='bg-[#00A884] text-white hover:bg-[#00A884]/90'
         >
-          <Plus className='mr-2 h-4 w-4' />
+          <MdAdd className='mr-2 h-4 w-4' />
           New Template
         </Button>
       </div>
@@ -173,7 +173,7 @@ export function TemplatesPanel() {
       {/* Search & Filters */}
       <div className='flex flex-shrink-0 items-center gap-3 border-b border-[var(--wa-border)] bg-white px-4 py-3 dark:bg-[#111B21]'>
         <div className='relative flex-1 max-w-md'>
-          <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#54656F] dark:text-[#AEBAC1]' />
+          <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#54656F] dark:text-[#AEBAC1]' />
           <Input
             placeholder='Search templates...'
             value={searchTerm}
@@ -223,7 +223,7 @@ export function TemplatesPanel() {
             ) : filteredTemplates?.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className='py-10 text-center'>
-                  <FileText className='mx-auto mb-2 h-10 w-10 text-muted-foreground' />
+                  <MdDescription className='mx-auto mb-2 h-10 w-10 text-muted-foreground' />
                   <p className='text-muted-foreground'>No templates found</p>
                 </TableCell>
               </TableRow>
@@ -259,7 +259,7 @@ export function TemplatesPanel() {
                   </TableCell>
                   <TableCell>
                     <div className='flex items-center gap-1'>
-                      <BarChart3 className='h-4 w-4 text-muted-foreground' />
+                      <MdBarChart className='h-4 w-4 text-muted-foreground' />
                       <span>{template.usageCount}</span>
                     </div>
                   </TableCell>
@@ -275,23 +275,23 @@ export function TemplatesPanel() {
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant='ghost' size='icon'>
-                          <MoreHorizontal className='h-4 w-4' />
+                          <MdMoreHoriz className='h-4 w-4' />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align='end'>
                         <DropdownMenuItem onClick={() => handleOpenDialog(template)}>
-                          <Edit className='mr-2 h-4 w-4' />
+                          <MdEdit className='mr-2 h-4 w-4' />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => handleCopy(template.content)}>
-                          <Copy className='mr-2 h-4 w-4' />
+                          <MdContentCopy className='mr-2 h-4 w-4' />
                           Copy
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDelete(template.id)}
                           className='text-destructive'
                         >
-                          <Trash2 className='mr-2 h-4 w-4' />
+                          <MdDelete className='mr-2 h-4 w-4' />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -376,7 +376,7 @@ export function TemplatesPanel() {
                 <div className='flex flex-wrap gap-2'>
                   {extractVariables(formData.content).map((v) => (
                     <Badge key={v} variant='secondary' className='gap-1'>
-                      <Variable className='h-3 w-3' />
+                      <MdCode className='h-3 w-3' />
                       {v}
                     </Badge>
                   ))}

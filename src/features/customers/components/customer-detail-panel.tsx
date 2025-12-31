@@ -1,10 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { format } from 'date-fns'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent } from '@/components/ui/animated-tabs'
 import {
   Select,
   SelectContent,
@@ -14,23 +15,23 @@ import {
 } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import {
-  Mail,
-  Phone,
-  MapPin,
-  Building2,
-  Globe,
-  CheckCircle,
-  Clock,
-  XCircle,
-  FileQuestion,
-  Award,
-  ShoppingBag,
-  Gavel,
-  Wallet,
-  AlertCircle,
-  Calendar,
-  User,
-} from 'lucide-react'
+  MdEmail,
+  MdPhone,
+  MdLocationOn,
+  MdBusiness,
+  MdPublic,
+  MdCheckCircle,
+  MdAccessTime,
+  MdCancel,
+  MdShoppingCart,
+  MdError,
+  MdCalendarToday,
+  MdPerson,
+  MdHelpOutline,
+  MdWorkspacePremium,
+  MdGavel,
+  MdAccountBalanceWallet,
+} from 'react-icons/md'
 import { type Customer, type UserLevel } from '../data/customers'
 
 interface CustomerDetailPanelProps {
@@ -58,7 +59,8 @@ const statusStyles = {
   active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
   inactive: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
   pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  suspended: 'bg-red-500/10 text-red-600 border-red-500/20',
+  suspended: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  banned: 'bg-red-500/10 text-red-600 border-red-500/20',
 }
 
 const verificationStyles = {
@@ -69,10 +71,10 @@ const verificationStyles = {
 }
 
 const verificationIcons = {
-  verified: CheckCircle,
-  pending: Clock,
-  unverified: XCircle,
-  documents_requested: FileQuestion,
+  verified: MdCheckCircle,
+  pending: MdAccessTime,
+  unverified: MdCancel,
+  documents_requested: MdHelpOutline,
 }
 
 const levelStyles = {
@@ -129,6 +131,7 @@ export function CustomerDetailPanel({
   onVerifyCustomer,
   onChangeUserLevel,
 }: CustomerDetailPanelProps) {
+  const [activeDetailTab, setActiveDetailTab] = useState('overview')
   const VerificationIcon = verificationIcons[customer.verificationStatus]
 
   return (
@@ -147,7 +150,7 @@ export function CustomerDetailPanel({
               <p className='text-sm text-muted-foreground'>{customer.email}</p>
               <div className='flex flex-wrap items-center gap-2 mt-2'>
                 <Badge variant='outline' className={cn('text-xs', levelStyles[customer.userLevel])}>
-                  <Award className='mr-1 h-3 w-3' />
+                  <MdWorkspacePremium className='mr-1 h-3 w-3' />
                   {levelLabels[customer.userLevel]}
                 </Badge>
                 <Badge variant='outline' className={cn('text-xs', statusStyles[customer.status])}>
@@ -163,16 +166,16 @@ export function CustomerDetailPanel({
           </div>
           <div className='flex items-center gap-2'>
             <Button variant='outline' size='sm' onClick={() => onSendEmail(customer)}>
-              <Mail className='mr-2 h-4 w-4' />
+              <MdEmail className='mr-2 h-4 w-4' />
               Email
             </Button>
             <Button variant='outline' size='sm' onClick={() => onCallCustomer(customer)}>
-              <Phone className='mr-2 h-4 w-4' />
+              <MdPhone className='mr-2 h-4 w-4' />
               Call
             </Button>
             {customer.verificationStatus !== 'verified' && (
               <Button size='sm' onClick={() => onVerifyCustomer(customer)}>
-                <CheckCircle className='mr-2 h-4 w-4' />
+                <MdCheckCircle className='mr-2 h-4 w-4' />
                 Verify
               </Button>
             )}
@@ -182,43 +185,30 @@ export function CustomerDetailPanel({
 
       {/* Tabs Content */}
       <div className='flex-1 overflow-hidden'>
-        <Tabs defaultValue='overview' className='h-full flex flex-col'>
-          <div className='border-b px-4'>
-            <TabsList className='bg-transparent h-10 p-0 gap-4'>
-              <TabsTrigger
-                value='overview'
-                className='data-[state=active]:bg-transparent data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-1 pb-3'
-              >
-                Overview
-              </TabsTrigger>
-              <TabsTrigger
-                value='financial'
-                className='data-[state=active]:bg-transparent data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-1 pb-3'
-              >
-                Financial
-              </TabsTrigger>
-              <TabsTrigger
-                value='activity'
-                className='data-[state=active]:bg-transparent data-[state=active]:shadow-none border-b-2 border-transparent data-[state=active]:border-primary rounded-none px-1 pb-3'
-              >
-                Activity
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
+        <AnimatedTabs
+          tabs={[
+            { id: 'overview', label: 'Overview' },
+            { id: 'financial', label: 'Financial' },
+            { id: 'activity', label: 'Activity' },
+          ]}
+          value={activeDetailTab}
+          onValueChange={setActiveDetailTab}
+          variant='compact'
+          className='h-full flex flex-col'
+        >
           <div className='flex-1 overflow-y-auto p-4'>
-            <TabsContent value='overview' className='mt-0 space-y-6'>
+            <AnimatedTabsContent value='overview' className='mt-0 space-y-6'>
               {/* Contact Information */}
               <div className='rounded-xl border border-border/50 bg-card/50 p-4'>
                 <h3 className='text-sm font-semibold mb-3'>Contact Information</h3>
                 <div className='divide-y divide-border/50'>
-                  <InfoRow icon={Mail} label='Email'>{customer.email}</InfoRow>
-                  <InfoRow icon={Phone} label='Phone'>{customer.phone}</InfoRow>
-                  <InfoRow icon={MapPin} label='Location'>{customer.city}, {customer.country}</InfoRow>
+                  <InfoRow icon={MdEmail} label='Email'>{customer.email}</InfoRow>
+                  <InfoRow icon={MdPhone} label='Phone'>{customer.phone}</InfoRow>
+                  <InfoRow icon={MdLocationOn} label='Location'>{customer.city}, {customer.country}</InfoRow>
                   {customer.company && (
-                    <InfoRow icon={Building2} label='Company'>{customer.company}</InfoRow>
+                    <InfoRow icon={MdBusiness} label='Company'>{customer.company}</InfoRow>
                   )}
-                  <InfoRow icon={Globe} label='Language'>{customer.preferredLanguage}</InfoRow>
+                  <InfoRow icon={MdPublic} label='Language'>{customer.preferredLanguage}</InfoRow>
                 </div>
               </div>
 
@@ -226,18 +216,18 @@ export function CustomerDetailPanel({
               <div className='rounded-xl border border-border/50 bg-card/50 p-4'>
                 <h3 className='text-sm font-semibold mb-3'>Account Details</h3>
                 <div className='divide-y divide-border/50'>
-                  <InfoRow icon={Calendar} label='Registered'>
+                  <InfoRow icon={MdCalendarToday} label='Registered'>
                     {format(customer.createdAt, 'MMM dd, yyyy')}
                   </InfoRow>
-                  <InfoRow icon={Clock} label='Last Active'>
+                  <InfoRow icon={MdAccessTime} label='Last Active'>
                     {getDaysSinceActive(customer.lastActivity)}
                   </InfoRow>
-                  <InfoRow icon={ShoppingBag} label='Last Purchase'>
+                  <InfoRow icon={MdShoppingCart} label='Last Purchase'>
                     {customer.lastPurchase ? format(customer.lastPurchase, 'MMM dd, yyyy') : 'Never'}
                   </InfoRow>
                   <div className='flex items-center justify-between py-2'>
                     <div className='flex items-center gap-2 text-muted-foreground'>
-                      <Award className='h-4 w-4' />
+                      <MdWorkspacePremium className='h-4 w-4' />
                       <span className='text-sm'>User Level</span>
                     </div>
                     <Select
@@ -275,24 +265,24 @@ export function CustomerDetailPanel({
                   <p className='text-sm text-muted-foreground'>{customer.notes}</p>
                 </div>
               )}
-            </TabsContent>
+            </AnimatedTabsContent>
 
-            <TabsContent value='financial' className='mt-0 space-y-6'>
+            <AnimatedTabsContent value='financial' className='mt-0 space-y-6'>
               {/* Financial Stats */}
               <div className='grid gap-4 grid-cols-3'>
                 <StatCard
-                  icon={Wallet}
+                  icon={MdAccountBalanceWallet}
                   label='Total Spent'
                   value={`¥${customer.totalSpent.toLocaleString()}`}
                 />
                 <StatCard
-                  icon={Wallet}
+                  icon={MdAccountBalanceWallet}
                   label='Deposit Balance'
                   value={`¥${customer.depositAmount.toLocaleString()}`}
                   className='text-emerald-600'
                 />
                 <StatCard
-                  icon={AlertCircle}
+                  icon={MdError}
                   label='Outstanding'
                   value={`¥${customer.outstandingBalance.toLocaleString()}`}
                   className={customer.outstandingBalance > 0 ? 'text-orange-600' : ''}
@@ -301,26 +291,26 @@ export function CustomerDetailPanel({
 
               {/* Auction Stats */}
               <div className='grid gap-4 grid-cols-4'>
-                <StatCard icon={Gavel} label='Total Bids' value={customer.totalBids} />
-                <StatCard icon={CheckCircle} label='Won' value={customer.wonAuctions} />
-                <StatCard icon={XCircle} label='Lost' value={customer.lostAuctions} />
+                <StatCard icon={MdGavel} label='Total Bids' value={customer.totalBids} />
+                <StatCard icon={MdCheckCircle} label='Won' value={customer.wonAuctions} />
+                <StatCard icon={MdCancel} label='Lost' value={customer.lostAuctions} />
                 <StatCard
-                  icon={Clock}
+                  icon={MdAccessTime}
                   label='Active Bids'
                   value={customer.activeBids}
                   className={customer.activeBids > 0 ? 'text-blue-600' : ''}
                 />
               </div>
-            </TabsContent>
+            </AnimatedTabsContent>
 
-            <TabsContent value='activity' className='mt-0'>
+            <AnimatedTabsContent value='activity' className='mt-0'>
               <div className='rounded-xl border border-border/50 bg-card/50 p-8 text-center'>
-                <User className='h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50' />
+                <MdPerson className='h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50' />
                 <p className='text-sm text-muted-foreground'>Activity history coming soon...</p>
               </div>
-            </TabsContent>
+            </AnimatedTabsContent>
           </div>
-        </Tabs>
+        </AnimatedTabs>
       </div>
     </div>
   )

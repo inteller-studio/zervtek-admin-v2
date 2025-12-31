@@ -4,23 +4,23 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
-  ArrowRight,
-  Car,
-  Check,
-  ChevronRight,
-  FileText,
-  Loader2,
-  Mail,
-  MapPin,
-  Package,
-  Phone,
-  Search,
-  Ship,
-  User,
-  Users,
-  X,
-} from 'lucide-react'
+  MdArrowBack,
+  MdArrowForward,
+  MdDirectionsCar,
+  MdCheck,
+  MdChevronRight,
+  MdDescription,
+  MdSync,
+  MdEmail,
+  MdLocationOn,
+  MdInventory,
+  MdPhone,
+  MdSearch,
+  MdDirectionsBoat,
+  MdPerson,
+  MdPeople,
+  MdClose,
+} from 'react-icons/md'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -94,10 +94,10 @@ const mockVehicles: Vehicle[] = [
 
 // Step definitions
 const steps = [
-  { id: 1, title: 'Customer', icon: Users },
-  { id: 2, title: 'Vehicle', icon: Car },
-  { id: 3, title: 'Pricing', icon: Package },
-  { id: 4, title: 'Review', icon: FileText },
+  { id: 1, title: 'Customer', icon: MdPeople },
+  { id: 2, title: 'Vehicle', icon: MdDirectionsCar },
+  { id: 3, title: 'Pricing', icon: MdInventory },
+  { id: 4, title: 'Review', icon: MdDescription },
 ]
 
 // Format price
@@ -257,7 +257,7 @@ export function CreateInvoiceDrawer({
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4'>
             <SheetTitle className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
+              <MdDescription className='h-5 w-5' />
               Create Invoice
             </SheetTitle>
             <SheetDescription>
@@ -286,7 +286,7 @@ export function CreateInvoiceDrawer({
                         )}
                       >
                         {isCompleted ? (
-                          <Check className='h-5 w-5' />
+                          <MdCheck className='h-5 w-5' />
                         ) : (
                           <Icon className='h-5 w-5' />
                         )}
@@ -336,7 +336,7 @@ export function CreateInvoiceDrawer({
 
                 {/* Search */}
                 <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                  <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                   <Input
                     placeholder='Search by name, email, or country...'
                     value={customerSearch}
@@ -375,7 +375,7 @@ export function CreateInvoiceDrawer({
                       </div>
                       {selectedCustomer?.id === customer.id && (
                         <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground'>
-                          <Check className='h-4 w-4' />
+                          <MdCheck className='h-4 w-4' />
                         </div>
                       )}
                     </div>
@@ -402,7 +402,7 @@ export function CreateInvoiceDrawer({
                 {/* Selected Customer Summary */}
                 {selectedCustomer && (
                   <div className='flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2'>
-                    <User className='h-4 w-4 text-muted-foreground' />
+                    <MdPerson className='h-4 w-4 text-muted-foreground' />
                     <span className='text-sm'>
                       Invoice for: <span className='font-medium'>{selectedCustomer.name}</span>
                     </span>
@@ -411,7 +411,7 @@ export function CreateInvoiceDrawer({
 
                 {/* Search */}
                 <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                  <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                   <Input
                     placeholder='Search by stock #, make, or model...'
                     value={vehicleSearch}
@@ -434,7 +434,7 @@ export function CreateInvoiceDrawer({
                       )}
                     >
                       <div className='flex h-12 w-16 items-center justify-center rounded-lg bg-muted'>
-                        <Car className='h-6 w-6 text-muted-foreground' />
+                        <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
                       </div>
                       <div className='flex-1 min-w-0'>
                         <div className='flex items-center gap-2'>
@@ -445,7 +445,7 @@ export function CreateInvoiceDrawer({
                       </div>
                       {selectedVehicle?.id === vehicle.id && (
                         <div className='flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground'>
-                          <Check className='h-4 w-4' />
+                          <MdCheck className='h-4 w-4' />
                         </div>
                       )}
                     </div>
@@ -488,7 +488,7 @@ export function CreateInvoiceDrawer({
                 <div className='space-y-2'>
                   <Label>Destination Port</Label>
                   <div className='relative'>
-                    <Ship className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                    <MdDirectionsBoat className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                     <Input
                       placeholder='e.g., Mombasa, Durban, Dar es Salaam'
                       value={destinationPort}
@@ -635,7 +635,7 @@ export function CreateInvoiceDrawer({
                 {/* Customer Card */}
                 <div className='rounded-xl border border-border/50 p-4'>
                   <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
-                    <User className='h-3.5 w-3.5' />
+                    <MdPerson className='h-3.5 w-3.5' />
                     Customer
                   </div>
                   <div className='flex items-center gap-3'>
@@ -655,12 +655,12 @@ export function CreateInvoiceDrawer({
                 {/* Vehicle Card */}
                 <div className='rounded-xl border border-border/50 p-4'>
                   <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
-                    <Car className='h-3.5 w-3.5' />
+                    <MdDirectionsCar className='h-3.5 w-3.5' />
                     Vehicle
                   </div>
                   <div className='flex items-center gap-3'>
                     <div className='flex h-12 w-16 items-center justify-center rounded-lg bg-muted'>
-                      <Car className='h-6 w-6 text-muted-foreground' />
+                      <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
                     </div>
                     <div>
                       <p className='font-semibold'>{selectedVehicle?.year} {selectedVehicle?.make} {selectedVehicle?.model}</p>
@@ -673,7 +673,7 @@ export function CreateInvoiceDrawer({
                 {destinationPort && (
                   <div className='rounded-xl border border-border/50 p-4'>
                     <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2'>
-                      <Ship className='h-3.5 w-3.5' />
+                      <MdDirectionsBoat className='h-3.5 w-3.5' />
                       Destination
                     </div>
                     <p className='font-medium'>{destinationPort}</p>
@@ -683,7 +683,7 @@ export function CreateInvoiceDrawer({
                 {/* Invoice Summary */}
                 <div className='rounded-xl border border-primary/20 bg-primary/5 p-4'>
                   <div className='flex items-center gap-2 text-xs font-medium text-primary uppercase tracking-wider mb-3'>
-                    <FileText className='h-3.5 w-3.5' />
+                    <MdDescription className='h-3.5 w-3.5' />
                     Invoice Summary
                   </div>
                   <div className='space-y-2'>
@@ -753,7 +753,7 @@ export function CreateInvoiceDrawer({
 
                 {/* Email Preview */}
                 <div className='flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground'>
-                  <Mail className='h-4 w-4 shrink-0' />
+                  <MdEmail className='h-4 w-4 shrink-0' />
                   <span>
                     Invoice will be sent to <span className='font-medium text-foreground'>{selectedCustomer?.email}</span>
                   </span>
@@ -770,7 +770,7 @@ export function CreateInvoiceDrawer({
             onClick={prevStep}
             disabled={currentStep === 1 || isSubmitting}
           >
-            <ArrowLeft className='mr-2 h-4 w-4' />
+            <MdArrowBack className='mr-2 h-4 w-4' />
             Back
           </Button>
 
@@ -786,18 +786,18 @@ export function CreateInvoiceDrawer({
             {currentStep < maxSteps ? (
               <Button onClick={nextStep} disabled={!canProceed()}>
                 Next
-                <ArrowRight className='ml-2 h-4 w-4' />
+                <MdArrowForward className='ml-2 h-4 w-4' />
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    <MdSync className='mr-2 h-4 w-4 animate-spin' />
                     Creating...
                   </>
                 ) : (
                   <>
-                    <Check className='mr-2 h-4 w-4' />
+                    <MdCheck className='mr-2 h-4 w-4' />
                     Create Invoice
                   </>
                 )}

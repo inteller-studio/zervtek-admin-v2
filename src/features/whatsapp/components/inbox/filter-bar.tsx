@@ -1,6 +1,6 @@
 'use client'
 
-import { Filter, Tag, User, X } from 'lucide-react'
+import { MdFilterList, MdLocalOffer, MdPerson, MdClose } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -48,7 +48,7 @@ export function FilterBar({ labels, staffMembers }: FilterBarProps) {
             size='sm'
             className='h-7 gap-1 text-xs'
           >
-            <Tag className='h-3 w-3' />
+            <MdLocalOffer className='h-3 w-3' />
             Labels
             {labelFilter.length > 0 && (
               <span className='ml-1 rounded-full bg-primary px-1.5 text-[10px] text-primary-foreground'>
@@ -99,7 +99,7 @@ export function FilterBar({ labels, staffMembers }: FilterBarProps) {
             size='sm'
             className='h-7 gap-1 text-xs'
           >
-            <User className='h-3 w-3' />
+            <MdPerson className='h-3 w-3' />
             {assignmentFilter === 'unassigned'
               ? 'Unassigned'
               : assignedStaff
@@ -155,7 +155,7 @@ export function FilterBar({ labels, staffMembers }: FilterBarProps) {
             setAssignmentFilter(null)
           }}
         >
-          <X className='h-3 w-3' />
+          <MdClose className='h-3 w-3' />
           Clear ({activeFilterCount})
         </Button>
       )}
@@ -179,7 +179,7 @@ export function FilterBar({ labels, staffMembers }: FilterBarProps) {
                   onClick={() => toggleLabelFilter(label.id)}
                   className='rounded-full p-0.5 transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
                 >
-                  <X className='h-2.5 w-2.5' />
+                  <MdClose className='h-2.5 w-2.5' />
                 </button>
               </span>
             )

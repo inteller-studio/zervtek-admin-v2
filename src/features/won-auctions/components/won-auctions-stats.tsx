@@ -1,10 +1,10 @@
 'use client'
 
-import { type WonAuction } from '../data/won-auctions'
+import { type Purchase } from '../data/won-auctions'
 import { StatsCard } from '@/features/dashboard/components/stats-card'
 
 interface WonAuctionsStatsProps {
-  auctions: WonAuction[]
+  auctions: Purchase[]
   loading?: boolean
 }
 

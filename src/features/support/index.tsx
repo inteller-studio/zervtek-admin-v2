@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import {
   Table,
   TableBody,
@@ -37,19 +37,19 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  TicketCheck,
-  Search as SearchIcon,
-  MoreHorizontal,
-  Eye,
-  UserPlus,
-  MessageSquare,
-  CheckCircle,
-  XCircle,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Car,
-} from 'lucide-react'
+  MdConfirmationNumber,
+  MdSearch,
+  MdMoreHoriz,
+  MdVisibility,
+  MdPersonAdd,
+  MdChat,
+  MdCheckCircle,
+  MdCancel,
+  MdSwapVert,
+  MdChevronLeft,
+  MdChevronRight,
+  MdDirectionsCar,
+} from 'react-icons/md'
 
 import {
   supportTickets,
@@ -245,41 +245,26 @@ export function Support() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as typeof activeTab); setCurrentPage(1) }}>
-          <TabsList>
-            <TabsTrigger value='all'>
-              All Tickets
-              <Badge variant='secondary' className='ml-2'>{tickets.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value='open'>
-              Open
-              <Badge variant='blue' className='ml-2'>{stats.open}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value='in_progress'>
-              In Progress
-              <Badge variant='amber' className='ml-2'>{stats.inProgress}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value='awaiting'>
-              Awaiting
-              <Badge variant='purple' className='ml-2'>{stats.awaitingCustomer}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value='resolved'>
-              Resolved
-              <Badge variant='emerald' className='ml-2'>{stats.resolved}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value='closed'>
-              Closed
-              <Badge variant='zinc' className='ml-2'>{stats.closed}</Badge>
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className='mt-4 space-y-4'>
+        <AnimatedTabs
+          tabs={[
+            { id: 'all', label: 'All Tickets', badge: tickets.length },
+            { id: 'open', label: 'Open', badge: stats.open, badgeColor: 'primary' },
+            { id: 'in_progress', label: 'In Progress', badge: stats.inProgress, badgeColor: 'amber' },
+            { id: 'awaiting', label: 'Awaiting', badge: stats.awaitingCustomer, badgeColor: 'primary' },
+            { id: 'resolved', label: 'Resolved', badge: stats.resolved, badgeColor: 'emerald' },
+            { id: 'closed', label: 'Closed', badge: stats.closed },
+          ] as TabItem[]}
+          value={activeTab}
+          onValueChange={(v) => { setActiveTab(v as typeof activeTab); setCurrentPage(1) }}
+          variant='compact'
+        >
+          <AnimatedTabsContent value={activeTab} className='mt-4 space-y-4'>
             {/* Filters */}
             <Card>
               <CardContent className='p-4'>
                 <div className='flex flex-wrap items-center gap-3'>
                   <div className='relative flex-1 min-w-[200px]'>
-                    <SearchIcon className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
+                    <MdSearch className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
                     <Input
                       placeholder='Search tickets...'
                       value={searchTerm}
@@ -347,30 +332,30 @@ export function Support() {
                       <TableRow>
                         <TableHead className='w-[120px]'>
                           <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('ticketNumber')}>
-                            Ticket # <ArrowUpDown className='ml-2 h-4 w-4' />
+                            Ticket # <MdSwapVert className='ml-2 h-4 w-4' />
                           </Button>
                         </TableHead>
                         <TableHead className='min-w-[300px]'>
                           <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('subject')}>
-                            Subject <ArrowUpDown className='ml-2 h-4 w-4' />
+                            Subject <MdSwapVert className='ml-2 h-4 w-4' />
                           </Button>
                         </TableHead>
                         <TableHead>Customer</TableHead>
                         <TableHead>Category</TableHead>
                         <TableHead>
                           <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('priority')}>
-                            Priority <ArrowUpDown className='ml-2 h-4 w-4' />
+                            Priority <MdSwapVert className='ml-2 h-4 w-4' />
                           </Button>
                         </TableHead>
                         <TableHead>
                           <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('status')}>
-                            Status <ArrowUpDown className='ml-2 h-4 w-4' />
+                            Status <MdSwapVert className='ml-2 h-4 w-4' />
                           </Button>
                         </TableHead>
                         <TableHead>Assigned To</TableHead>
                         <TableHead>
                           <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('updatedAt')}>
-                            Last Updated <ArrowUpDown className='ml-2 h-4 w-4' />
+                            Last Updated <MdSwapVert className='ml-2 h-4 w-4' />
                           </Button>
                         </TableHead>
                         <TableHead className='text-right'>Actions</TableHead>
@@ -391,12 +376,12 @@ export function Support() {
                               <div className='space-y-1'>
                                 <p className='font-medium line-clamp-1'>{ticket.subject}</p>
                                 <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-                                  <MessageSquare className='h-3 w-3' />
+                                  <MdChat className='h-3 w-3' />
                                   <span>{ticket.messageCount} messages</span>
                                   {ticket.relatedVehicleName && (
                                     <>
                                       <span>•</span>
-                                      <Car className='h-3 w-3' />
+                                      <MdDirectionsCar className='h-3 w-3' />
                                       <span className='truncate max-w-[150px]'>{ticket.relatedVehicleName}</span>
                                     </>
                                   )}
@@ -438,27 +423,27 @@ export function Support() {
                               <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
                                   <Button variant='ghost' size='icon'>
-                                    <MoreHorizontal className='h-4 w-4' />
+                                    <MdMoreHoriz className='h-4 w-4' />
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align='end'>
                                   <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem onClick={() => handleViewTicket(ticket)}>
-                                    <Eye className='mr-2 h-4 w-4' />
+                                    <MdVisibility className='mr-2 h-4 w-4' />
                                     View Details
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>
-                                    <UserPlus className='mr-2 h-4 w-4' />
+                                    <MdPersonAdd className='mr-2 h-4 w-4' />
                                     Assign
                                   </DropdownMenuItem>
                                   <DropdownMenuSeparator />
                                   <DropdownMenuItem>
-                                    <CheckCircle className='mr-2 h-4 w-4' />
+                                    <MdCheckCircle className='mr-2 h-4 w-4' />
                                     Mark Resolved
                                   </DropdownMenuItem>
                                   <DropdownMenuItem>
-                                    <XCircle className='mr-2 h-4 w-4' />
+                                    <MdCancel className='mr-2 h-4 w-4' />
                                     Close Ticket
                                   </DropdownMenuItem>
                                 </DropdownMenuContent>
@@ -470,7 +455,7 @@ export function Support() {
                         <TableRow>
                           <TableCell colSpan={9} className='h-24 text-center'>
                             <div className='flex flex-col items-center justify-center'>
-                              <TicketCheck className='h-8 w-8 text-muted-foreground/50 mb-2' />
+                              <MdConfirmationNumber className='h-8 w-8 text-muted-foreground/50 mb-2' />
                               <p className='text-muted-foreground'>No tickets found</p>
                             </div>
                           </TableCell>
@@ -510,7 +495,7 @@ export function Support() {
                         onClick={() => setCurrentPage(currentPage - 1)}
                         disabled={currentPage === 1}
                       >
-                        <ChevronLeft className='h-4 w-4' />
+                        <MdChevronLeft className='h-4 w-4' />
                       </Button>
                       <span className='text-sm'>
                         Page {currentPage} of {totalPages || 1}
@@ -521,15 +506,15 @@ export function Support() {
                         onClick={() => setCurrentPage(currentPage + 1)}
                         disabled={currentPage === totalPages || totalPages === 0}
                       >
-                        <ChevronRight className='h-4 w-4' />
+                        <MdChevronRight className='h-4 w-4' />
                       </Button>
                     </div>
                   </div>
                 )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </Main>
     </>
   )

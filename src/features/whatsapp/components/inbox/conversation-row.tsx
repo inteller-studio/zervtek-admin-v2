@@ -1,7 +1,7 @@
 'use client'
 
 import { format, isToday, isYesterday } from 'date-fns'
-import { Check, CheckCheck, Clock, MoreVertical } from 'lucide-react'
+import { MdCheck, MdDoneAll, MdAccessTime, MdMoreVert } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -77,13 +77,13 @@ export function ConversationRow({
     if (!lastMessage?.key.fromMe) return null
     switch (lastMessage.status) {
       case 'read':
-        return <CheckCheck className='h-4 w-4 text-blue-500' />
+        return <MdDoneAll className='h-4 w-4 text-blue-500' />
       case 'delivered':
-        return <CheckCheck className='h-4 w-4 text-muted-foreground' />
+        return <MdDoneAll className='h-4 w-4 text-muted-foreground' />
       case 'sent':
-        return <Check className='h-4 w-4 text-muted-foreground' />
+        return <MdCheck className='h-4 w-4 text-muted-foreground' />
       case 'pending':
-        return <Clock className='h-3.5 w-3.5 text-muted-foreground' />
+        return <MdAccessTime className='h-3.5 w-3.5 text-muted-foreground' />
       default:
         return null
     }
@@ -163,7 +163,7 @@ export function ConversationRow({
           <div className='flex shrink-0 items-center gap-2'>
             {/* Snooze indicator */}
             {snooze && (
-              <Clock className='h-4 w-4 text-amber-500' />
+              <MdAccessTime className='h-4 w-4 text-amber-500' />
             )}
             {/* Assignment badge */}
             {assignment && (
@@ -195,7 +195,7 @@ export function ConversationRow({
                   className='size-7 text-muted-foreground hover:text-foreground'
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <MoreVertical className='h-4 w-4' />
+                  <MdMoreVert className='h-4 w-4' />
                 </Button>
               </ConversationRowActions>
             </div>

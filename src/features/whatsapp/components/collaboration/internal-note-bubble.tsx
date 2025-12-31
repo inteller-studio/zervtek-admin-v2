@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Lock } from 'lucide-react'
+import { MdLock } from 'react-icons/md'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { cn } from '@/lib/utils'
 import type { InternalNote, StaffMember } from '../../types'
@@ -79,7 +79,7 @@ export function InternalNotesList({ notes, className }: InternalNotesListProps) 
   return (
     <div className={cn('space-y-3', className)}>
       <div className='flex items-center gap-2 text-xs text-muted-foreground'>
-        <Lock className='h-3 w-3' />
+        <MdLock className='h-3 w-3' />
         <span>Internal notes ({notes.length})</span>
       </div>
       <div className='space-y-2'>

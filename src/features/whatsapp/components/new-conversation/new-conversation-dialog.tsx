@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { MessageSquarePlus, Tag, UserPlus } from 'lucide-react'
+import { MdAddComment, MdLocalOffer, MdPersonAdd } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -143,7 +143,7 @@ export function NewConversationDialog({
       <DialogContent className='sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
-            <MessageSquarePlus className='h-5 w-5' />
+            <MdAddComment className='h-5 w-5' />
             New Conversation
           </DialogTitle>
           <DialogDescription>
@@ -203,7 +203,7 @@ export function NewConversationDialog({
           {/* Labels */}
           <div className='space-y-2'>
             <label className='flex items-center gap-2 text-sm font-medium'>
-              <Tag className='h-4 w-4' />
+              <MdLocalOffer className='h-4 w-4' />
               Labels <span className='text-muted-foreground'>(optional)</span>
             </label>
             <div className='flex flex-wrap gap-2'>
@@ -235,7 +235,7 @@ export function NewConversationDialog({
           {/* Assign to */}
           <div className='space-y-2'>
             <label className='flex items-center gap-2 text-sm font-medium'>
-              <UserPlus className='h-4 w-4' />
+              <MdPersonAdd className='h-4 w-4' />
               Assign to <span className='text-muted-foreground'>(optional)</span>
             </label>
             <select

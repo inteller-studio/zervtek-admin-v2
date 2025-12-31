@@ -1,6 +1,6 @@
 import { type SVGProps } from 'react'
 import { Root as Radio, Item } from '@radix-ui/react-radio-group'
-import { CircleCheck, RotateCcw, Settings } from 'lucide-react'
+import { MdCheckCircle, MdRefresh, MdSettings } from 'react-icons/md'
 import { IconDir } from '@/assets/custom/icon-dir'
 import { IconLayoutCompact } from '@/assets/custom/icon-layout-compact'
 import { IconLayoutDefault } from '@/assets/custom/icon-layout-default'
@@ -50,7 +50,7 @@ export function ConfigDrawer() {
           aria-describedby='config-drawer-description'
           className='rounded-full'
         >
-          <Settings aria-hidden='true' />
+          <MdSettings aria-hidden='true' />
         </Button>
       </SheetTrigger>
       <SheetContent className='flex flex-col'>
@@ -106,7 +106,7 @@ function SectionTitle({
           className='size-4 rounded-full'
           onClick={onReset}
         >
-          <RotateCcw className='size-3' />
+          <MdRefresh className='size-3' />
         </Button>
       )}
     </div>
@@ -141,9 +141,9 @@ function RadioGroupItem({
         aria-hidden='false'
         aria-label={`${item.label} option preview`}
       >
-        <CircleCheck
+        <MdCheckCircle
           className={cn(
-            'fill-primary size-6 stroke-white',
+            'fill-primary size-6 text-white',
             'group-data-[state=unchecked]:hidden',
             'absolute top-0 right-0 translate-x-1/2 -translate-y-1/2'
           )}

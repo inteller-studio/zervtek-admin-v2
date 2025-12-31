@@ -24,13 +24,13 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
           size='lg'
           className='cursor-default hover:bg-transparent group/brand'
         >
-          <div className='flex aspect-square size-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 transition-all duration-300 group-hover/brand:from-primary/15 group-hover/brand:to-primary/10'>
+          <div className='flex aspect-square size-9 items-center justify-center rounded-lg bg-muted/50 border border-border/50'>
             <Image
               src='/images/logo.svg'
               alt='Zervtek'
               width={28}
               height={28}
-              className='size-7 transition-transform duration-300 group-hover/brand:scale-105'
+              className='size-7'
             />
           </div>
           <div className='grid flex-1 text-start leading-tight'>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import { Mic, Paperclip, Send, Smile, StickyNote } from 'lucide-react'
+import { MdMic, MdAttachFile, MdSend, MdSentimentSatisfied, MdNote } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -91,7 +91,7 @@ export function EnhancedMessageInput({
       <div className={cn('bg-amber-50 px-4 py-3 dark:bg-amber-950/30', className)}>
         <div className='mb-3 flex items-center justify-between'>
           <div className='flex items-center gap-2'>
-            <StickyNote className='h-4 w-4 text-amber-600' />
+            <MdNote className='h-4 w-4 text-amber-600' />
             <span className='text-sm font-medium text-amber-700 dark:text-amber-400'>
               Internal Note
             </span>
@@ -133,7 +133,7 @@ export function EnhancedMessageInput({
                 className='h-10 w-10 shrink-0 text-[#54656F] hover:bg-transparent hover:text-[#00A884] dark:text-[#AEBAC1] dark:hover:text-[#00A884]'
                 disabled={disabled}
               >
-                <Smile className='h-6 w-6' />
+                <MdSentimentSatisfied className='h-6 w-6' />
               </Button>
             </TooltipTrigger>
             <TooltipContent side='top' sideOffset={8}>Emoji</TooltipContent>
@@ -148,7 +148,7 @@ export function EnhancedMessageInput({
                 className='h-10 w-10 shrink-0 text-[#54656F] hover:bg-transparent hover:text-[#00A884] dark:text-[#AEBAC1] dark:hover:text-[#00A884]'
                 disabled={disabled}
               >
-                <Paperclip className='h-6 w-6' />
+                <MdAttachFile className='h-6 w-6' />
               </Button>
             </TooltipTrigger>
             <TooltipContent side='top' sideOffset={8}>Attach</TooltipContent>
@@ -192,7 +192,7 @@ export function EnhancedMessageInput({
                   disabled={disabled}
                   onClick={() => setInternalNoteMode(true)}
                 >
-                  <StickyNote className='h-5 w-5' />
+                  <MdNote className='h-5 w-5' />
                 </Button>
               </TooltipTrigger>
               <TooltipContent side='top' sideOffset={8}>Internal note</TooltipContent>
@@ -216,9 +216,9 @@ export function EnhancedMessageInput({
                 onClick={() => hasText ? handleSend() : undefined}
               >
                 {hasText ? (
-                  <Send className='h-6 w-6' />
+                  <MdSend className='h-6 w-6' />
                 ) : (
-                  <Mic className='h-6 w-6' />
+                  <MdMic className='h-6 w-6' />
                 )}
               </Button>
             </TooltipTrigger>

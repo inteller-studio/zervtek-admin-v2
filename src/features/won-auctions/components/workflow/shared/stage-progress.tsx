@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, Lock } from 'lucide-react'
+import { MdCheck, MdLock } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import {
   Tooltip,
@@ -89,9 +89,9 @@ export function StageProgress({
                     )}
                   >
                     {completed ? (
-                      <Check className='h-4 w-4' />
+                      <MdCheck className='h-4 w-4' />
                     ) : !accessible ? (
-                      <Lock className='h-3 w-3' />
+                      <MdLock className='h-3 w-3' />
                     ) : (
                       stage.number
                     )}
@@ -139,9 +139,9 @@ export function StageProgress({
                 )}
               >
                 {completed ? (
-                  <Check className='h-3.5 w-3.5' />
+                  <MdCheck className='h-3.5 w-3.5' />
                 ) : !accessible ? (
-                  <Lock className='h-3 w-3' />
+                  <MdLock className='h-3 w-3' />
                 ) : (
                   <span className='text-xs font-medium'>{stage.number}</span>
                 )}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Ship } from 'lucide-react'
+import { MdDirectionsBoat } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -21,12 +21,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { toast } from 'sonner'
-import { type WonAuction, type ShipmentTracking } from '../../data/won-auctions'
+import { type Purchase, type ShipmentTracking } from '../../data/won-auctions'
 
 interface ShippingUpdateDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  auction: WonAuction | null
+  auction: Purchase | null
   onSubmit: (auctionId: string, shipment: ShipmentTracking) => void
 }
 
@@ -139,7 +139,7 @@ export function ShippingUpdateDialog({
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={!trackingNumber || !carrier}>
-            <Ship className='mr-2 h-4 w-4' />
+            <MdDirectionsBoat className='mr-2 h-4 w-4' />
             Update Shipping
           </Button>
         </DialogFooter>

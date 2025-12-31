@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Download, FileText, Truck } from 'lucide-react'
+import { MdDownload, MdDescription, MdLocalShipping } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -14,7 +14,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Progress } from '@/components/ui/progress'
-import { type WonAuction, type ShipmentTracking } from '../../data/won-auctions'
+import { type Purchase, type ShipmentTracking } from '../../data/won-auctions'
 import { VinCopyButton } from '../vin-copy-button'
 import { PaymentHistoryTimeline } from '../payment-history-timeline'
 import { DocumentChecklist } from '../document-checklist'
@@ -22,11 +22,11 @@ import { DocumentChecklist } from '../document-checklist'
 interface AuctionDetailDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  auction: WonAuction | null
+  auction: Purchase | null
 }
 
-const getStatusColor = (status: WonAuction['status']) => {
-  const colors: Record<WonAuction['status'], string> = {
+const getStatusColor = (status: Purchase['status']) => {
+  const colors: Record<Purchase['status'], string> = {
     payment_pending: 'text-yellow-600 bg-yellow-50 border-yellow-200',
     processing: 'text-blue-600 bg-blue-50 border-blue-200',
     documents_pending: 'text-slate-700 bg-slate-100 border-slate-300',
@@ -37,8 +37,8 @@ const getStatusColor = (status: WonAuction['status']) => {
   return colors[status] || ''
 }
 
-const getPaymentStatusColor = (status: WonAuction['paymentStatus']) => {
-  const colors: Record<WonAuction['paymentStatus'], string> = {
+const getPaymentStatusColor = (status: Purchase['paymentStatus']) => {
+  const colors: Record<Purchase['paymentStatus'], string> = {
     pending: 'text-yellow-600 bg-yellow-50',
     partial: 'text-slate-700 bg-slate-100',
     completed: 'text-green-600 bg-green-50',
@@ -57,7 +57,7 @@ const getShippingStatusColor = (status: ShipmentTracking['status']) => {
   return colors[status] || ''
 }
 
-const getProgress = (auction: WonAuction) => {
+const getProgress = (auction: Purchase) => {
   const steps = [
     'payment_pending',
     'processing',
@@ -101,7 +101,7 @@ export function AuctionDetailDialog({
                 variant='outline'
                 className={getShippingStatusColor(auction.shipment.status)}
               >
-                <Truck className='mr-1 h-3 w-3' />
+                <MdLocalShipping className='mr-1 h-3 w-3' />
                 {auction.shipment.status.replace(/_/g, ' ')}
               </Badge>
             )}
@@ -300,7 +300,7 @@ export function AuctionDetailDialog({
                       className='flex items-center justify-between rounded-lg bg-muted p-3'
                     >
                       <div className='flex items-center gap-3'>
-                        <FileText className='h-5 w-5 text-muted-foreground' />
+                        <MdDescription className='h-5 w-5 text-muted-foreground' />
                         <div>
                           <p className='font-medium'>{doc.name}</p>
                           <p className='text-xs text-muted-foreground'>
@@ -310,7 +310,7 @@ export function AuctionDetailDialog({
                         </div>
                       </div>
                       <Button variant='ghost' size='sm'>
-                        <Download className='h-4 w-4' />
+                        <MdDownload className='h-4 w-4' />
                       </Button>
                     </div>
                   ))}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Check, X } from 'lucide-react'
+import { MdCheck, MdClose } from 'react-icons/md'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -70,7 +70,7 @@ export function NewChat({ users, onOpenChange, open }: NewChatProps) {
                   }}
                   onClick={() => handleRemoveUser(user.id)}
                 >
-                  <X className='text-muted-foreground hover:text-foreground h-3 w-3' />
+                  <MdClose className='text-muted-foreground hover:text-foreground h-3 w-3' />
                 </button>
               </Badge>
             ))}
@@ -106,7 +106,7 @@ export function NewChat({ users, onOpenChange, open }: NewChatProps) {
                     </div>
 
                     {selectedUsers.find((u) => u.id === user.id) && (
-                      <Check className='h-4 w-4' />
+                      <MdCheck className='h-4 w-4' />
                     )}
                   </CommandItem>
                 ))}

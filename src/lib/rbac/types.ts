@@ -1,4 +1,4 @@
-import { type LucideIcon } from 'lucide-react'
+import { type IconType } from 'react-icons'
 
 // Role definitions
 export const ROLES = {
@@ -8,6 +8,7 @@ export const ROLES = {
   ACCOUNTANT: 'accountant',
   CONTENT_MANAGER: 'content_manager',
   BACKOFFICE_STAFF: 'backoffice_staff',
+  TV_DISPLAY: 'tv_display',
 } as const
 
 export type Role = (typeof ROLES)[keyof typeof ROLES]
@@ -20,6 +21,7 @@ export const ROLE_HIERARCHY: Record<Role, number> = {
   accountant: 2,
   content_manager: 2,
   backoffice_staff: 2,
+  tv_display: 1,
 }
 
 // Route access configuration type
@@ -33,7 +35,7 @@ export type RoutePermission = {
 export type RBACNavItem = {
   title: string
   url?: string
-  icon?: LucideIcon
+  icon?: IconType
   badge?: string
   roles?: Role[]
   items?: RBACNavItem[]

@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, RefreshCw, Receipt, XCircle } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdRefresh, MdReceipt, MdCancel } from 'react-icons/md'
 import { type Payment } from '../data/payments'
 import { format } from 'date-fns'
 
@@ -106,23 +106,23 @@ export function PaymentsTable({ data }: PaymentsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Receipt className='mr-2 h-4 w-4' />
+                      <MdReceipt className='mr-2 h-4 w-4' />
                       View Receipt
                     </DropdownMenuItem>
                     {payment.status === 'pending' && (
                       <DropdownMenuItem>
-                        <RefreshCw className='mr-2 h-4 w-4' />
+                        <MdRefresh className='mr-2 h-4 w-4' />
                         Process Payment
                       </DropdownMenuItem>
                     )}
@@ -130,7 +130,7 @@ export function PaymentsTable({ data }: PaymentsTableProps) {
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='text-destructive'>
-                          <XCircle className='mr-2 h-4 w-4' />
+                          <MdCancel className='mr-2 h-4 w-4' />
                           Cancel Payment
                         </DropdownMenuItem>
                       </>

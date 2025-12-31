@@ -2,18 +2,17 @@
 
 import { motion } from 'framer-motion'
 import {
-  DollarSign,
-  Globe,
-  TrendingUp,
-  Users,
-  Gavel,
-  ShoppingCart,
-  UserPlus,
-  UserX,
-  Car,
-  ArrowUpRight,
-  ArrowDownRight,
-} from 'lucide-react'
+  MdAttachMoney,
+  MdTrendingUp,
+  MdPeople,
+  MdGavel,
+  MdDirectionsCar,
+  MdPublic,
+  MdShoppingCart,
+  MdPersonAdd,
+  MdPersonOff,
+  MdTrendingDown,
+} from 'react-icons/md'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -86,7 +85,7 @@ function StatCard({ title, value, change, prefix = '', suffix = '' }: {
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className={`flex items-center gap-1 text-xs ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {isPositive ? <MdTrendingUp className="h-3 w-3" /> : <MdTrendingDown className="h-3 w-3" />}
             {Math.abs(change)}%
           </div>
         </div>
@@ -128,7 +127,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-blue-500" />
+              <MdPublic className="h-5 w-5 text-blue-500" />
               Countries Sold To
             </CardTitle>
             <CardDescription>Sales distribution by country</CardDescription>
@@ -158,7 +157,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
+              <MdTrendingUp className="h-5 w-5 text-emerald-500" />
               Recent Sales
             </CardTitle>
             <CardDescription>Your latest closed deals</CardDescription>
@@ -191,7 +190,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gavel className="h-5 w-5 text-purple-500" />
+              <MdGavel className="h-5 w-5 text-purple-500" />
               Customer Bids
             </CardTitle>
             <CardDescription>Bids placed by your customers</CardDescription>
@@ -224,7 +223,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="h-5 w-5 text-orange-500" />
+              <MdShoppingCart className="h-5 w-5 text-orange-500" />
               Stock Purchase Requests
             </CardTitle>
             <CardDescription>Customer requests for stock vehicles</CardDescription>
@@ -257,7 +256,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserPlus className="h-5 w-5 text-green-500" />
+              <MdPersonAdd className="h-5 w-5 text-green-500" />
               New Sign-ups (Under You)
             </CardTitle>
             <CardDescription>Customers who signed up under your referral</CardDescription>
@@ -274,7 +273,7 @@ export function SalesStaffDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-100 dark:bg-green-950">
-                      <Users className="h-4 w-4 text-green-600" />
+                      <MdPeople className="h-4 w-4 text-green-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">{signup.name}</p>
@@ -295,7 +294,7 @@ export function SalesStaffDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserX className="h-5 w-5 text-red-500" />
+              <MdPersonOff className="h-5 w-5 text-red-500" />
               Customers Without Agent
             </CardTitle>
             <CardDescription>Unassigned customers you can claim</CardDescription>
@@ -312,7 +311,7 @@ export function SalesStaffDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 dark:bg-red-950">
-                      <UserX className="h-4 w-4 text-red-600" />
+                      <MdPersonOff className="h-4 w-4 text-red-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">{customer.name}</p>

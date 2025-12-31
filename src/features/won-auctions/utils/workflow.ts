@@ -7,6 +7,7 @@ import {
   type WorkflowStageStatus,
   type WorkflowTask,
   type TaskCompletion,
+  type WorkflowAttachment,
   type AfterPurchaseStage,
   type TransportStage,
   type PaymentProcessingStage,
@@ -160,7 +161,7 @@ export const isPaymentProcessingComplete = (stage: PaymentProcessingStage): bool
 
 /** Check if Repair/Stored stage is complete */
 export const isRepairStoredComplete = (stage: RepairStoredStage): boolean => {
-  return stage.markedComplete.completed
+  return stage.markedComplete.completed || stage.skipped === true
 }
 
 /** Check if Documents Received stage is complete */
@@ -325,8 +326,11 @@ export const calculateStageProgress = (
     }
     case 3:
       return { completed: workflow.stages.paymentProcessing.payments.length > 0 ? 1 : 0, total: 1 }
-    case 4:
-      return { completed: workflow.stages.repairStored.markedComplete.completed ? 1 : 0, total: 1 }
+    case 4: {
+      const r = workflow.stages.repairStored
+      if (r.skipped) return { completed: 1, total: 1 }
+      return { completed: r.markedComplete.completed ? 1 : 0, total: 1 }
+    }
     case 5: {
       const d = workflow.stages.documentsReceived
       if (d.isRegistered === null) return { completed: 0, total: 1 }
@@ -380,7 +384,8 @@ export const updateTaskCompletion = (
   task: WorkflowTask,
   completed: boolean,
   completedBy?: string,
-  notes?: string
+  notes?: string,
+  attachments?: WorkflowAttachment[]
 ): WorkflowTask => {
   if (completed && completedBy) {
     return {
@@ -389,6 +394,7 @@ export const updateTaskCompletion = (
         completedBy,
         completedAt: new Date(),
         notes,
+        attachments,
       },
     }
   }

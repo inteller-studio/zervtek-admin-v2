@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect, KeyboardEvent } from 'react'
-import { Lock, Send, AtSign } from 'lucide-react'
+import { MdLock, MdSend, MdAlternateEmail } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -120,7 +120,7 @@ export function InternalNoteInput({
     <div className={cn('relative', className)}>
       {/* Internal note indicator */}
       <div className='mb-2 flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400'>
-        <Lock className='h-3 w-3' />
+        <MdLock className='h-3 w-3' />
         <span>Internal note - only visible to your team</span>
       </div>
 
@@ -194,7 +194,7 @@ export function InternalNoteInput({
               }, 0)
             }}
           >
-            <AtSign className='mr-1 h-3 w-3' />
+            <MdAlternateEmail className='mr-1 h-3 w-3' />
             Mention
           </Button>
           <Button
@@ -203,7 +203,7 @@ export function InternalNoteInput({
             onClick={handleSend}
             disabled={!content.trim() || isLoading}
           >
-            <Send className='mr-1 h-3 w-3' />
+            <MdSend className='mr-1 h-3 w-3' />
             {isLoading ? 'Sending...' : 'Add note'}
           </Button>
         </div>

@@ -23,13 +23,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
-  Award,
-  CheckCircle,
-  Building2,
-  Wallet,
-  StickyNote,
-  UserCheck,
-} from 'lucide-react'
+  MdCheckCircle,
+  MdBusiness,
+  MdWorkspacePremium,
+  MdAccountBalanceWallet,
+  MdNote,
+  MdVerifiedUser,
+} from 'react-icons/md'
 import { type Customer, type UserLevel } from '../data/customers'
 
 interface ApprovalData {
@@ -107,7 +107,7 @@ export function VerificationApprovalModal({
       <DialogContent className='sm:max-w-[500px]'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
-            <UserCheck className='h-5 w-5' />
+            <MdVerifiedUser className='h-5 w-5' />
             Approve Verification Request
           </DialogTitle>
           <DialogDescription>
@@ -128,7 +128,7 @@ export function VerificationApprovalModal({
           </div>
           {customer.company && (
             <Badge variant='outline' className='text-xs'>
-              <Building2 className='mr-1 h-3 w-3' />
+              <MdBusiness className='mr-1 h-3 w-3' />
               {customer.company}
             </Badge>
           )}
@@ -139,7 +139,7 @@ export function VerificationApprovalModal({
           {/* User Level Selection (Required) */}
           <div className='space-y-2'>
             <Label className='flex items-center gap-2'>
-              <Award className='h-4 w-4 text-muted-foreground' />
+              <MdWorkspacePremium className='h-4 w-4 text-muted-foreground' />
               User Level <span className='text-destructive'>*</span>
             </Label>
             <Select value={userLevel} onValueChange={(v) => setUserLevel(v as Exclude<UserLevel, 'unverified'>)}>
@@ -165,7 +165,7 @@ export function VerificationApprovalModal({
           {/* Deposit Amount (Optional) */}
           <div className='space-y-2'>
             <Label className='flex items-center gap-2'>
-              <Wallet className='h-4 w-4 text-muted-foreground' />
+              <MdAccountBalanceWallet className='h-4 w-4 text-muted-foreground' />
               Deposit Amount
             </Label>
             <div className='relative'>
@@ -191,7 +191,7 @@ export function VerificationApprovalModal({
           {/* Account Status (Optional) */}
           <div className='space-y-2'>
             <Label className='flex items-center gap-2'>
-              <CheckCircle className='h-4 w-4 text-muted-foreground' />
+              <MdCheckCircle className='h-4 w-4 text-muted-foreground' />
               Account Status
             </Label>
             <Select value={accountStatus} onValueChange={(v) => setAccountStatus(v as 'active' | 'inactive' | 'suspended')}>
@@ -211,7 +211,7 @@ export function VerificationApprovalModal({
           {/* Notes (Optional) */}
           <div className='space-y-2'>
             <Label className='flex items-center gap-2'>
-              <StickyNote className='h-4 w-4 text-muted-foreground' />
+              <MdNote className='h-4 w-4 text-muted-foreground' />
               Notes / Comments
             </Label>
             <Textarea
@@ -228,7 +228,7 @@ export function VerificationApprovalModal({
             Cancel
           </Button>
           <Button onClick={handleApprove} disabled={isSubmitting}>
-            <CheckCircle className='mr-2 h-4 w-4' />
+            <MdCheckCircle className='mr-2 h-4 w-4' />
             Save Changes
           </Button>
         </DialogFooter>

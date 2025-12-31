@@ -7,16 +7,6 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, Mail, Phone, UserCircle } from 'lucide-react'
 import { type Customer } from '../data/customers'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -27,10 +17,11 @@ interface CustomersTableProps {
 
 // Status styles matching purchases page pattern
 const statusStyles: Record<Customer['status'], string> = {
-  active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-  inactive: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
-  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  suspended: 'bg-red-500/10 text-red-600 border-red-500/20',
+  active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30',
+  inactive: 'bg-slate-500/10 text-slate-600 border-slate-500/20 dark:bg-slate-500/20 dark:text-slate-400 dark:border-slate-500/30',
+  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30',
+  suspended: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30',
+  banned: 'bg-red-500/10 text-red-600 border-red-500/20 dark:bg-red-500/20 dark:text-red-400 dark:border-red-500/30',
 }
 
 const statusLabels: Record<Customer['status'], string> = {
@@ -38,13 +29,14 @@ const statusLabels: Record<Customer['status'], string> = {
   inactive: 'Inactive',
   pending: 'Pending',
   suspended: 'Suspended',
+  banned: 'Banned',
 }
 
 const verificationStyles: Record<Customer['verificationStatus'], string> = {
-  verified: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  unverified: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
-  documents_requested: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+  verified: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:bg-emerald-500/20 dark:text-emerald-400 dark:border-emerald-500/30',
+  pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:bg-amber-500/20 dark:text-amber-400 dark:border-amber-500/30',
+  unverified: 'bg-slate-500/10 text-slate-600 border-slate-500/20 dark:bg-slate-500/20 dark:text-slate-400 dark:border-slate-500/30',
+  documents_requested: 'bg-blue-500/10 text-blue-600 border-blue-500/20 dark:bg-blue-500/20 dark:text-blue-400 dark:border-blue-500/30',
 }
 
 const verificationLabels: Record<Customer['verificationStatus'], string> = {
@@ -56,10 +48,10 @@ const verificationLabels: Record<Customer['verificationStatus'], string> = {
 
 export function CustomersTable({ data }: CustomersTableProps) {
   return (
-    <div className='rounded-md border'>
-      <Table>
+    <div className='rounded-xl border border-border/60 bg-card overflow-hidden shadow-sm'>
+      <Table striped>
         <TableHeader>
-          <TableRow>
+          <TableRow className='hover:bg-transparent'>
             <TableHead>Customer</TableHead>
             <TableHead>Country</TableHead>
             <TableHead>Assigned To</TableHead>
@@ -68,75 +60,55 @@ export function CustomersTable({ data }: CustomersTableProps) {
             <TableHead>Total Spent</TableHead>
             <TableHead>Purchases</TableHead>
             <TableHead>Last Activity</TableHead>
-            <TableHead className='text-right'>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {data.slice(0, 20).map((customer) => (
             <TableRow key={customer.id}>
               <TableCell>
-                <div>
-                  <p className='font-medium'>{customer.name}</p>
-                  <p className='text-sm text-muted-foreground'>{customer.email}</p>
+                <div className='flex items-center gap-3'>
+                  <div className='flex h-9 w-9 items-center justify-center rounded-full bg-primary/10 text-sm font-medium text-primary'>
+                    {customer.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                  </div>
+                  <div>
+                    <p className='font-medium text-foreground'>{customer.name}</p>
+                    <p className='text-xs text-muted-foreground'>{customer.email}</p>
+                  </div>
                 </div>
               </TableCell>
-              <TableCell>{customer.country}</TableCell>
+              <TableCell>
+                <span className='text-muted-foreground'>{customer.country}</span>
+              </TableCell>
               <TableCell>
                 {customer.assignedToName ? (
                   <div className='flex items-center gap-2'>
-                    <UserCircle className='h-4 w-4 text-muted-foreground' />
+                    <div className='flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium'>
+                      {customer.assignedToName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                    </div>
                     <span className='text-sm'>{customer.assignedToName}</span>
                   </div>
                 ) : (
-                  <span className='text-sm text-muted-foreground'>Unassigned</span>
+                  <span className='text-sm text-muted-foreground italic'>Unassigned</span>
                 )}
               </TableCell>
               <TableCell>
-                <Badge variant='outline' className={cn('text-xs', statusStyles[customer.status])}>
+                <Badge variant='outline' className={cn('text-xs font-medium', statusStyles[customer.status])}>
                   {statusLabels[customer.status]}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant='outline' className={cn('text-xs', verificationStyles[customer.verificationStatus])}>
+                <Badge variant='outline' className={cn('text-xs font-medium', verificationStyles[customer.verificationStatus])}>
                   {verificationLabels[customer.verificationStatus]}
                 </Badge>
               </TableCell>
-              <TableCell className='font-medium'>¥{customer.totalSpent.toLocaleString()}</TableCell>
-              <TableCell>{customer.wonAuctions}</TableCell>
-              <TableCell>{format(customer.lastActivity, 'MMM dd, yyyy')}</TableCell>
-              <TableCell className='text-right'>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align='end'>
-                    <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
-                      View Profile
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
-                      Edit Customer
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Mail className='mr-2 h-4 w-4' />
-                      Send Email
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Phone className='mr-2 h-4 w-4' />
-                      Call Customer
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+              <TableCell>
+                <span className='font-semibold tabular-nums'>¥{customer.totalSpent.toLocaleString()}</span>
+              </TableCell>
+              <TableCell>
+                <span className='tabular-nums text-muted-foreground'>{customer.wonAuctions}</span>
+              </TableCell>
+              <TableCell>
+                <span className='text-muted-foreground'>{format(customer.lastActivity, 'MMM dd, yyyy')}</span>
               </TableCell>
             </TableRow>
           ))}

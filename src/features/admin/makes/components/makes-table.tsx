@@ -17,7 +17,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2, ExternalLink } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdEdit, MdDelete, MdOpenInNew } from 'react-icons/md'
 import { type MakeSEO } from '../data/makes'
 import { format } from 'date-fns'
 
@@ -99,29 +99,29 @@ export function MakesTable({ data }: MakesTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
+                      <MdEdit className='mr-2 h-4 w-4' />
                       Edit SEO
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       Preview
                     </DropdownMenuItem>
                     {make.status === 'published' && (
                       <DropdownMenuItem>
-                        <ExternalLink className='mr-2 h-4 w-4' />
+                        <MdOpenInNew className='mr-2 h-4 w-4' />
                         View Live
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

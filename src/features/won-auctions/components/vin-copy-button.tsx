@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Copy, Check } from 'lucide-react'
+import { MdContentCopy, MdCheck } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { toast } from 'sonner'
 
@@ -41,9 +41,9 @@ export function VinCopyButton({ vin, showFull = false }: VinCopyButtonProps) {
         }}
       >
         {copied ? (
-          <Check className='h-3 w-3 text-green-600' />
+          <MdCheck className='h-3 w-3 text-green-600' />
         ) : (
-          <Copy className='h-3 w-3' />
+          <MdContentCopy className='h-3 w-3' />
         )}
       </Button>
     </div>

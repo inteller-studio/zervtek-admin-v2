@@ -2,16 +2,16 @@
 
 import { motion } from 'framer-motion'
 import {
-  MessageSquare,
-  Send,
-  Users,
-  Clock,
-  TrendingUp,
-  TrendingDown,
-  BarChart3,
-  Radio,
-  FileText,
-} from 'lucide-react'
+  MdMessage,
+  MdSend,
+  MdPeople,
+  MdAccessTime,
+  MdTrendingUp,
+  MdTrendingDown,
+  MdBarChart,
+  MdRadio,
+  MdDescription,
+} from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { useWhatsAppStats } from '@/hooks/use-whatsapp'
 import { cn } from '@/lib/utils'
@@ -63,9 +63,9 @@ function StatCard({
                   )}
                 >
                   {isPositive ? (
-                    <TrendingUp className='h-3 w-3' />
+                    <MdTrendingUp className='h-3 w-3' />
                   ) : (
-                    <TrendingDown className='h-3 w-3' />
+                    <MdTrendingDown className='h-3 w-3' />
                   )}
                   <span>
                     {isPositive ? '+' : ''}
@@ -109,7 +109,7 @@ export function AnalyticsPanel() {
           title='Messages Sent'
           value={stats?.messagesSent || 0}
           change={12}
-          icon={Send}
+          icon={MdSend}
           iconColor='text-blue-600'
           iconBg='bg-blue-100 dark:bg-blue-950'
         />
@@ -117,7 +117,7 @@ export function AnalyticsPanel() {
           title='Messages Received'
           value={stats?.messagesReceived || 0}
           change={8}
-          icon={MessageSquare}
+          icon={MdMessage}
           iconColor='text-green-600'
           iconBg='bg-green-100 dark:bg-green-950'
         />
@@ -125,7 +125,7 @@ export function AnalyticsPanel() {
           title='Total Contacts'
           value={stats?.totalContacts || 0}
           change={5}
-          icon={Users}
+          icon={MdPeople}
           iconColor='text-purple-600'
           iconBg='bg-purple-100 dark:bg-purple-950'
         />
@@ -133,7 +133,7 @@ export function AnalyticsPanel() {
           title='Active Chats'
           value={stats?.activeChats || 0}
           change={-3}
-          icon={MessageSquare}
+          icon={MdMessage}
           iconColor='text-orange-600'
           iconBg='bg-orange-100 dark:bg-orange-950'
         />
@@ -144,14 +144,14 @@ export function AnalyticsPanel() {
         <StatCard
           title='Broadcasts Sent'
           value={stats?.broadcastsSent || 0}
-          icon={Radio}
+          icon={MdRadio}
           iconColor='text-indigo-600'
           iconBg='bg-indigo-100 dark:bg-indigo-950'
         />
         <StatCard
           title='Templates Used'
           value={stats?.templatesUsed || 0}
-          icon={FileText}
+          icon={MdDescription}
           iconColor='text-pink-600'
           iconBg='bg-pink-100 dark:bg-pink-950'
         />
@@ -159,14 +159,14 @@ export function AnalyticsPanel() {
           title='Avg Response Time'
           value={stats?.avgResponseTime || 0}
           suffix=' min'
-          icon={Clock}
+          icon={MdAccessTime}
           iconColor='text-cyan-600'
           iconBg='bg-cyan-100 dark:bg-cyan-950'
         />
         <StatCard
           title='Total Chats'
           value={stats?.totalChats || 0}
-          icon={BarChart3}
+          icon={MdBarChart}
           iconColor='text-amber-600'
           iconBg='bg-amber-100 dark:bg-amber-950'
         />
@@ -182,7 +182,7 @@ export function AnalyticsPanel() {
           <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-5'>
             <div className='flex items-center gap-3 rounded-lg border p-4'>
               <div className='rounded-full bg-blue-100 p-2 dark:bg-blue-950'>
-                <MessageSquare className='h-4 w-4 text-blue-600' />
+                <MdMessage className='h-4 w-4 text-blue-600' />
               </div>
               <div>
                 <p className='text-xl font-semibold'>68%</p>
@@ -191,7 +191,7 @@ export function AnalyticsPanel() {
             </div>
             <div className='flex items-center gap-3 rounded-lg border p-4'>
               <div className='rounded-full bg-green-100 p-2 dark:bg-green-950'>
-                <MessageSquare className='h-4 w-4 text-green-600' />
+                <MdMessage className='h-4 w-4 text-green-600' />
               </div>
               <div>
                 <p className='text-xl font-semibold'>18%</p>
@@ -200,7 +200,7 @@ export function AnalyticsPanel() {
             </div>
             <div className='flex items-center gap-3 rounded-lg border p-4'>
               <div className='rounded-full bg-purple-100 p-2 dark:bg-purple-950'>
-                <MessageSquare className='h-4 w-4 text-purple-600' />
+                <MdMessage className='h-4 w-4 text-purple-600' />
               </div>
               <div>
                 <p className='text-xl font-semibold'>8%</p>
@@ -209,7 +209,7 @@ export function AnalyticsPanel() {
             </div>
             <div className='flex items-center gap-3 rounded-lg border p-4'>
               <div className='rounded-full bg-orange-100 p-2 dark:bg-orange-950'>
-                <MessageSquare className='h-4 w-4 text-orange-600' />
+                <MdMessage className='h-4 w-4 text-orange-600' />
               </div>
               <div>
                 <p className='text-xl font-semibold'>4%</p>
@@ -218,7 +218,7 @@ export function AnalyticsPanel() {
             </div>
             <div className='flex items-center gap-3 rounded-lg border p-4'>
               <div className='rounded-full bg-pink-100 p-2 dark:bg-pink-950'>
-                <MessageSquare className='h-4 w-4 text-pink-600' />
+                <MdMessage className='h-4 w-4 text-pink-600' />
               </div>
               <div>
                 <p className='text-xl font-semibold'>2%</p>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format, subDays, startOfDay, endOfDay } from 'date-fns'
-import { Calendar, ChevronDown } from 'lucide-react'
+import { MdCalendarToday, MdExpandMore } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import {
@@ -102,7 +102,7 @@ export function StatsDateRangeFilter({
       <Popover open={showCustom} onOpenChange={setShowCustom}>
         <PopoverTrigger asChild>
           <Button variant='outline' size='sm' className={cn('gap-2', className)}>
-            <Calendar className='h-4 w-4' />
+            <MdCalendarToday className='h-4 w-4' />
             Custom range
           </Button>
         </PopoverTrigger>
@@ -148,9 +148,9 @@ export function StatsDateRangeFilter({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant='outline' size='sm' className={cn('gap-2', className)}>
-          <Calendar className='h-4 w-4' />
+          <MdCalendarToday className='h-4 w-4' />
           {getDisplayLabel()}
-          <ChevronDown className='h-3 w-3 opacity-50' />
+          <MdExpandMore className='h-3 w-3 opacity-50' />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
@@ -165,7 +165,7 @@ export function StatsDateRangeFilter({
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => setShowCustom(true)}>
-          <Calendar className='mr-2 h-4 w-4' />
+          <MdCalendarToday className='mr-2 h-4 w-4' />
           Custom range...
         </DropdownMenuItem>
       </DropdownMenuContent>

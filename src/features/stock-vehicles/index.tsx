@@ -21,50 +21,58 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { VehicleDetailModal } from './components/vehicle-detail-modal'
 import { AddVehicleDrawer } from './components/dialogs/add-vehicle-drawer'
-import { CreateInvoiceDrawer } from '@/features/invoices/components/create-invoice-drawer'
+import { VehicleDetailModal } from './components/vehicle-detail-modal'
 import { toast } from 'sonner'
 import { Slider } from '@/components/ui/slider'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import {
-  Building2,
-  Car,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Filter,
-  Gauge,
-  Gavel,
-  LayoutGrid,
-  LayoutList,
-  MapPin,
-  Plus,
-  RotateCcw,
-  Search as SearchIcon,
-  Settings,
-} from 'lucide-react'
+  MdBusiness,
+  MdDirectionsCar,
+  MdChevronLeft,
+  MdChevronRight,
+  MdVisibility,
+  MdFilterList,
+  MdSpeed,
+  MdGavel,
+  MdGridView,
+  MdViewList,
+  MdLocationOn,
+  MdAdd,
+  MdRefresh,
+  MdSearch,
+  MdSettings,
+} from 'react-icons/md'
 import { vehicles as initialVehicles, vendorVehicles as initialVendorVehicles, vendorPartners, type Vehicle, type VehicleSource } from './data/vehicles'
 
 
 export function StockVehicles() {
   const [auctionVehicles, setAuctionVehicles] = useState(initialVehicles)
+
+  // Vehicle detail modal state
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
+  const [isVehicleModalOpen, setIsVehicleModalOpen] = useState(false)
+
+  const handleViewVehicle = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle)
+    setIsVehicleModalOpen(true)
+  }
+
+  const closeVehicleModal = () => {
+    setIsVehicleModalOpen(false)
+    setSelectedVehicle(null)
+  }
   const [vendorVehicles, setVendorVehicles] = useState(initialVendorVehicles)
   const [mainTab, setMainTab] = useState<'auction' | 'vendor'>('auction')
 
   // Combined vehicles for filtering
   const vehicles = mainTab === 'auction' ? auctionVehicles : vendorVehicles
-  const setVehicles = mainTab === 'auction' ? setAuctionVehicles : setVendorVehicles
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [activeTab, setActiveTab] = useState('available')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('newest')
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [addDrawerOpen, setAddDrawerOpen] = useState(false)
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null)
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
-  const [isInvoiceDrawerOpen, setIsInvoiceDrawerOpen] = useState(false)
-  const [invoiceVehicle, setInvoiceVehicle] = useState<Vehicle | null>(null)
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1)
@@ -198,6 +206,20 @@ export function StockVehicles() {
     mileageRange[0] !== 0 ||
     mileageRange[1] !== 200000
 
+  // Main source tabs configuration
+  const mainTabs: TabItem[] = useMemo(() => [
+    { id: 'auction', label: 'Auction Stock', icon: MdGavel },
+    { id: 'vendor', label: 'Zervtek Stock', icon: MdBusiness },
+  ], [])
+
+  // Status tabs configuration with dynamic counts
+  const statusTabs: TabItem[] = useMemo(() => [
+    { id: 'all', label: 'All', badge: vehicles.length },
+    { id: 'available', label: 'Available', badge: vehicles.filter((v) => v.status === 'available').length, badgeColor: 'emerald' as const },
+    { id: 'reserved', label: 'Reserved', badge: vehicles.filter((v) => v.status === 'reserved').length, badgeColor: 'amber' as const },
+    { id: 'sold', label: 'Sold', badge: vehicles.filter((v) => v.status === 'sold').length },
+  ], [vehicles])
+
   const handleAddVehicle = (vehicleData: Omit<Vehicle, 'id' | 'createdAt' | 'updatedAt'>) => {
     const vehicle: Vehicle = {
       ...vehicleData,
@@ -233,32 +255,26 @@ export function StockVehicles() {
             <Badge variant='outline' className='px-3 py-1'>
               {filteredVehicles.length} Vehicles
             </Badge>
-            <Button onClick={() => setAddDrawerOpen(true)}>
-              <Plus className='mr-2 h-4 w-4' />
+            <Button size='xs' onClick={() => setAddDrawerOpen(true)}>
+              <MdAdd />
               Add Vehicle
             </Button>
           </div>
         </div>
 
         {/* Main Source Tabs */}
-        <Tabs value={mainTab} onValueChange={(v) => setMainTab(v as 'auction' | 'vendor')}>
-          <TabsList>
-            <TabsTrigger value='auction' className='gap-2'>
-              <Gavel className='h-4 w-4' />
-              Auction Stock
-            </TabsTrigger>
-            <TabsTrigger value='vendor' className='gap-2'>
-              <Building2 className='h-4 w-4' />
-              Zervtek Stock
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value='auction' className='mt-4 space-y-4'>
+        <AnimatedTabs
+          tabs={mainTabs}
+          value={mainTab}
+          onValueChange={(v) => setMainTab(v as 'auction' | 'vendor')}
+          variant='compact'
+        >
+          <AnimatedTabsContent value='auction' className='mt-4 space-y-4'>
         {/* Search and Filter Bar */}
         <div className='space-y-4'>
           <div className='flex flex-col gap-4 sm:flex-row'>
             <div className='relative flex-1'>
-              <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+              <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
               <Input
                 placeholder='Search by make, model, VIN, or stock number...'
                 value={searchQuery}
@@ -296,7 +312,7 @@ export function StockVehicles() {
                   onClick={() => setViewMode('grid')}
                   className='h-full rounded-r-none'
                 >
-                  <LayoutGrid className='h-4 w-4' />
+                  <MdGridView className='h-4 w-4' />
                 </Button>
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
@@ -304,7 +320,7 @@ export function StockVehicles() {
                   onClick={() => setViewMode('list')}
                   className='h-full rounded-l-none'
                 >
-                  <LayoutList className='h-4 w-4' />
+                  <MdViewList className='h-4 w-4' />
                 </Button>
               </div>
               <Button
@@ -312,7 +328,7 @@ export function StockVehicles() {
                 onClick={() => setIsFilterOpen(!isFilterOpen)}
                 className='relative'
               >
-                <Filter className='mr-2 h-4 w-4' />
+                <MdFilterList className='mr-2 h-4 w-4' />
                 Filters
                 {hasActiveFilters && (
                   <span className='absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary' />
@@ -320,7 +336,7 @@ export function StockVehicles() {
               </Button>
               {hasActiveFilters && (
                 <Button variant='ghost' size='sm' onClick={clearFilters}>
-                  <RotateCcw className='mr-2 h-4 w-4' />
+                  <MdRefresh className='mr-2 h-4 w-4' />
                   Clear
                 </Button>
               )}
@@ -468,26 +484,15 @@ export function StockVehicles() {
           </Collapsible>
 
           {/* Status Tabs */}
-          <Tabs
+          <AnimatedTabs
+            tabs={statusTabs}
             value={activeTab}
             onValueChange={(value) => {
               setActiveTab(value)
               resetPagination()
             }}
-          >
-            <TabsList>
-              <TabsTrigger value='all'>All ({vehicles.length})</TabsTrigger>
-              <TabsTrigger value='available'>
-                Available ({vehicles.filter((v) => v.status === 'available').length})
-              </TabsTrigger>
-              <TabsTrigger value='reserved'>
-                Reserved ({vehicles.filter((v) => v.status === 'reserved').length})
-              </TabsTrigger>
-              <TabsTrigger value='sold'>
-                Sold ({vehicles.filter((v) => v.status === 'sold').length})
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
+            variant='compact'
+          />
         </div>
 
         {/* Results count and items per page */}
@@ -524,10 +529,7 @@ export function StockVehicles() {
               <Card
                 key={vehicle.id}
                 className='group cursor-pointer overflow-hidden transition-all hover:shadow-md !py-0 !gap-0'
-                onClick={() => {
-                  setSelectedVehicle(vehicle)
-                  setIsViewModalOpen(true)
-                }}
+                onClick={() => handleViewVehicle(vehicle)}
               >
                 <CardContent className='p-0'>
                   {/* Image Section */}
@@ -542,7 +544,7 @@ export function StockVehicles() {
                       />
                     ) : (
                       <div className='flex h-full w-full items-center justify-center bg-muted'>
-                        <Car className='h-12 w-12 text-muted-foreground/20' />
+                        <MdDirectionsCar className='h-12 w-12 text-muted-foreground/20' />
                       </div>
                     )}
                     {/* Score Badge */}
@@ -606,10 +608,7 @@ export function StockVehicles() {
                   <div
                     key={vehicle.id}
                     className='cursor-pointer p-4 transition-colors hover:bg-muted/50'
-                    onClick={() => {
-                      setSelectedVehicle(vehicle)
-                      setIsViewModalOpen(true)
-                    }}
+                    onClick={() => handleViewVehicle(vehicle)}
                   >
                     <div className='flex items-center justify-between'>
                       <div className='flex items-center gap-4'>
@@ -624,7 +623,7 @@ export function StockVehicles() {
                             />
                           ) : (
                             <div className='flex h-full w-full items-center justify-center'>
-                              <Car className='h-8 w-8 text-muted-foreground/20' />
+                              <MdDirectionsCar className='h-8 w-8 text-muted-foreground/20' />
                             </div>
                           )}
                         </div>
@@ -642,15 +641,15 @@ export function StockVehicles() {
                           </div>
                           <div className='mt-1 flex items-center gap-4 text-sm text-muted-foreground'>
                             <span className='flex items-center gap-1'>
-                              <Gauge className='h-3 w-3' />
+                              <MdSpeed className='h-3 w-3' />
                               {vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`}
                             </span>
                             <span className='flex items-center gap-1'>
-                              <Settings className='h-3 w-3' />
+                              <MdSettings className='h-3 w-3' />
                               {vehicle.transmission}
                             </span>
                             <span className='flex items-center gap-1'>
-                              <MapPin className='h-3 w-3' />
+                              <MdLocationOn className='h-3 w-3' />
                               {vehicle.location}
                             </span>
                           </div>
@@ -671,7 +670,7 @@ export function StockVehicles() {
                           </p>
                         </div>
                         <Button variant='ghost' size='sm'>
-                          <Eye className='h-4 w-4' />
+                          <MdVisibility className='h-4 w-4' />
                           <span className='ml-1 text-xs'>View</span>
                         </Button>
                       </div>
@@ -700,7 +699,7 @@ export function StockVehicles() {
               onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
               disabled={currentPage === 1}
             >
-              <ChevronLeft className='h-4 w-4' />
+              <MdChevronLeft className='h-4 w-4' />
             </Button>
             <span className='px-4 text-sm'>
               Page {currentPage} of {totalPages}
@@ -711,7 +710,7 @@ export function StockVehicles() {
               onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
-              <ChevronRight className='h-4 w-4' />
+              <MdChevronRight className='h-4 w-4' />
             </Button>
             <Button
               variant='outline'
@@ -723,16 +722,15 @@ export function StockVehicles() {
             </Button>
           </div>
         )}
-          </TabsContent>
-
-          <TabsContent value='vendor' className='mt-4 space-y-4'>
+          </AnimatedTabsContent>
+          <AnimatedTabsContent value='vendor' className='mt-4 space-y-4'>
             {/* Zervtek Stock Stats */}
             <div className='flex items-center justify-between'>
               <p className='text-sm text-muted-foreground'>
                 {vendorVehicles.length} vehicles from {vendorPartners.length} vendor partners
               </p>
               <Button onClick={() => setAddDrawerOpen(true)}>
-                <Plus className='mr-2 h-4 w-4' />
+                <MdAdd className='mr-2 h-4 w-4' />
                 Add Zervtek Vehicle
               </Button>
             </div>
@@ -741,13 +739,13 @@ export function StockVehicles() {
               /* Empty State */
               <Card>
                 <CardContent className='flex flex-col items-center justify-center py-16'>
-                  <Building2 className='h-16 w-16 text-muted-foreground/30 mb-4' />
+                  <MdBusiness className='h-16 w-16 text-muted-foreground/30 mb-4' />
                   <h3 className='text-lg font-semibold mb-2'>No Vendor Vehicles</h3>
                   <p className='text-sm text-muted-foreground text-center max-w-md mb-6'>
                     Add vehicles from your trusted vendor partners. These vehicles are manually entered and managed separately from auction stock.
                   </p>
                   <Button onClick={() => setAddDrawerOpen(true)}>
-                    <Plus className='mr-2 h-4 w-4' />
+                    <MdAdd className='mr-2 h-4 w-4' />
                     Add First Vendor Vehicle
                   </Button>
                 </CardContent>
@@ -759,10 +757,7 @@ export function StockVehicles() {
                   <Card
                     key={vehicle.id}
                     className='group cursor-pointer overflow-hidden transition-all hover:shadow-md'
-                    onClick={() => {
-                      setSelectedVehicle(vehicle)
-                      setIsViewModalOpen(true)
-                    }}
+                    onClick={() => handleViewVehicle(vehicle)}
                   >
                     <div className='relative aspect-[4/3] overflow-hidden bg-muted'>
                       {vehicle.images && vehicle.images.length > 0 ? (
@@ -774,7 +769,7 @@ export function StockVehicles() {
                         />
                       ) : (
                         <div className='flex h-full items-center justify-center'>
-                          <Car className='h-12 w-12 text-muted-foreground/30' />
+                          <MdDirectionsCar className='h-12 w-12 text-muted-foreground/30' />
                         </div>
                       )}
                       <Badge
@@ -804,11 +799,11 @@ export function StockVehicles() {
                       </div>
                       <div className='mb-3 flex flex-wrap items-center gap-2 text-xs text-muted-foreground'>
                         <span className='flex items-center gap-1'>
-                          <Gauge className='h-3 w-3' />
+                          <MdSpeed className='h-3 w-3' />
                           {vehicle.mileageDisplay}
                         </span>
                         <span className='flex items-center gap-1'>
-                          <MapPin className='h-3 w-3' />
+                          <MdLocationOn className='h-3 w-3' />
                           {vehicle.location}
                         </span>
                       </div>
@@ -821,17 +816,16 @@ export function StockVehicles() {
                           variant='ghost'
                           onClick={(e) => {
                             e.stopPropagation()
-                            setSelectedVehicle(vehicle)
-                            setIsViewModalOpen(true)
+                            handleViewVehicle(vehicle)
                           }}
                         >
-                          <Eye className='h-4 w-4' />
+                          <MdVisibility className='h-4 w-4' />
                         </Button>
                       </div>
                       {vehicle.vendorName && (
                         <div className='mt-2 pt-2 border-t'>
                           <p className='text-xs text-muted-foreground flex items-center gap-1'>
-                            <Building2 className='h-3 w-3' />
+                            <MdBusiness className='h-3 w-3' />
                             {vehicle.vendorName}
                           </p>
                         </div>
@@ -841,50 +835,9 @@ export function StockVehicles() {
                 ))}
               </div>
             )}
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </Main>
-
-      {/* View Vehicle Modal */}
-      <VehicleDetailModal
-        vehicle={selectedVehicle}
-        open={isViewModalOpen}
-        onClose={() => setIsViewModalOpen(false)}
-        onCreateInvoice={(vehicle) => {
-          setInvoiceVehicle(vehicle)
-          setIsViewModalOpen(false)
-          setIsInvoiceDrawerOpen(true)
-        }}
-        onDelete={(vehicle) => {
-          if (vehicle.source === 'vendor') {
-            setVendorVehicles(vendorVehicles.filter(v => v.id !== vehicle.id))
-          } else {
-            setAuctionVehicles(auctionVehicles.filter(v => v.id !== vehicle.id))
-          }
-          setIsViewModalOpen(false)
-          toast.success('Vehicle deleted')
-        }}
-      />
-
-      {/* Create Invoice Drawer */}
-      <CreateInvoiceDrawer
-        open={isInvoiceDrawerOpen}
-        onOpenChange={setIsInvoiceDrawerOpen}
-        preselectedVehicle={invoiceVehicle ? {
-          id: invoiceVehicle.id,
-          stockNumber: invoiceVehicle.stockNumber,
-          year: invoiceVehicle.year,
-          make: invoiceVehicle.make,
-          model: invoiceVehicle.model,
-          price: invoiceVehicle.price,
-          status: invoiceVehicle.status,
-          location: invoiceVehicle.location,
-          images: invoiceVehicle.images,
-        } : null}
-        onSuccess={() => {
-          setInvoiceVehicle(null)
-        }}
-      />
 
       {/* Add Vehicle Drawer */}
       <AddVehicleDrawer
@@ -892,6 +845,25 @@ export function StockVehicles() {
         onOpenChange={setAddDrawerOpen}
         onAddVehicle={handleAddVehicle}
         defaultSource={mainTab}
+      />
+
+      {/* Vehicle Detail Modal */}
+      <VehicleDetailModal
+        vehicle={selectedVehicle}
+        open={isVehicleModalOpen}
+        onClose={closeVehicleModal}
+        onCreateInvoice={(vehicle) => {
+          toast.success(`Creating invoice for ${vehicle.year} ${vehicle.make} ${vehicle.model}`)
+          closeVehicleModal()
+        }}
+        onEdit={(vehicle) => {
+          toast.info(`Edit vehicle: ${vehicle.stockNumber}`)
+          closeVehicleModal()
+        }}
+        onDelete={(vehicle) => {
+          toast.success(`Vehicle ${vehicle.stockNumber} deleted`)
+          closeVehicleModal()
+        }}
       />
     </>
   )

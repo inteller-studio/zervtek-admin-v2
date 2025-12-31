@@ -3,21 +3,21 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import {
-  Plus,
-  Send,
-  Clock,
-  Users,
-  CheckCircle,
-  AlertCircle,
-  MoreHorizontal,
-  Radio,
-  Eye,
-  Trash2,
-  Calendar,
-  MessageSquare,
-  BarChart3,
-  Loader2,
-} from 'lucide-react'
+  MdAdd,
+  MdSend,
+  MdAccessTime,
+  MdPeople,
+  MdCheckCircle,
+  MdError,
+  MdMoreHoriz,
+  MdRadio,
+  MdVisibility,
+  MdDelete,
+  MdCalendarToday,
+  MdMessage,
+  MdBarChart,
+  MdLoop,
+} from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,7 +46,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import {
   useBroadcastLists,
   useBroadcasts,
@@ -59,11 +59,11 @@ import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 const statusConfig = {
-  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: MessageSquare },
-  scheduled: { label: 'Scheduled', color: 'bg-blue-100 text-blue-700', icon: Clock },
-  sending: { label: 'Sending', color: 'bg-yellow-100 text-yellow-700', icon: Loader2 },
-  completed: { label: 'Completed', color: 'bg-green-100 text-green-700', icon: CheckCircle },
-  failed: { label: 'Failed', color: 'bg-red-100 text-red-700', icon: AlertCircle },
+  draft: { label: 'Draft', color: 'bg-gray-100 text-gray-700', icon: MdMessage },
+  scheduled: { label: 'Scheduled', color: 'bg-blue-100 text-blue-700', icon: MdAccessTime },
+  sending: { label: 'Sending', color: 'bg-yellow-100 text-yellow-700', icon: MdLoop },
+  completed: { label: 'Completed', color: 'bg-green-100 text-green-700', icon: MdCheckCircle },
+  failed: { label: 'Failed', color: 'bg-red-100 text-red-700', icon: MdError },
 }
 
 export function BroadcastPanel() {
@@ -73,6 +73,7 @@ export function BroadcastPanel() {
   const sendBroadcast = useSendBroadcast()
 
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('all')
   const [formData, setFormData] = useState({
     listId: '',
     templateId: '',
@@ -136,7 +137,7 @@ export function BroadcastPanel() {
           onClick={() => setDialogOpen(true)}
           className='bg-[#00A884] text-white hover:bg-[#00A884]/90'
         >
-          <Radio className='mr-2 h-4 w-4' />
+          <MdRadio className='mr-2 h-4 w-4' />
           New Broadcast
         </Button>
       </div>
@@ -147,7 +148,7 @@ export function BroadcastPanel() {
         <div className='grid gap-3 border-b border-[var(--wa-border)] bg-[#F0F2F5] p-4 dark:bg-[#202C33] sm:grid-cols-4'>
           <div className='flex items-center gap-3 rounded-lg bg-white p-3 dark:bg-[#111B21]'>
             <div className='rounded-full bg-[#00A884]/10 p-2.5'>
-              <Radio className='h-5 w-5 text-[#00A884]' />
+              <MdRadio className='h-5 w-5 text-[#00A884]' />
             </div>
             <div>
               <p className='text-xl font-semibold text-[#111B21] dark:text-[#E9EDEF]'>
@@ -158,7 +159,7 @@ export function BroadcastPanel() {
           </div>
           <div className='flex items-center gap-3 rounded-lg bg-white p-3 dark:bg-[#111B21]'>
             <div className='rounded-full bg-green-500/10 p-2.5'>
-              <CheckCircle className='h-5 w-5 text-green-500' />
+              <MdCheckCircle className='h-5 w-5 text-green-500' />
             </div>
             <div>
               <p className='text-xl font-semibold text-[#111B21] dark:text-[#E9EDEF]'>
@@ -169,7 +170,7 @@ export function BroadcastPanel() {
           </div>
           <div className='flex items-center gap-3 rounded-lg bg-white p-3 dark:bg-[#111B21]'>
             <div className='rounded-full bg-amber-500/10 p-2.5'>
-              <Clock className='h-5 w-5 text-amber-500' />
+              <MdAccessTime className='h-5 w-5 text-amber-500' />
             </div>
             <div>
               <p className='text-xl font-semibold text-[#111B21] dark:text-[#E9EDEF]'>
@@ -180,7 +181,7 @@ export function BroadcastPanel() {
           </div>
           <div className='flex items-center gap-3 rounded-lg bg-white p-3 dark:bg-[#111B21]'>
             <div className='rounded-full bg-purple-500/10 p-2.5'>
-              <Users className='h-5 w-5 text-purple-500' />
+              <MdPeople className='h-5 w-5 text-purple-500' />
             </div>
             <div>
               <p className='text-xl font-semibold text-[#111B21] dark:text-[#E9EDEF]'>
@@ -193,15 +194,18 @@ export function BroadcastPanel() {
 
         {/* Broadcasts List */}
         <div className='p-4'>
-          <Tabs defaultValue='all'>
-            <TabsList className='bg-[#F0F2F5] dark:bg-[#202C33]'>
-              <TabsTrigger value='all'>All</TabsTrigger>
-              <TabsTrigger value='completed'>Completed</TabsTrigger>
-              <TabsTrigger value='scheduled'>Scheduled</TabsTrigger>
-              <TabsTrigger value='sending'>In Progress</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value='all' className='mt-4'>
+          <AnimatedTabs
+            tabs={[
+              { id: 'all', label: 'All' },
+              { id: 'completed', label: 'Completed' },
+              { id: 'scheduled', label: 'Scheduled' },
+              { id: 'sending', label: 'In Progress' },
+            ] as TabItem[]}
+            value={activeTab}
+            onValueChange={setActiveTab}
+            variant='compact'
+          >
+            <AnimatedTabsContent value='all' className='mt-4'>
           <div className='space-y-4'>
             {broadcastsLoading ? (
               [...Array(3)].map((_, i) => (
@@ -214,7 +218,7 @@ export function BroadcastPanel() {
             ) : broadcasts?.length === 0 ? (
               <Card>
                 <CardContent className='flex flex-col items-center justify-center py-10'>
-                  <Radio className='mb-2 h-10 w-10 text-muted-foreground' />
+                  <MdRadio className='mb-2 h-10 w-10 text-muted-foreground' />
                   <p className='text-muted-foreground'>No broadcasts yet</p>
                   <Button
                     variant='outline'
@@ -318,7 +322,7 @@ export function BroadcastPanel() {
                             {broadcast.status === 'scheduled' &&
                               broadcast.scheduledAt && (
                                 <p className='flex items-center gap-1 text-sm text-muted-foreground'>
-                                  <Calendar className='h-4 w-4' />
+                                  <MdCalendarToday className='h-4 w-4' />
                                   Scheduled for{' '}
                                   {format(broadcast.scheduledAt, 'PPp')}
                                 </p>
@@ -334,20 +338,20 @@ export function BroadcastPanel() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant='ghost' size='icon'>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <MdMoreHoriz className='h-4 w-4' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                               <DropdownMenuItem>
-                                <Eye className='mr-2 h-4 w-4' />
+                                <MdVisibility className='mr-2 h-4 w-4' />
                                 View Details
                               </DropdownMenuItem>
                               <DropdownMenuItem>
-                                <BarChart3 className='mr-2 h-4 w-4' />
+                                <MdBarChart className='mr-2 h-4 w-4' />
                                 Analytics
                               </DropdownMenuItem>
                               <DropdownMenuItem className='text-destructive'>
-                                <Trash2 className='mr-2 h-4 w-4' />
+                                <MdDelete className='mr-2 h-4 w-4' />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -360,9 +364,9 @@ export function BroadcastPanel() {
               })
             )}
           </div>
-        </TabsContent>
+        </AnimatedTabsContent>
 
-        <TabsContent value='completed' className='mt-4'>
+        <AnimatedTabsContent value='completed' className='mt-4'>
           <div className='space-y-4'>
             {broadcasts
               ?.filter((b) => b.status === 'completed')
@@ -374,9 +378,9 @@ export function BroadcastPanel() {
                 </Card>
               ))}
           </div>
-        </TabsContent>
+        </AnimatedTabsContent>
 
-        <TabsContent value='scheduled' className='mt-4'>
+        <AnimatedTabsContent value='scheduled' className='mt-4'>
           <div className='space-y-4'>
             {broadcasts
               ?.filter((b) => b.status === 'scheduled')
@@ -388,9 +392,9 @@ export function BroadcastPanel() {
                 </Card>
               ))}
           </div>
-        </TabsContent>
+        </AnimatedTabsContent>
 
-        <TabsContent value='sending' className='mt-4'>
+        <AnimatedTabsContent value='sending' className='mt-4'>
           <div className='space-y-4'>
             {broadcasts
               ?.filter((b) => b.status === 'sending')
@@ -402,8 +406,8 @@ export function BroadcastPanel() {
                 </Card>
               ))}
           </div>
-          </TabsContent>
-          </Tabs>
+          </AnimatedTabsContent>
+          </AnimatedTabs>
         </div>
       </div>
 
@@ -506,7 +510,7 @@ export function BroadcastPanel() {
             </Button>
             {formData.scheduledAt ? (
               <Button onClick={() => handleSend(true)}>
-                <Clock className='mr-2 h-4 w-4' />
+                <MdAccessTime className='mr-2 h-4 w-4' />
                 Schedule
               </Button>
             ) : (
@@ -514,7 +518,7 @@ export function BroadcastPanel() {
                 onClick={() => handleSend(false)}
                 disabled={sendBroadcast.isPending}
               >
-                <Send className='mr-2 h-4 w-4' />
+                <MdSend className='mr-2 h-4 w-4' />
                 Send Now
               </Button>
             )}

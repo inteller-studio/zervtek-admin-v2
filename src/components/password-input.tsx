@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Eye, EyeOff } from 'lucide-react'
+import { MdVisibility, MdVisibilityOff } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Button } from './ui/button'
 
@@ -35,7 +35,7 @@ export function PasswordInput({
         className='text-muted-foreground absolute end-1 top-1/2 h-6 w-6 -translate-y-1/2 rounded-md'
         onClick={() => setShowPassword((prev) => !prev)}
       >
-        {showPassword ? <Eye size={18} /> : <EyeOff size={18} />}
+        {showPassword ? <MdVisibility size={18} /> : <MdVisibilityOff size={18} />}
       </Button>
     </div>
   )

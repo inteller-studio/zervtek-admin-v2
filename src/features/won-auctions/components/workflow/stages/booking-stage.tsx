@@ -1,6 +1,6 @@
 'use client'
 
-import { Ship, Container, Anchor } from 'lucide-react'
+import { MdDirectionsBoat, MdViewInAr, MdAnchor } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import {
   type PurchaseWorkflow,
   type ShippingMethod,
@@ -27,7 +27,7 @@ import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workfl
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 
 interface BookingStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
@@ -114,7 +114,7 @@ export function BookingStage({
     <div className='space-y-4'>
       {/* Info Alert */}
       <Alert>
-        <Ship className='h-4 w-4' />
+        <MdDirectionsBoat className='h-4 w-4' />
         <AlertDescription>
           Request shipping booking, select method, and manage shipping documentation.
         </AlertDescription>
@@ -153,7 +153,7 @@ export function BookingStage({
           >
             <RadioGroupItem value='roro' id='roro' disabled={!stage.bookingRequested.completed} />
             <div className='flex items-center gap-2'>
-              <Ship className='h-4 w-4 text-blue-600' />
+              <MdDirectionsBoat className='h-4 w-4 text-blue-600' />
               <div>
                 <p className='text-sm font-medium'>RoRo</p>
                 <p className='text-xs text-muted-foreground'>Roll-on/Roll-off</p>
@@ -170,7 +170,7 @@ export function BookingStage({
           >
             <RadioGroupItem value='container' id='container' disabled={!stage.bookingRequested.completed} />
             <div className='flex items-center gap-2'>
-              <Container className='h-4 w-4 text-amber-600' />
+              <MdViewInAr className='h-4 w-4 text-amber-600' />
               <div>
                 <p className='text-sm font-medium'>Container</p>
                 <p className='text-xs text-muted-foreground'>Enclosed shipping</p>

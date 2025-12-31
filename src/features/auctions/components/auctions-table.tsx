@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, Edit, Trash2 } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdEdit, MdDelete } from 'react-icons/md'
 import { type Auction } from '../data/auctions'
 import { format } from 'date-fns'
 
@@ -74,23 +74,23 @@ export function AuctionsTable({ data }: AuctionsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Edit className='mr-2 h-4 w-4' />
+                      <MdEdit className='mr-2 h-4 w-4' />
                       Edit Auction
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className='text-destructive'>
-                      <Trash2 className='mr-2 h-4 w-4' />
+                      <MdDelete className='mr-2 h-4 w-4' />
                       Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>

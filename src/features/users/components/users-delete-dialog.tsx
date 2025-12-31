@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { AlertTriangle } from 'lucide-react'
+import { MdWarning } from 'react-icons/md'
 import { showSubmittedData } from '@/lib/show-submitted-data'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Input } from '@/components/ui/input'
@@ -37,8 +37,8 @@ export function UsersDeleteDialog({
       disabled={value.trim() !== currentRow.username}
       title={
         <span className='text-destructive'>
-          <AlertTriangle
-            className='stroke-destructive me-1 inline-block'
+          <MdWarning
+            className='text-destructive me-1 inline-block'
             size={18}
           />{' '}
           Delete User

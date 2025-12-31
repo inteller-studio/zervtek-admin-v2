@@ -1,33 +1,33 @@
 import {
-  LayoutDashboard,
-  Users,
-  UserCircle,
-  CreditCard,
-  FileText,
-  Gavel,
-  Hand,
-  ShoppingCart,
-  Car,
-  Tv,
-  Globe,
-  Database,
-  Tag,
-  Shield,
-  Settings,
-  Command,
-  ClipboardCheck,
-  MessageCircle,
-  Headphones,
-  TicketCheck,
-  HelpCircle,
-  CircleHelp,
-} from 'lucide-react'
+  MdDashboard,
+  MdPeople,
+  MdAccountCircle,
+  MdCreditCard,
+  MdDescription,
+  MdGavel,
+  MdPanTool,
+  MdShoppingCart,
+  MdDirectionsCar,
+  MdTv,
+  MdPublic,
+  MdStorage,
+  MdLocalOffer,
+  MdSecurity,
+  MdTerminal,
+  MdFactCheck,
+  MdChat,
+  MdConfirmationNumber,
+  MdHelpOutline,
+  MdPersonAdd,
+  MdInbox,
+} from 'react-icons/md'
 import { type NavGroup, type User, type Team } from '../types'
 import { ROLES } from '@/lib/rbac/types'
 import { bids } from '@/features/bids/data/bids'
 import { requests } from '@/features/requests/data/requests'
 import { customers } from '@/features/customers/data/customers'
 import { getTicketStats } from '@/features/support/data/tickets'
+import { getSubmissionStats } from '@/features/leads/data/submissions'
 
 // Count customers assigned to current user (simulated - in production this would use auth context)
 const CURRENT_USER_ID = 'staff-001'
@@ -42,10 +42,17 @@ const pendingInspectionsCount = requests.filter((r) => r.type === 'inspection' &
 const ticketStats = getTicketStats()
 const openTicketsCount = ticketStats.open + ticketStats.inProgress
 
+// Submissions/Inquiries stats
+const submissionStats = getSubmissionStats()
+const newSubmissionsCount = submissionStats.byStatus.new
+const newInquiriesCount = submissionStats.byType.inquiry
+const unscheduledOnboardingCount = submissionStats.byType.onboarding
+
 // Role group shortcuts
 const SALES_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.SALES_STAFF] as const
 const FINANCE_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.ACCOUNTANT] as const
 const CONTENT_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.CONTENT_MANAGER] as const
+const TV_DISPLAY_ROLES = [ROLES.ADMIN, ROLES.TV_DISPLAY] as const
 const MANAGEMENT_ROLES = [ROLES.ADMIN, ROLES.MANAGER] as const
 const ADMIN_ONLY = [ROLES.ADMIN] as const
 
@@ -58,7 +65,7 @@ export const sidebarUser: User = {
 export const sidebarTeams: Team[] = [
   {
     name: 'Zervtek',
-    logo: Command,
+    logo: MdTerminal,
     plan: 'Admin Panel',
   },
 ]
@@ -70,73 +77,105 @@ export const sidebarNavGroups: NavGroup[] = [
       {
         title: 'Dashboard',
         url: '/',
-        icon: LayoutDashboard,
-      },
-      {
-        title: 'My Customers',
-        url: '/my-customers',
-        icon: UserCircle,
-        badge: myCustomersCount > 0 ? String(myCustomersCount) : undefined,
+        icon: MdDashboard,
       },
     ],
   },
   {
-    title: 'Sales',
+    title: 'Inventory',
     roles: [...SALES_ROLES],
     items: [
-      { title: 'Auctions', url: '/auctions', icon: Gavel },
-      { title: 'Purchases', url: '/purchases', icon: ShoppingCart },
+      { title: 'Auctions', url: '/auctions', icon: MdGavel },
+      { title: 'Stock Vehicles', url: '/stock-vehicles', icon: MdDirectionsCar },
+    ],
+  },
+  {
+    title: 'Operations',
+    roles: [...SALES_ROLES],
+    items: [
       {
         title: 'Bids',
         url: '/bids',
-        icon: Hand,
+        icon: MdPanTool,
         badge: pendingBidsCount > 0 ? String(pendingBidsCount) : undefined,
       },
-      { title: 'Stock Vehicles', url: '/stock-vehicles', icon: Car },
-      { title: 'Inquiries', url: '/inquiries', icon: HelpCircle },
-    ],
-  },
-  {
-    title: 'Services',
-    roles: [...FINANCE_ROLES],
-    items: [
       {
         title: 'Tasks',
         url: '/services',
-        icon: ClipboardCheck,
+        icon: MdFactCheck,
         badge: (pendingTranslationsCount + pendingInspectionsCount) > 0 ? String(pendingTranslationsCount + pendingInspectionsCount) : undefined,
       },
-      { title: 'TV Display', url: '/tv-display', icon: Tv },
     ],
   },
   {
-    title: 'Payments',
+    title: 'Finance',
     roles: [...FINANCE_ROLES],
     items: [
-      { title: 'Invoices', url: '/invoices', icon: FileText },
-      { title: 'Payments', url: '/payments', icon: CreditCard },
+      { title: 'Purchases', url: '/purchases', icon: MdShoppingCart },
+      { title: 'Invoices', url: '/invoices', icon: MdDescription },
+      { title: 'Payments', url: '/payments', icon: MdCreditCard },
+    ],
+  },
+  {
+    title: 'CRM',
+    roles: [...MANAGEMENT_ROLES],
+    items: [
+      { title: 'WhatsApp', url: '/whatsapp', icon: MdChat },
+      { title: 'Customers', url: '/customers', icon: MdPeople },
+      {
+        title: 'My Customers',
+        url: '/my-customers',
+        icon: MdAccountCircle,
+        badge: myCustomersCount > 0 ? String(myCustomersCount) : undefined,
+        roles: [ROLES.MANAGER, ROLES.SALES_STAFF],
+      },
+      {
+        title: 'Leads',
+        icon: MdInbox,
+        badge: newSubmissionsCount > 0 ? String(newSubmissionsCount) : undefined,
+        items: [
+          {
+            title: 'Inquiries',
+            url: '/leads/inquiries',
+            icon: MdDirectionsCar,
+            badge: newInquiriesCount > 0 ? String(newInquiriesCount) : undefined,
+          },
+          {
+            title: 'Onboarding',
+            url: '/leads/onboarding',
+            icon: MdFactCheck,
+            badge: unscheduledOnboardingCount > 0 ? String(unscheduledOnboardingCount) : undefined,
+          },
+          {
+            title: 'Assign',
+            url: '/leads/assign',
+            icon: MdPersonAdd,
+            roles: [...ADMIN_ONLY],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    title: 'Display',
+    roles: [...TV_DISPLAY_ROLES],
+    items: [
+      { title: 'TV Display', url: '/tv-display', icon: MdTv },
     ],
   },
   {
     title: 'Content',
     roles: [...CONTENT_ROLES],
     items: [
-      { title: 'Blogs', url: '/blogs', icon: FileText },
+      { title: 'Blogs', url: '/blogs', icon: MdDescription },
       {
         title: 'SEO Management',
-        icon: Globe,
+        icon: MdPublic,
         items: [
-          { title: 'Makes SEO', url: '/admin/makes', icon: Database },
-          { title: 'Models SEO', url: '/admin/models', icon: Tag },
+          { title: 'Makes SEO', url: '/admin/makes', icon: MdStorage },
+          { title: 'Models SEO', url: '/admin/models', icon: MdLocalOffer },
         ],
       },
-    ],
-  },
-  {
-    title: 'Communication',
-    roles: [...MANAGEMENT_ROLES],
-    items: [
-      { title: 'WhatsApp', url: '/whatsapp', icon: MessageCircle },
     ],
   },
   {
@@ -146,43 +185,25 @@ export const sidebarNavGroups: NavGroup[] = [
       {
         title: 'Support Tickets',
         url: '/support',
-        icon: TicketCheck,
+        icon: MdConfirmationNumber,
         badge: openTicketsCount > 0 ? String(openTicketsCount) : undefined,
       },
       {
         title: 'FAQ',
         url: '/faq',
-        icon: CircleHelp,
+        icon: MdHelpOutline,
       },
     ],
   },
   {
-    title: 'Users',
-    roles: [...MANAGEMENT_ROLES],
+    title: 'Admin',
+    roles: [...ADMIN_ONLY],
     items: [
-      { title: 'Customers', url: '/customers', icon: Users },
       {
         title: 'User Management',
         url: '/users',
-        icon: Shield,
-        roles: [...ADMIN_ONLY],
+        icon: MdSecurity,
       },
-    ],
-  },
-  {
-    title: 'System',
-    items: [
-      {
-        title: 'Settings',
-        icon: Settings,
-        items: [
-          { title: 'Profile', url: '/settings' },
-          { title: 'Account', url: '/settings/account' },
-          { title: 'Appearance', url: '/settings/appearance' },
-          { title: 'Notifications', url: '/settings/notifications' },
-        ],
-      },
-      { title: 'Security', url: '/security', icon: Shield },
     ],
   },
 ]

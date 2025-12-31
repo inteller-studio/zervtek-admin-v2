@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { type Table } from '@tanstack/react-table'
-import { Trash2, UserX, UserCheck, Mail } from 'lucide-react'
+import { MdDelete, MdPersonOff, MdVerifiedUser, MdEmail } from 'react-icons/md'
 import { toast } from 'sonner'
 import { sleep } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -62,7 +62,7 @@ export function DataTableBulkActions<TData>({
               aria-label='Invite selected users'
               title='Invite selected users'
             >
-              <Mail />
+              <MdEmail />
               <span className='sr-only'>Invite selected users</span>
             </Button>
           </TooltipTrigger>
@@ -81,7 +81,7 @@ export function DataTableBulkActions<TData>({
               aria-label='Activate selected users'
               title='Activate selected users'
             >
-              <UserCheck />
+              <MdVerifiedUser />
               <span className='sr-only'>Activate selected users</span>
             </Button>
           </TooltipTrigger>
@@ -100,7 +100,7 @@ export function DataTableBulkActions<TData>({
               aria-label='Deactivate selected users'
               title='Deactivate selected users'
             >
-              <UserX />
+              <MdPersonOff />
               <span className='sr-only'>Deactivate selected users</span>
             </Button>
           </TooltipTrigger>
@@ -119,7 +119,7 @@ export function DataTableBulkActions<TData>({
               aria-label='Delete selected users'
               title='Delete selected users'
             >
-              <Trash2 />
+              <MdDelete />
               <span className='sr-only'>Delete selected users</span>
             </Button>
           </TooltipTrigger>

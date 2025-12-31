@@ -1,14 +1,14 @@
 'use client'
 
 import { format } from 'date-fns'
-import { CreditCard, Building2, Receipt, Wallet } from 'lucide-react'
+import { MdCreditCard, MdBusiness, MdReceipt, MdAccountBalanceWallet } from 'react-icons/md'
 import { type Payment } from '../data/won-auctions'
 
 const methodIcons = {
-  card: CreditCard,
-  wire_transfer: Building2,
-  bank_check: Receipt,
-  paypal: Wallet,
+  card: MdCreditCard,
+  wire_transfer: MdBusiness,
+  bank_check: MdReceipt,
+  paypal: MdAccountBalanceWallet,
 }
 
 const methodLabels = {

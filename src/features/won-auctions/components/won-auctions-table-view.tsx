@@ -1,7 +1,7 @@
 'use client'
 
 import { format } from 'date-fns'
-import { Eye, MoreHorizontal, FileText, Ship, DollarSign } from 'lucide-react'
+import { MdVisibility, MdMoreHoriz, MdDescription, MdDirectionsBoat, MdAttachMoney } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -21,21 +21,21 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { type WonAuction } from '../data/won-auctions'
+import { type Purchase } from '../data/won-auctions'
 import { VinCopyButton } from './vin-copy-button'
 import { DeliveryCountdown } from './delivery-countdown'
-import { type WonAuctionsDialogType, type PurchaseModalMode } from '../types'
+import { type WonAuctionsDialogType } from '../types'
 
 interface WonAuctionsTableViewProps {
-  data: WonAuction[]
-  onOpenDialog: (type: WonAuctionsDialogType, auction: WonAuction) => void
-  onOpenPurchaseModal: (auction: WonAuction, mode: PurchaseModalMode) => void
-  onMarkDelivered: (auction: WonAuction) => void
-  onMarkCompleted: (auction: WonAuction) => void
+  data: Purchase[]
+  onOpenDialog: (type: WonAuctionsDialogType, auction: Purchase) => void
+  onViewDetails: (auction: Purchase) => void
+  onMarkDelivered: (auction: Purchase) => void
+  onMarkCompleted: (auction: Purchase) => void
 }
 
-const getStatusColor = (status: WonAuction['status']) => {
-  const colors: Record<WonAuction['status'], string> = {
+const getStatusColor = (status: Purchase['status']) => {
+  const colors: Record<Purchase['status'], string> = {
     payment_pending: 'text-yellow-600 bg-yellow-50 border-yellow-200',
     processing: 'text-blue-600 bg-blue-50 border-blue-200',
     documents_pending: 'text-slate-700 bg-slate-100 border-slate-300',
@@ -46,8 +46,8 @@ const getStatusColor = (status: WonAuction['status']) => {
   return colors[status] || ''
 }
 
-const getPaymentStatusColor = (status: WonAuction['paymentStatus']) => {
-  const colors: Record<WonAuction['paymentStatus'], string> = {
+const getPaymentStatusColor = (status: Purchase['paymentStatus']) => {
+  const colors: Record<Purchase['paymentStatus'], string> = {
     pending: 'text-yellow-600 bg-yellow-50',
     partial: 'text-slate-700 bg-slate-100',
     completed: 'text-green-600 bg-green-50',
@@ -58,7 +58,7 @@ const getPaymentStatusColor = (status: WonAuction['paymentStatus']) => {
 export function WonAuctionsTableView({
   data,
   onOpenDialog,
-  onOpenPurchaseModal,
+  onViewDetails,
   onMarkDelivered,
   onMarkCompleted,
 }: WonAuctionsTableViewProps) {
@@ -139,31 +139,31 @@ export function WonAuctionsTableView({
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant='ghost' size='sm'>
-                        <MoreHorizontal className='h-4 w-4' />
+                        <MdMoreHoriz className='h-4 w-4' />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={() => onOpenPurchaseModal(auction, 'overview')}>
-                        <Eye className='mr-2 h-4 w-4' />
+                      <DropdownMenuItem onClick={() => onViewDetails(auction)}>
+                        <MdVisibility className='mr-2 h-4 w-4' />
                         View Details
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onOpenDialog('invoice', auction)}>
-                        <FileText className='mr-2 h-4 w-4' />
+                        <MdDescription className='mr-2 h-4 w-4' />
                         Invoice
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onOpenDialog('payment', auction)}>
-                        <DollarSign className='mr-2 h-4 w-4' />
+                        <MdAttachMoney className='mr-2 h-4 w-4' />
                         Record Payment
                       </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => onOpenDialog('documents', auction)}>
-                        <FileText className='mr-2 h-4 w-4' />
+                        <MdDescription className='mr-2 h-4 w-4' />
                         Manage Documents
                       </DropdownMenuItem>
                       {auction.paymentStatus === 'completed' && auction.status !== 'shipping' && (
                         <DropdownMenuItem onClick={() => onOpenDialog('shipping', auction)}>
-                          <Ship className='mr-2 h-4 w-4' />
+                          <MdDirectionsBoat className='mr-2 h-4 w-4' />
                           Update Shipping
                         </DropdownMenuItem>
                       )}
@@ -186,7 +186,7 @@ export function WonAuctionsTableView({
           {data.length === 0 && (
             <TableRow>
               <TableCell colSpan={7} className='py-8 text-center text-muted-foreground'>
-                No auctions found matching your criteria
+                No purchases found matching your criteria
               </TableCell>
             </TableRow>
           )}

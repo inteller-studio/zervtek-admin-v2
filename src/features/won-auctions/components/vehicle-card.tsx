@@ -2,34 +2,20 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { format, formatDistanceToNow } from 'date-fns'
+import { MdGavel, MdInventory } from 'react-icons/md'
 import { motion } from 'framer-motion'
 import {
-  MoreHorizontal,
-  Ship,
-  FileText,
-  CreditCard,
-  Truck,
-  CheckCircle2,
-  Copy,
-  Clock,
-  Package,
-  MapPin,
-  Check,
-  User,
-  Calendar,
-  Banknote,
-  FileCheck,
-  Anchor,
-  ClipboardList,
-} from 'lucide-react'
+  MdMoreVert,
+  MdDirectionsBoat,
+  MdDescription,
+  MdCreditCard,
+  MdLocalShipping,
+  MdCheckCircle,
+  MdContentCopy,
+  MdCheck,
+  MdAssignment,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from '@/components/ui/tooltip'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -37,12 +23,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { type WonAuction } from '../data/won-auctions'
+import { type Purchase } from '../data/won-auctions'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
 interface VehicleCardProps {
-  auction: WonAuction
+  auction: Purchase
   loading?: boolean
   selected?: boolean
   onViewDetails: () => void
@@ -56,38 +42,45 @@ interface VehicleCardProps {
   onMarkCompleted: () => void
 }
 
-// Status configuration with Catalyst variants
-const getStatusConfig = (status: WonAuction['status']) => {
+// Material Design 3 status configuration - dot indicator style
+const getStatusConfig = (status: Purchase['status']) => {
   const config: Record<
-    WonAuction['status'],
+    Purchase['status'],
     {
       label: string
-      variant: 'amber' | 'blue' | 'zinc' | 'emerald'
+      dotColor: string
+      textColor: string
     }
   > = {
     payment_pending: {
-      label: 'Payment Pending',
-      variant: 'amber',
+      label: 'Payment',
+      dotColor: 'bg-amber-500',
+      textColor: 'text-amber-700 dark:text-amber-400',
     },
     processing: {
       label: 'Processing',
-      variant: 'blue',
+      dotColor: 'bg-blue-500',
+      textColor: 'text-blue-700 dark:text-blue-400',
     },
     documents_pending: {
-      label: 'Documents Pending',
-      variant: 'zinc',
+      label: 'Documents',
+      dotColor: 'bg-purple-500',
+      textColor: 'text-purple-700 dark:text-purple-400',
     },
     shipping: {
       label: 'In Transit',
-      variant: 'blue',
+      dotColor: 'bg-cyan-500',
+      textColor: 'text-cyan-700 dark:text-cyan-400',
     },
     delivered: {
       label: 'Delivered',
-      variant: 'emerald',
+      dotColor: 'bg-emerald-500',
+      textColor: 'text-emerald-700 dark:text-emerald-400',
     },
     completed: {
       label: 'Completed',
-      variant: 'zinc',
+      dotColor: 'bg-emerald-500',
+      textColor: 'text-emerald-700 dark:text-emerald-400',
     },
   }
   return config[status]
@@ -112,7 +105,7 @@ export function VehicleCard({
   const imageIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
   const images = auction.vehicleInfo.images.filter(img => img !== '#' && img)
-  const defaultImageIndex = images.length > 1 ? 1 : 0 // Use 2nd image as default
+  const defaultImageIndex = images.length > 1 ? 1 : 0
   const [currentImageIndex, setCurrentImageIndex] = useState(defaultImageIndex)
 
   // Cycle through images on hover
@@ -120,7 +113,7 @@ export function VehicleCard({
     if (isHovered && images.length > 1) {
       imageIntervalRef.current = setInterval(() => {
         setCurrentImageIndex((prev) => (prev + 1) % images.length)
-      }, 1000)
+      }, 1500)
     } else {
       if (imageIntervalRef.current) {
         clearInterval(imageIntervalRef.current)
@@ -139,32 +132,25 @@ export function VehicleCard({
   // Loading skeleton
   if (loading) {
     return (
-      <Card className='border-border/50 py-0 gap-0'>
-        <CardContent className='px-4 py-2'>
-          <div className='flex gap-4'>
-            {/* Image skeleton */}
-            <div className='w-[200px] h-[140px] rounded-lg animate-pulse bg-muted/50 shrink-0' />
-            {/* Content skeleton */}
-            <div className='flex-1 space-y-4'>
-              <div className='flex justify-between'>
-                <div className='space-y-2'>
-                  <div className='h-5 w-48 animate-pulse rounded bg-muted/50' />
-                  <div className='h-4 w-64 animate-pulse rounded bg-muted/50' />
-                </div>
-                <div className='h-6 w-28 animate-pulse rounded-md bg-muted/50' />
+      <div className='rounded-2xl border border-border/50 bg-card p-2'>
+        <div className='flex gap-3'>
+          <div className='w-[220px] h-[140px] rounded-xl animate-pulse bg-muted/50 shrink-0' />
+          <div className='flex-1 py-1 space-y-3'>
+            <div className='flex justify-between'>
+              <div className='space-y-2'>
+                <div className='h-5 w-48 animate-pulse rounded bg-muted/50' />
+                <div className='h-4 w-32 animate-pulse rounded bg-muted/50' />
               </div>
-              <div className='grid grid-cols-6 gap-6'>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className='space-y-1.5'>
-                    <div className='h-3 w-14 animate-pulse rounded bg-muted/50' />
-                    <div className='h-4 w-20 animate-pulse rounded bg-muted/50' />
-                  </div>
-                ))}
-              </div>
+              <div className='h-6 w-20 animate-pulse rounded-full bg-muted/50' />
+            </div>
+            <div className='h-4 w-64 animate-pulse rounded bg-muted/50' />
+            <div className='flex gap-4'>
+              <div className='h-5 w-28 animate-pulse rounded bg-muted/50' />
+              <div className='h-5 w-24 animate-pulse rounded bg-muted/50' />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     )
   }
 
@@ -172,8 +158,6 @@ export function VehicleCard({
   const statusConfig = getStatusConfig(auction.status)
   const paymentProgress = Math.round((auction.paidAmount / auction.totalAmount) * 100)
   const vehicleTitle = `${auction.vehicleInfo.year} ${auction.vehicleInfo.make} ${auction.vehicleInfo.model}`
-  const documentsCount = auction.documents.length
-  const paymentsCount = auction.payments.length
 
   const copyVin = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -183,26 +167,33 @@ export function VehicleCard({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  // Format specs line with dot separators
+  const specsLine = [
+    auction.vehicleInfo.color,
+    `${auction.vehicleInfo.mileage.toLocaleString()} km`,
+    auction.destinationPort?.split(',')[0],
+  ].filter(Boolean).join(' • ')
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 4 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
       className='group'
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <Card
+      <div
         tabIndex={0}
         role='button'
         aria-label={`View details for ${vehicleTitle}`}
         className={cn(
-          'cursor-pointer overflow-hidden transition-all duration-150 py-0 gap-0',
-          'border-border/50 bg-card',
+          'relative rounded-2xl border bg-card overflow-hidden transition-all duration-200 cursor-pointer',
+          'hover:shadow-xl hover:shadow-black/5 dark:hover:shadow-black/20',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           selected
-            ? 'border-l-2 border-l-primary bg-primary/5'
-            : 'hover:bg-accent/5'
+            ? 'border-primary shadow-lg shadow-primary/10'
+            : 'border-border/50 hover:border-border'
         )}
         onClick={onViewDetails}
         onKeyDown={(e) => {
@@ -212,13 +203,14 @@ export function VehicleCard({
           }
         }}
       >
-        <CardContent className='px-4 py-2'>
-          <div className='flex gap-4'>
-            {/* Vehicle Image - Larger with hover slideshow */}
+        {/* Main Container - Consistent p-2 padding */}
+        <div className='flex p-2 gap-3'>
+          {/* Image Section - 220x140px */}
+          <div className='relative w-[220px] shrink-0'>
             <div
               className={cn(
-                'relative w-[200px] h-[140px] rounded-lg overflow-hidden bg-muted/30 shrink-0',
-                'transition-transform duration-150',
+                'relative h-[140px] rounded-xl overflow-hidden bg-gradient-to-br from-muted/50 to-muted',
+                'transition-transform duration-300',
                 isHovered && 'scale-[1.02]'
               )}
             >
@@ -226,29 +218,33 @@ export function VehicleCard({
                 <>
                   <img
                     src={images[currentImageIndex]}
-                    alt={`${vehicleTitle} - Image ${currentImageIndex + 1}`}
-                    className='h-full w-full object-cover transition-opacity duration-300'
+                    alt={vehicleTitle}
+                    className='h-full w-full object-cover'
                   />
-                  {/* Image indicators */}
+                  {/* Subtle gradient overlay */}
+                  <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent' />
+
+                  {/* Image count badge */}
+                  {images.length > 1 && (
+                    <div className='absolute top-2 left-2 bg-black/60 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-md'>
+                      {currentImageIndex + 1}/{images.length}
+                    </div>
+                  )}
+
+                  {/* Image dots indicator */}
                   {images.length > 1 && (
                     <div className='absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1'>
-                      {images.map((_, idx) => (
+                      {images.slice(0, 5).map((_, idx) => (
                         <div
                           key={idx}
                           className={cn(
-                            'w-1.5 h-1.5 rounded-full transition-all duration-200',
+                            'h-1 rounded-full transition-all duration-300',
                             idx === currentImageIndex
-                              ? 'bg-white w-3'
-                              : 'bg-white/50'
+                              ? 'w-4 bg-white'
+                              : 'w-1 bg-white/50'
                           )}
                         />
                       ))}
-                    </div>
-                  )}
-                  {/* Image count badge */}
-                  {images.length > 1 && (
-                    <div className='absolute top-2 right-2 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded'>
-                      {currentImageIndex + 1}/{images.length}
                     </div>
                   )}
                 </>
@@ -258,362 +254,207 @@ export function VehicleCard({
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Main Content */}
-            <div className='flex-1 min-w-0'>
-              {/* Header Row */}
-              <div className='flex items-start justify-between gap-4 mb-2'>
-                {/* Left: Title, VIN, Customer */}
-                <div className='min-w-0 flex-1'>
-                  <div className='flex items-center gap-3'>
-                    <h2 className='text-base font-medium text-foreground truncate'>
-                      {vehicleTitle}
-                    </h2>
-                    <span className='text-xs text-muted-foreground shrink-0'>
-                      #{auction.auctionId}
-                    </span>
-                  </div>
+          {/* Content Section */}
+          <div className='flex-1 min-w-0 flex flex-col justify-between py-1'>
+            {/* Section 1: Header */}
+            <div>
+              {/* Title + Status + Actions */}
+              <div className='flex items-start justify-between gap-2'>
+                <h2 className='text-[15px] font-semibold text-foreground truncate leading-tight'>
+                  {vehicleTitle}
+                </h2>
 
-                  {/* VIN + Customer Row */}
-                  <div className='flex items-center gap-4 mt-1.5'>
-                    <button
-                      onClick={copyVin}
-                      className={cn(
-                        'inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground',
-                        'hover:text-foreground transition-colors rounded-sm',
-                        'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring'
-                      )}
-                      aria-label={`Copy VIN ${auction.vehicleInfo.vin}`}
-                    >
-                      <span>{auction.vehicleInfo.vin}</span>
-                      {copied ? (
-                        <Check className='h-3 w-3 text-emerald-500' />
-                      ) : (
-                        <Copy className={cn(
-                          'h-3 w-3 transition-opacity',
-                          isHovered ? 'opacity-60' : 'opacity-0'
-                        )} />
-                      )}
-                    </button>
-
-                    <span className='text-border'>|</span>
-
-                    <span className='inline-flex items-center gap-1.5 text-sm text-muted-foreground'>
-                      <User className='h-3 w-3 shrink-0' />
-                      <span className='truncate'>{auction.winnerName}</span>
-                    </span>
-
-                    <span className='text-border'>|</span>
-
-                    <span className='inline-flex items-center gap-1.5 text-sm text-muted-foreground'>
-                      <Calendar className='h-3 w-3 shrink-0' />
-                      <span>{format(new Date(auction.auctionEndDate), 'MMM d, yyyy')}</span>
-                    </span>
-                  </div>
-                </div>
-
-                {/* Right: Status Badge + Actions */}
                 <div className='flex items-center gap-2 shrink-0'>
-                  <Badge variant={statusConfig.variant}>
-                    {statusConfig.label}
-                  </Badge>
+                  {/* Material Design 3 Status - Dot + Label */}
+                  <div className='inline-flex items-center gap-1.5'>
+                    <span className={cn(
+                      'h-2 w-2 rounded-full animate-pulse',
+                      statusConfig.dotColor
+                    )} />
+                    <span className={cn(
+                      'text-xs font-medium',
+                      statusConfig.textColor
+                    )}>
+                      {statusConfig.label}
+                    </span>
+                  </div>
 
                   {/* Actions Menu */}
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant='ghost'
-                              size='icon'
-                              className={cn(
-                                'h-8 w-8 text-muted-foreground hover:text-foreground',
-                                'transition-opacity duration-150',
-                                isHovered ? 'opacity-100' : 'opacity-0',
-                                'focus-visible:opacity-100'
-                              )}
-                              aria-label='More actions'
-                            >
-                              <MoreHorizontal className='h-4 w-4' />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align='end' className='w-48' onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewDetails() }}>
-                              <FileText className='mr-2 h-4 w-4' />
-                              View Details
-                            </DropdownMenuItem>
-                            {onManageWorkflow && (
-                              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onManageWorkflow() }}>
-                                <ClipboardList className='mr-2 h-4 w-4' />
-                                Manage Workflow
-                              </DropdownMenuItem>
-                            )}
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onGenerateInvoice() }}>
-                              <FileText className='mr-2 h-4 w-4' />
-                              Download Invoice
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRecordPayment() }}>
-                              <CreditCard className='mr-2 h-4 w-4' />
-                              Record Payment
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onManageDocuments() }}>
-                              <FileText className='mr-2 h-4 w-4' />
-                              Manage Documents
-                            </DropdownMenuItem>
-                            {auction.paymentStatus === 'completed' && auction.status !== 'shipping' && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUpdateShipping() }}>
-                                  <Ship className='mr-2 h-4 w-4' />
-                                  Update Shipping
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {auction.status === 'shipping' && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkDelivered() }}>
-                                  <Truck className='mr-2 h-4 w-4' />
-                                  Mark Delivered
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            {auction.status === 'delivered' && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkCompleted() }}>
-                                  <CheckCircle2 className='mr-2 h-4 w-4' />
-                                  Mark Completed
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </TooltipTrigger>
-                    <TooltipContent side='left'>
-                      <p>More actions</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  <DropdownMenu>
+                  <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className={cn(
+                        'h-7 w-7 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted shrink-0',
+                        'opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity'
+                      )}
+                    >
+                      <MdMoreVert className='h-4 w-4' />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align='end' className='w-44' onClick={(e) => e.stopPropagation()}>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewDetails() }}>
+                      <MdDescription className='mr-2 h-4 w-4' />
+                      View Details
+                    </DropdownMenuItem>
+                    {onManageWorkflow && (
+                      <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onManageWorkflow() }}>
+                        <MdAssignment className='mr-2 h-4 w-4' />
+                        Manage Workflow
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onGenerateInvoice() }}>
+                      <MdDescription className='mr-2 h-4 w-4' />
+                      Download Invoice
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onRecordPayment() }}>
+                      <MdCreditCard className='mr-2 h-4 w-4' />
+                      Record Payment
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onManageDocuments() }}>
+                      <MdDescription className='mr-2 h-4 w-4' />
+                      Manage Documents
+                    </DropdownMenuItem>
+                    {auction.paymentStatus === 'completed' && auction.status !== 'shipping' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onUpdateShipping() }}>
+                          <MdDirectionsBoat className='mr-2 h-4 w-4' />
+                          Update Shipping
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {auction.status === 'shipping' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkDelivered() }}>
+                          <MdLocalShipping className='mr-2 h-4 w-4' />
+                          Mark Delivered
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                    {auction.status === 'delivered' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onMarkCompleted() }}>
+                          <MdCheckCircle className='mr-2 h-4 w-4' />
+                          Mark Completed
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 </div>
               </div>
 
-              {/* Data Grid - 2 rows with consistent columns */}
-              <div className='grid grid-cols-7 gap-x-6 gap-y-2' style={{ gridTemplateColumns: 'repeat(7, minmax(85px, 1fr))' }}>
-                {/* Row 1 */}
-                {/* Mileage */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Mileage
-                  </p>
-                  <p className='text-sm font-medium tabular-nums'>
-                    {auction.vehicleInfo.mileage.toLocaleString()} km
-                  </p>
-                </div>
-
-                {/* Color */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Color
-                  </p>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <p className='text-sm font-medium truncate cursor-default'>
-                        {auction.vehicleInfo.color}
-                      </p>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{auction.vehicleInfo.color}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-
-                {/* Winning Bid */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Winning Bid
-                  </p>
-                  <p className='text-sm font-medium tabular-nums'>
-                    ¥{auction.winningBid.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Shipping */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Shipping
-                  </p>
-                  <p className='text-sm font-medium tabular-nums'>
-                    ¥{auction.shippingCost.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Total Amount */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Total
-                  </p>
-                  <p className='text-sm font-semibold tabular-nums'>
-                    ¥{auction.totalAmount.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Payment Progress */}
-                <div className='space-y-1 min-w-[90px]'>
-                  <div className='flex items-center justify-between'>
-                    <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                      Paid
-                    </p>
-                    <div className='flex items-center gap-1'>
-                      {paymentProgress === 100 && (
-                        <CheckCircle2 className='h-3 w-3 text-emerald-500' />
-                      )}
-                      <span className='text-xs font-medium tabular-nums'>{paymentProgress}%</span>
+              {/* Source Info (Auction or Stock) + VIN + Customer */}
+              <div className='flex items-center gap-2 mt-1 text-xs'>
+                {auction.source === 'auction' ? (
+                  <>
+                    <div className='inline-flex items-center gap-1 text-muted-foreground'>
+                      <MdGavel className='h-3 w-3' />
+                      <span className='font-medium'>{auction.auctionHouse}</span>
                     </div>
+                    <span className='text-muted-foreground/40'>•</span>
+                    <span className='font-mono text-muted-foreground'>Lot {auction.lotNumber}</span>
+                    {auction.auctionDate && (
+                      <>
+                        <span className='text-muted-foreground/40'>•</span>
+                        <span className='text-muted-foreground'>{format(new Date(auction.auctionDate), 'MMM d')}</span>
+                      </>
+                    )}
+                  </>
+                ) : (
+                  <div className='inline-flex items-center gap-1 text-muted-foreground'>
+                    <MdInventory className='h-3 w-3' />
+                    <span className='font-mono font-medium'>{auction.stockId}</span>
                   </div>
-                  <div className='h-1.5 w-full bg-muted rounded-full overflow-hidden'>
-                    <div
-                      className='h-full bg-foreground/60 rounded-full transition-all duration-300'
-                      style={{ width: `${paymentProgress}%` }}
-                    />
-                  </div>
-                </div>
+                )}
+                <span className='text-muted-foreground/40'>•</span>
+                <button
+                  onClick={copyVin}
+                  className={cn(
+                    'inline-flex items-center gap-1 font-mono',
+                    'text-muted-foreground hover:text-foreground transition-colors',
+                    'focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded'
+                  )}
+                >
+                  <span>{auction.vehicleInfo.vin}</span>
+                  {copied ? (
+                    <MdCheck className='h-3.5 w-3.5 text-emerald-500' />
+                  ) : (
+                    <MdContentCopy className='h-3.5 w-3.5 opacity-0 group-hover:opacity-50 transition-opacity' />
+                  )}
+                </button>
+              </div>
 
-                {/* Outstanding / Paid Status */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Balance
-                  </p>
-                  {outstandingBalance > 0 ? (
-                    <p className='text-sm font-medium tabular-nums'>
+              {/* Customer + Specs line */}
+              <p className='text-xs text-muted-foreground mt-1.5 truncate'>
+                <span className='font-medium text-foreground/80'>{auction.winnerName}</span>
+                <span className='mx-1.5'>•</span>
+                {specsLine}
+                {auction.shipment && (
+                  <span> • {auction.shipment.carrier}</span>
+                )}
+              </p>
+            </div>
+
+            {/* Section 2: Financial */}
+            <div className='flex items-center gap-3 mt-auto'>
+              {/* Bid Price */}
+              <div className='text-xs'>
+                <span className='text-muted-foreground'>Bid </span>
+                <span className='font-semibold tabular-nums'>¥{auction.winningBid.toLocaleString()}</span>
+              </div>
+
+              {/* Total Price */}
+              <div className='text-xs'>
+                <span className='text-muted-foreground'>Total </span>
+                <span className='font-bold tabular-nums'>¥{auction.totalAmount.toLocaleString()}</span>
+              </div>
+
+              {/* Payment Status */}
+              <div className='flex items-center gap-1'>
+                {paymentProgress === 100 ? (
+                  <>
+                    <MdCheckCircle className='h-3.5 w-3.5 text-emerald-500' />
+                    <span className='text-xs font-semibold text-emerald-600 dark:text-emerald-400'>Paid</span>
+                  </>
+                ) : (
+                  <>
+                    <span className='text-xs text-muted-foreground'>Due</span>
+                    <span className='text-xs font-semibold tabular-nums text-amber-600 dark:text-amber-400'>
                       ¥{outstandingBalance.toLocaleString()}
-                    </p>
-                  ) : (
-                    <p className='text-sm font-medium text-emerald-600 dark:text-emerald-500 flex items-center gap-1'>
-                      <CheckCircle2 className='h-3.5 w-3.5' />
-                      Cleared
-                    </p>
-                  )}
-                </div>
+                    </span>
+                  </>
+                )}
+              </div>
 
-                {/* Row 2 */}
-                {/* Destination */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Destination
-                  </p>
-                  {auction.destinationPort ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className='text-sm font-medium truncate flex items-center gap-1.5 cursor-default'>
-                          <MapPin className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
-                          <span className='truncate'>{auction.destinationPort.split(',')[0]}</span>
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{auction.destinationPort}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>—</p>
-                  )}
-                </div>
+              {/* Documents count */}
+              <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <MdDescription className='h-3.5 w-3.5' />
+                <span>{auction.documents.length}</span>
+              </div>
 
-                {/* Documents */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Documents
-                  </p>
-                  <p className='text-sm font-medium flex items-center gap-1.5'>
-                    <FileCheck className='h-3.5 w-3.5 text-muted-foreground' />
-                    {documentsCount}
-                  </p>
-                </div>
-
-                {/* Payments */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Payments
-                  </p>
-                  <p className='text-sm font-medium flex items-center gap-1.5'>
-                    <Banknote className='h-3.5 w-3.5 text-muted-foreground' />
-                    {paymentsCount}
-                  </p>
-                </div>
-
-                {/* Carrier / Shipping Info */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Carrier
-                  </p>
-                  {auction.shipment ? (
-                    <p className='text-sm font-medium truncate flex items-center gap-1.5'>
-                      <Anchor className='h-3.5 w-3.5 text-muted-foreground shrink-0' />
-                      <span className='truncate'>{auction.shipment.carrier}</span>
-                    </p>
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>—</p>
-                  )}
-                </div>
-
-                {/* ETA */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    ETA
-                  </p>
-                  {auction.shipment?.estimatedDelivery ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className='text-sm font-medium cursor-default'>
-                          {format(new Date(auction.shipment.estimatedDelivery), 'MMM d')}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{format(new Date(auction.shipment.estimatedDelivery), 'MMMM d, yyyy')}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>—</p>
-                  )}
-                </div>
-
-                {/* Tracking */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Tracking
-                  </p>
-                  {auction.shipment?.trackingNumber ? (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className='text-sm font-mono font-medium truncate cursor-default'>
-                          {auction.shipment.trackingNumber.slice(0, 8)}...
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{auction.shipment.trackingNumber}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ) : (
-                    <p className='text-sm text-muted-foreground'>—</p>
-                  )}
-                </div>
-
-                {/* Time Since Won */}
-                <div className='space-y-1'>
-                  <p className='text-xs text-muted-foreground uppercase tracking-wide'>
-                    Age
-                  </p>
-                  <p className='text-sm font-medium'>
-                    {formatDistanceToNow(new Date(auction.auctionEndDate), { addSuffix: false })}
-                  </p>
-                </div>
+              {/* ETA or Age - Right aligned */}
+              <div className='flex items-center gap-1 text-xs text-muted-foreground ml-auto'>
+                {auction.shipment?.estimatedDelivery ? (
+                  <>
+                    <MdDirectionsBoat className='h-3.5 w-3.5' />
+                    <span>ETA {format(new Date(auction.shipment.estimatedDelivery), 'MMM d')}</span>
+                  </>
+                ) : (
+                  <span>{formatDistanceToNow(new Date(auction.auctionEndDate), { addSuffix: true })}</span>
+                )}
               </div>
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   )
 }

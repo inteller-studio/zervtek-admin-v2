@@ -3,28 +3,28 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  X,
-  Car,
-  ChevronLeft,
-  ChevronRight,
-  Warehouse,
-  GaugeCircle,
-  Wrench,
-  Fuel,
-  Paintbrush2,
-  CalendarDays,
-  FileText,
-  Edit,
-  Trash2,
-  Link,
-  Check,
-  Copy,
-  ZoomIn,
-  Maximize2,
-  Tag,
-  Award,
-  Package,
-} from 'lucide-react'
+  MdClose,
+  MdDirectionsCar,
+  MdChevronLeft,
+  MdChevronRight,
+  MdWarehouse,
+  MdSpeed,
+  MdBuild,
+  MdLocalGasStation,
+  MdBrush,
+  MdCalendarToday,
+  MdDescription,
+  MdEdit,
+  MdDelete,
+  MdLink,
+  MdCheck,
+  MdContentCopy,
+  MdZoomIn,
+  MdFullscreen,
+  MdLocalOffer,
+  MdEmojiEvents,
+  MdInventory2,
+} from 'react-icons/md'
 import {
   Tooltip,
   TooltipContent,
@@ -142,7 +142,7 @@ function InfoRow({
             className='p-1 rounded hover:bg-muted transition-colors'
             aria-label='Copy to clipboard'
           >
-            <Copy className='h-3 w-3 text-muted-foreground' />
+            <MdContentCopy className='h-3 w-3 text-muted-foreground' />
           </button>
         )}
       </div>
@@ -274,7 +274,7 @@ export function VehicleDetailModal({
                             {/* Zoom hint overlay */}
                             <div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center'>
                               <div className='opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3 backdrop-blur-sm'>
-                                <ZoomIn className='h-6 w-6 text-white' />
+                                <MdZoomIn className='h-6 w-6 text-white' />
                               </div>
                             </div>
 
@@ -288,7 +288,7 @@ export function VehicleDetailModal({
                                   }}
                                   className='absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
                                 >
-                                  <ChevronLeft className='h-6 w-6' />
+                                  <MdChevronLeft className='h-6 w-6' />
                                 </button>
                                 <button
                                   onClick={(e) => {
@@ -297,7 +297,7 @@ export function VehicleDetailModal({
                                   }}
                                   className='absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
                                 >
-                                  <ChevronRight className='h-6 w-6' />
+                                  <MdChevronRight className='h-6 w-6' />
                                 </button>
                               </>
                             )}
@@ -326,14 +326,14 @@ export function VehicleDetailModal({
                             {/* Fullscreen hint */}
                             <div className='absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity'>
                               <div className='flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm'>
-                                <Maximize2 className='h-3.5 w-3.5' />
+                                <MdFullscreen className='h-3.5 w-3.5' />
                                 <span>Click to expand</span>
                               </div>
                             </div>
                           </>
                         ) : (
                           <div className='flex h-full w-full items-center justify-center'>
-                            <Car className='h-20 w-20 text-muted-foreground/30' />
+                            <MdDirectionsCar className='h-20 w-20 text-muted-foreground/30' />
                           </div>
                         )}
                       </div>
@@ -367,7 +367,7 @@ export function VehicleDetailModal({
                         onClick={onClose}
                         className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40'
                       >
-                        <X className='h-5 w-5' />
+                        <MdClose className='h-5 w-5' />
                       </button>
                     </div>
 
@@ -398,7 +398,7 @@ export function VehicleDetailModal({
                       {/* Vehicle Title Card */}
                       <div className='flex items-center gap-4 rounded-xl bg-muted/30 p-4'>
                         <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center'>
-                          <Car className='h-6 w-6 text-primary' />
+                          <MdDirectionsCar className='h-6 w-6 text-primary' />
                         </div>
                         <div className='flex-1 min-w-0'>
                           <div className='flex items-center gap-2'>
@@ -429,9 +429,9 @@ export function VehicleDetailModal({
                               className='p-2 rounded-lg hover:bg-muted transition-colors'
                             >
                               {copiedLink ? (
-                                <Check className='w-4 h-4 text-emerald-500' />
+                                <MdCheck className='w-4 h-4 text-emerald-500' />
                               ) : (
-                                <Link className='w-4 h-4 text-muted-foreground' />
+                                <MdLink className='w-4 h-4 text-muted-foreground' />
                               )}
                             </button>
                           </TooltipTrigger>
@@ -451,7 +451,7 @@ export function VehicleDetailModal({
                           <div className='space-y-0.5'>
                             <div className='flex justify-between items-center py-2.5'>
                               <span className='text-sm text-muted-foreground flex items-center gap-1.5'>
-                                <Tag className='h-3.5 w-3.5' />
+                                <MdLocalOffer className='h-3.5 w-3.5' />
                                 Stock ID
                               </span>
                               <div className='flex items-center gap-1.5'>
@@ -466,9 +466,9 @@ export function VehicleDetailModal({
                                   className='p-1 rounded hover:bg-muted transition-colors'
                                 >
                                   {copiedId ? (
-                                    <Check className='h-3 w-3 text-emerald-500' />
+                                    <MdCheck className='h-3 w-3 text-emerald-500' />
                                   ) : (
-                                    <Copy className='h-3 w-3 text-muted-foreground' />
+                                    <MdContentCopy className='h-3 w-3 text-muted-foreground' />
                                   )}
                                 </button>
                               </div>
@@ -476,26 +476,26 @@ export function VehicleDetailModal({
                             <InfoRow
                               label='Stock #'
                               value={vehicle.stockNumber}
-                              icon={<Package className='h-3.5 w-3.5' />}
+                              icon={<MdInventory2 className='h-3.5 w-3.5' />}
                               mono
                             />
                             <InfoRow
                               label='Location'
                               value={vehicle.location}
-                              icon={<Warehouse className='h-3.5 w-3.5' />}
+                              icon={<MdWarehouse className='h-3.5 w-3.5' />}
                             />
                             {vehicle.score && (
                               <InfoRow
                                 label='Score'
                                 value={vehicle.score}
-                                icon={<Award className='h-3.5 w-3.5' />}
+                                icon={<MdEmojiEvents className='h-3.5 w-3.5' />}
                               />
                             )}
                             {vehicle.dateAvailable && (
                               <InfoRow
                                 label='Available'
                                 value={vehicle.dateAvailable}
-                                icon={<CalendarDays className='h-3.5 w-3.5' />}
+                                icon={<MdCalendarToday className='h-3.5 w-3.5' />}
                               />
                             )}
                           </div>
@@ -510,22 +510,22 @@ export function VehicleDetailModal({
                             <InfoRow
                               label='Mileage'
                               value={vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`}
-                              icon={<GaugeCircle className='h-3.5 w-3.5' />}
+                              icon={<MdSpeed className='h-3.5 w-3.5' />}
                             />
                             <InfoRow
                               label='Trans'
                               value={vehicle.transmission}
-                              icon={<Wrench className='h-3.5 w-3.5' />}
+                              icon={<MdBuild className='h-3.5 w-3.5' />}
                             />
                             <InfoRow
                               label='Fuel'
                               value={vehicle.fuelType}
-                              icon={<Fuel className='h-3.5 w-3.5' />}
+                              icon={<MdLocalGasStation className='h-3.5 w-3.5' />}
                             />
                             <InfoRow
                               label='Color'
                               value={vehicle.exteriorColor}
-                              icon={<Paintbrush2 className='h-3.5 w-3.5' />}
+                              icon={<MdBrush className='h-3.5 w-3.5' />}
                             />
                             {vehicle.displacement && (
                               <InfoRow label='Engine' value={vehicle.displacement} />
@@ -571,7 +571,7 @@ export function VehicleDetailModal({
                         className='h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white'
                         onClick={() => onCreateInvoice(vehicle)}
                       >
-                        <FileText className='mr-2 h-4 w-4' />
+                        <MdDescription className='mr-2 h-4 w-4' />
                         Create Invoice
                       </Button>
                     )}
@@ -582,7 +582,7 @@ export function VehicleDetailModal({
                         className='h-10 rounded-lg'
                         onClick={() => onEdit(vehicle)}
                       >
-                        <Edit className='mr-2 h-4 w-4' />
+                        <MdEdit className='mr-2 h-4 w-4' />
                         Edit
                       </Button>
                     )}
@@ -594,7 +594,7 @@ export function VehicleDetailModal({
                             variant='outline'
                             className='h-10 rounded-lg text-destructive hover:text-destructive border-destructive/30 hover:border-destructive/50 hover:bg-destructive/10'
                           >
-                            <Trash2 className='mr-2 h-4 w-4' />
+                            <MdDelete className='mr-2 h-4 w-4' />
                             Delete
                           </Button>
                         </AlertDialogTrigger>
@@ -648,7 +648,7 @@ export function VehicleDetailModal({
               onClick={() => setLightboxOpen(false)}
               className='absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20'
             >
-              <X className='h-6 w-6' />
+              <MdClose className='h-6 w-6' />
             </button>
 
             {/* Counter */}
@@ -679,13 +679,13 @@ export function VehicleDetailModal({
                   onClick={goToPrev}
                   className='absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110'
                 >
-                  <ChevronLeft className='h-8 w-8' />
+                  <MdChevronLeft className='h-8 w-8' />
                 </button>
                 <button
                   onClick={goToNext}
                   className='absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110'
                 >
-                  <ChevronRight className='h-8 w-8' />
+                  <MdChevronRight className='h-8 w-8' />
                 </button>
               </>
             )}

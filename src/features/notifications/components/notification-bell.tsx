@@ -4,17 +4,17 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import {
-  Bell,
-  CheckCircle,
-  ClipboardCheck,
-  CreditCard,
-  Gavel,
-  Languages,
-  AlertTriangle,
-  UserPlus,
-  Check,
-  ExternalLink,
-} from 'lucide-react'
+  MdNotifications,
+  MdCheckCircle,
+  MdAssignmentTurnedIn,
+  MdCreditCard,
+  MdGavel,
+  MdTranslate,
+  MdWarning,
+  MdPersonAdd,
+  MdCheck,
+  MdOpenInNew,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -35,13 +35,13 @@ import {
 const CURRENT_USER_ROLE: 'superadmin' | 'admin' | 'manager' | 'cashier' = 'admin'
 
 const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  ClipboardCheck,
-  Languages,
-  Gavel,
-  CreditCard,
-  UserPlus,
-  CheckCircle,
-  AlertTriangle,
+  ClipboardCheck: MdAssignmentTurnedIn,
+  Languages: MdTranslate,
+  Gavel: MdGavel,
+  CreditCard: MdCreditCard,
+  UserPlus: MdPersonAdd,
+  CheckCircle: MdCheckCircle,
+  AlertTriangle: MdWarning,
 }
 
 const colorMap: Record<string, string> = {
@@ -84,7 +84,7 @@ export function NotificationBell() {
 
   const getIcon = (type: NotificationType) => {
     const config = notificationTypeConfig[type]
-    const Icon = iconMap[config.icon] || Bell
+    const Icon = iconMap[config.icon] || MdNotifications
     return Icon
   }
 
@@ -102,7 +102,7 @@ export function NotificationBell() {
           className='relative'
           aria-label='Notifications'
         >
-          <Bell className='h-5 w-5' />
+          <MdNotifications className='h-5 w-5' />
           {unreadCount > 0 && (
             <span className='absolute -top-0.5 -right-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-white'>
               {unreadCount > 99 ? '99+' : unreadCount}
@@ -132,7 +132,7 @@ export function NotificationBell() {
               className='h-auto p-1 text-xs text-muted-foreground hover:text-foreground'
               onClick={markAllAsRead}
             >
-              <Check className='mr-1 h-3 w-3' />
+              <MdCheck className='mr-1 h-3 w-3' />
               Mark all read
             </Button>
           )}
@@ -193,7 +193,7 @@ export function NotificationBell() {
             </div>
           ) : (
             <div className='flex flex-col items-center justify-center py-12 text-center'>
-              <Bell className='h-10 w-10 text-muted-foreground/50 mb-3' />
+              <MdNotifications className='h-10 w-10 text-muted-foreground/50 mb-3' />
               <p className='text-sm font-medium'>No notifications</p>
               <p className='text-xs text-muted-foreground'>
                 You&apos;re all caught up!
@@ -214,7 +214,7 @@ export function NotificationBell() {
               }}
             >
               View all notifications
-              <ExternalLink className='ml-1.5 h-3.5 w-3.5' />
+              <MdOpenInNew className='ml-1.5 h-3.5 w-3.5' />
             </Button>
           </div>
         )}

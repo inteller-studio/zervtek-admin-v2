@@ -1,13 +1,13 @@
 'use client'
 
 import {
-  ArrowDown,
-  ArrowUp,
-  Clock,
-  MessageSquare,
-  MessagesSquare,
-  Target,
-} from 'lucide-react'
+  MdArrowDownward,
+  MdArrowUpward,
+  MdAccessTime,
+  MdMessage,
+  MdForum,
+  MdTrackChanges,
+} from 'react-icons/md'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { EnhancedWhatsAppStats } from '../../types'
@@ -45,13 +45,13 @@ function StatCard({ title, value, icon, change, changeLabel, className }: StatCa
           <div className='mt-1 flex items-center gap-1 text-xs'>
             {isPositive && (
               <>
-                <ArrowUp className='h-3 w-3 text-green-500' />
+                <MdArrowUpward className='h-3 w-3 text-green-500' />
                 <span className='text-green-500'>+{change}%</span>
               </>
             )}
             {isNegative && (
               <>
-                <ArrowDown className='h-3 w-3 text-red-500' />
+                <MdArrowDownward className='h-3 w-3 text-red-500' />
                 <span className='text-red-500'>{change}%</span>
               </>
             )}
@@ -90,21 +90,21 @@ export function StatsOverviewCards({
       <StatCard
         title='Messages Sent Today'
         value={stats.messagesSent.toLocaleString()}
-        icon={<MessageSquare className='h-4 w-4' />}
+        icon={<MdMessage className='h-4 w-4' />}
         change={calculateChange(stats.messagesSent, previousStats?.messagesSent)}
         changeLabel='vs average'
       />
       <StatCard
         title='Active Conversations'
         value={stats.activeChats}
-        icon={<MessagesSquare className='h-4 w-4' />}
+        icon={<MdForum className='h-4 w-4' />}
         change={calculateChange(stats.activeChats, previousStats?.activeChats)}
         changeLabel='vs yesterday'
       />
       <StatCard
         title='Avg Response Time'
         value={formatResponseTime(stats.avgResponseTime)}
-        icon={<Clock className='h-4 w-4' />}
+        icon={<MdAccessTime className='h-4 w-4' />}
         change={
           previousStats
             ? -calculateChange(stats.avgResponseTime, previousStats.avgResponseTime)!
@@ -115,7 +115,7 @@ export function StatsOverviewCards({
       <StatCard
         title='Resolution Rate'
         value={`${Math.round((stats.messagesRead / Math.max(stats.messagesSent, 1)) * 100)}%`}
-        icon={<Target className='h-4 w-4' />}
+        icon={<MdTrackChanges className='h-4 w-4' />}
       />
     </div>
   )

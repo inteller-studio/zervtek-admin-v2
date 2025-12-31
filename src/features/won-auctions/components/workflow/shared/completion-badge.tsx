@@ -1,7 +1,7 @@
 'use client'
 
 import { format, formatDistanceToNow } from 'date-fns'
-import { User, Clock } from 'lucide-react'
+import { MdPerson, MdAccessTime } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import {
   Tooltip,
@@ -25,7 +25,7 @@ export function CompletionBadge({ completion, variant = 'default' }: CompletionB
       <Tooltip>
         <TooltipTrigger asChild>
           <Badge variant='outline' className='text-xs font-normal gap-1'>
-            <User className='h-3 w-3' />
+            <MdPerson className='h-3 w-3' />
             {completion.completedBy}
           </Badge>
         </TooltipTrigger>
@@ -45,12 +45,12 @@ export function CompletionBadge({ completion, variant = 'default' }: CompletionB
       <div className='flex flex-col gap-1 p-2 rounded-md bg-muted/50'>
         <div className='flex items-center gap-2'>
           <div className='h-6 w-6 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center'>
-            <User className='h-3.5 w-3.5 text-emerald-600' />
+            <MdPerson className='h-3.5 w-3.5 text-emerald-600' />
           </div>
           <span className='text-sm font-medium'>{completion.completedBy}</span>
         </div>
         <div className='flex items-center gap-1.5 text-xs text-muted-foreground ml-8'>
-          <Clock className='h-3 w-3' />
+          <MdAccessTime className='h-3 w-3' />
           {formattedDate} at {formattedTime}
         </div>
         {completion.notes && (
@@ -66,11 +66,11 @@ export function CompletionBadge({ completion, variant = 'default' }: CompletionB
   return (
     <div className='flex items-center gap-2 text-xs text-muted-foreground'>
       <Badge variant='outline' className='font-normal gap-1'>
-        <User className='h-3 w-3' />
+        <MdPerson className='h-3 w-3' />
         {completion.completedBy}
       </Badge>
       <span className='flex items-center gap-1'>
-        <Clock className='h-3 w-3' />
+        <MdAccessTime className='h-3 w-3' />
         {relativeTime}
       </span>
     </div>

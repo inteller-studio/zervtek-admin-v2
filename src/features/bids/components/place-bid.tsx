@@ -23,16 +23,16 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import {
-  Search as SearchIcon,
-  User,
-  Clock,
-  AlertCircle,
-  CheckCircle,
-  History,
-  Gavel,
-  UserCog,
-  ArrowUp,
-} from 'lucide-react'
+  MdSearch,
+  MdPerson,
+  MdAccessTime,
+  MdError,
+  MdCheckCircle,
+  MdHistory,
+  MdGavel,
+  MdManageAccounts,
+  MdArrowUpward,
+} from 'react-icons/md'
 import { differenceInHours, differenceInMinutes } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -333,7 +333,7 @@ export function PlaceBid() {
             <CardContent>
               <div className="flex gap-3">
                 <div className="relative flex-1">
-                  <SearchIcon className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <MdSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                   <Input
                     placeholder="Search by customer name or email..."
                     value={searchQuery}
@@ -438,16 +438,16 @@ export function PlaceBid() {
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-4">
                           <span className="flex items-center gap-1">
-                            <Gavel className="h-3 w-3" />
+                            <MdGavel className="h-3 w-3" />
                             {bid.totalBids} bids
                           </span>
                           <span className="flex items-center gap-1">
-                            <User className="h-3 w-3" />
+                            <MdPerson className="h-3 w-3" />
                             {bid.customerTotalBids} by customer
                           </span>
                         </div>
                         <span className="flex items-center gap-1 text-slate-700">
-                          <Clock className="h-3 w-3" />
+                          <MdAccessTime className="h-3 w-3" />
                           {getTimeRemaining(bid.endTime)}
                         </span>
                       </div>
@@ -460,7 +460,7 @@ export function PlaceBid() {
                               <div className="flex items-center gap-1">
                                 {history.isCustomer ? (
                                   <>
-                                    <User className="h-3 w-3 text-blue-600" />
+                                    <MdPerson className="h-3 w-3 text-blue-600" />
                                     <span className="text-blue-600">Customer</span>
                                     {history.type === 'assisted' && (
                                       <Badge variant="outline" className="text-xs scale-75 -ml-1">
@@ -470,7 +470,7 @@ export function PlaceBid() {
                                   </>
                                 ) : (
                                   <>
-                                    <User className="h-3 w-3 text-gray-400" />
+                                    <MdPerson className="h-3 w-3 text-gray-400" />
                                     <span className="text-gray-600">Other</span>
                                   </>
                                 )}
@@ -489,18 +489,18 @@ export function PlaceBid() {
                         >
                           {bid.status === 'winning' ? (
                             <>
-                              <CheckCircle className="h-4 w-4 mr-2" />
+                              <MdCheckCircle className="h-4 w-4 mr-2" />
                               Currently Winning
                             </>
                           ) : (
                             <>
-                              <ArrowUp className="h-4 w-4 mr-2" />
+                              <MdArrowUpward className="h-4 w-4 mr-2" />
                               Place Higher Bid
                             </>
                           )}
                         </Button>
                         <Button variant="outline" size="icon">
-                          <History className="h-4 w-4" />
+                          <MdHistory className="h-4 w-4" />
                         </Button>
                       </div>
                     </CardContent>
@@ -513,7 +513,7 @@ export function PlaceBid() {
           {selectedCustomer && customerBids.length === 0 && (
             <Card>
               <CardContent className="py-12 text-center">
-                <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <MdError className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-semibold mb-2">No Active Bids</h3>
                 <p className="text-muted-foreground">
                   This customer doesn&apos;t have any active bids. Admins can only continue existing bids.
@@ -593,7 +593,7 @@ export function PlaceBid() {
                   </div>
 
                   <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <UserCog className="h-4 w-4 text-blue-600" />
+                    <MdManageAccounts className="h-4 w-4 text-blue-600" />
                     <span className="text-sm text-blue-900">
                       This bid will be marked as an <strong>Assisted Bid</strong> placed by admin on behalf of the customer
                     </span>

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, ChevronsUpDown, MapPin, Building2 } from 'lucide-react'
+import { MdCheck, MdUnfoldMore, MdLocationOn, MdBusiness, MdAdd } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -10,6 +10,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
+  CommandSeparator,
 } from '@/components/ui/command'
 import {
   Popover,
@@ -24,6 +25,7 @@ interface YardSelectorProps {
   yards: Yard[]
   selectedYardId: string | null
   onSelect: (yard: Yard | null) => void
+  onAddYard?: () => void
   disabled?: boolean
   placeholder?: string
   className?: string
@@ -33,12 +35,18 @@ export function YardSelector({
   yards,
   selectedYardId,
   onSelect,
+  onAddYard,
   disabled = false,
   placeholder = 'Select a yard...',
   className,
 }: YardSelectorProps) {
   const [open, setOpen] = useState(false)
   const selectedYard = yards.find((y) => y.id === selectedYardId)
+
+  const handleAddYard = () => {
+    setOpen(false)
+    onAddYard?.()
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -56,7 +64,7 @@ export function YardSelector({
         >
           {selectedYard ? (
             <div className='flex items-center gap-2 text-left'>
-              <Building2 className='h-4 w-4 shrink-0 text-muted-foreground' />
+              <MdBusiness className='h-4 w-4 shrink-0 text-muted-foreground' />
               <div className='flex-1 min-w-0'>
                 <p className='font-medium truncate'>{selectedYard.name}</p>
                 <p className='text-xs text-muted-foreground truncate'>
@@ -66,11 +74,11 @@ export function YardSelector({
             </div>
           ) : (
             <span className='flex items-center gap-2'>
-              <MapPin className='h-4 w-4' />
+              <MdLocationOn className='h-4 w-4' />
               {placeholder}
             </span>
           )}
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          <MdUnfoldMore className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[400px] p-0' align='start'>
@@ -109,7 +117,7 @@ export function YardSelector({
                       Capacity: {yard.currentVehicles}/{yard.capacity} vehicles
                     </p>
                   </div>
-                  <Check
+                  <MdCheck
                     className={cn(
                       'h-4 w-4 shrink-0',
                       selectedYardId === yard.id ? 'opacity-100' : 'opacity-0'
@@ -118,6 +126,25 @@ export function YardSelector({
                 </CommandItem>
               ))}
             </CommandGroup>
+            {onAddYard && (
+              <>
+                <CommandSeparator />
+                <CommandGroup>
+                  <CommandItem
+                    onSelect={handleAddYard}
+                    className='flex items-center gap-2 py-2.5 cursor-pointer'
+                  >
+                    <div className='h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center'>
+                      <MdAdd className='h-4 w-4 text-primary' />
+                    </div>
+                    <div className='flex-1'>
+                      <p className='font-medium text-primary'>Add New Yard</p>
+                      <p className='text-xs text-muted-foreground'>Create a new storage yard</p>
+                    </div>
+                  </CommandItem>
+                </CommandGroup>
+              </>
+            )}
           </CommandList>
         </Command>
       </PopoverContent>

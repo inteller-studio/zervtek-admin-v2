@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
-  ArrowRight,
-  Car,
-  Check,
-  FileText,
-  Loader2,
-  Mail,
-  Ship,
-  User,
-} from 'lucide-react'
+  MdArrowBack,
+  MdArrowForward,
+  MdDirectionsCar,
+  MdCheck,
+  MdDescription,
+  MdSync,
+  MdEmail,
+  MdDirectionsBoat,
+  MdPerson,
+} from 'react-icons/md'
 import { format } from 'date-fns'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -39,12 +39,12 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../data/won-auctions'
+import { type Purchase } from '../../data/won-auctions'
 
 interface InvoiceDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  auction: WonAuction | null
+  auction: Purchase | null
 }
 
 // Format price
@@ -148,7 +148,7 @@ export function InvoiceDialog({
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4'>
             <SheetTitle className='flex items-center gap-2'>
-              <FileText className='h-5 w-5' />
+              <MdDescription className='h-5 w-5' />
               Create Invoice
             </SheetTitle>
             <SheetDescription>
@@ -164,7 +164,7 @@ export function InvoiceDialog({
                   'flex h-8 w-8 items-center justify-center rounded-full border-2 text-sm font-medium',
                   currentStep >= 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground/30'
                 )}>
-                  {currentStep > 1 ? <Check className='h-4 w-4' /> : '1'}
+                  {currentStep > 1 ? <MdCheck className='h-4 w-4' /> : '1'}
                 </div>
                 <span className={cn('text-sm', currentStep === 1 ? 'font-medium' : 'text-muted-foreground')}>
                   Configure
@@ -202,7 +202,7 @@ export function InvoiceDialog({
                 {/* Customer Info */}
                 <div className='flex items-center gap-3 rounded-lg border p-3'>
                   <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10'>
-                    <User className='h-5 w-5 text-primary' />
+                    <MdPerson className='h-5 w-5 text-primary' />
                   </div>
                   <div>
                     <p className='font-medium'>{auction.winnerName}</p>
@@ -248,7 +248,7 @@ export function InvoiceDialog({
                   <Label className='text-sm font-medium'>Include in Invoice</Label>
                   <div className='flex items-center justify-between rounded-lg border p-3'>
                     <div className='flex items-center gap-2'>
-                      <Ship className='h-4 w-4 text-muted-foreground' />
+                      <MdDirectionsBoat className='h-4 w-4 text-muted-foreground' />
                       <div>
                         <p className='text-sm font-medium'>Shipping Cost</p>
                         <p className='text-xs text-muted-foreground'>{formatPrice(auction.shippingCost)}</p>
@@ -258,7 +258,7 @@ export function InvoiceDialog({
                   </div>
                   <div className='flex items-center justify-between rounded-lg border p-3'>
                     <div className='flex items-center gap-2'>
-                      <FileText className='h-4 w-4 text-muted-foreground' />
+                      <MdDescription className='h-4 w-4 text-muted-foreground' />
                       <div>
                         <p className='text-sm font-medium'>Insurance</p>
                         <p className='text-xs text-muted-foreground'>{formatPrice(auction.insuranceFee)}</p>
@@ -394,7 +394,7 @@ export function InvoiceDialog({
                 {/* Customer Card */}
                 <div className='rounded-xl border p-4'>
                   <div className='mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                    <User className='h-3.5 w-3.5' />
+                    <MdPerson className='h-3.5 w-3.5' />
                     Bill To
                   </div>
                   <p className='font-semibold'>{auction.winnerName}</p>
@@ -404,7 +404,7 @@ export function InvoiceDialog({
                 {/* Vehicle Card */}
                 <div className='rounded-xl border p-4'>
                   <div className='mb-2 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-muted-foreground'>
-                    <Car className='h-3.5 w-3.5' />
+                    <MdDirectionsCar className='h-3.5 w-3.5' />
                     Vehicle
                   </div>
                   <p className='font-semibold'>
@@ -417,7 +417,7 @@ export function InvoiceDialog({
                 {/* Amount Summary */}
                 <div className='rounded-xl border border-primary/20 bg-primary/5 p-4'>
                   <div className='mb-3 flex items-center gap-2 text-xs font-medium uppercase tracking-wider text-primary'>
-                    <FileText className='h-3.5 w-3.5' />
+                    <MdDescription className='h-3.5 w-3.5' />
                     Amount Summary
                   </div>
                   <div className='space-y-2'>
@@ -469,7 +469,7 @@ export function InvoiceDialog({
 
                 {/* Email Info */}
                 <div className='flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground'>
-                  <Mail className='h-4 w-4 shrink-0' />
+                  <MdEmail className='h-4 w-4 shrink-0' />
                   <span>
                     Invoice will be saved and can be sent to{' '}
                     <span className='font-medium text-foreground'>{auction.winnerEmail}</span>
@@ -487,7 +487,7 @@ export function InvoiceDialog({
             onClick={prevStep}
             disabled={currentStep === 1 || isSubmitting}
           >
-            <ArrowLeft className='mr-2 h-4 w-4' />
+            <MdArrowBack className='mr-2 h-4 w-4' />
             Back
           </Button>
 
@@ -503,18 +503,18 @@ export function InvoiceDialog({
             {currentStep < maxSteps ? (
               <Button onClick={nextStep}>
                 Next
-                <ArrowRight className='ml-2 h-4 w-4' />
+                <MdArrowForward className='ml-2 h-4 w-4' />
               </Button>
             ) : (
               <Button onClick={handleSubmit} disabled={isSubmitting}>
                 {isSubmitting ? (
                   <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    <MdSync className='mr-2 h-4 w-4 animate-spin' />
                     Creating...
                   </>
                 ) : (
                   <>
-                    <Check className='mr-2 h-4 w-4' />
+                    <MdCheck className='mr-2 h-4 w-4' />
                     Create Invoice
                   </>
                 )}

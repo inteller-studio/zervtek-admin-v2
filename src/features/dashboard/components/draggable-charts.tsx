@@ -18,7 +18,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical } from 'lucide-react'
+import { MdDragHandle } from 'react-icons/md'
 import { useDashboardStore } from '@/stores/dashboard-store'
 import { ClientOnly } from '@/components/ui/client-only'
 import {
@@ -51,7 +51,7 @@ function DraggableChart({ id, children }: DraggableChartProps) {
         {...listeners}
         className='hover:bg-accent absolute top-4 right-4 z-10 cursor-move rounded-md p-2 transition-colors'
       >
-        <GripVertical className='text-muted-foreground h-4 w-4' />
+        <MdDragHandle className='text-muted-foreground h-4 w-4' />
       </div>
       {children}
     </div>

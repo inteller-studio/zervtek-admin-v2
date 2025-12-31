@@ -1,30 +1,19 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import {
-  Check,
-  Receipt,
-  Truck,
-  CreditCard,
-  Wrench,
-  FileText,
-  Ship,
-  Package,
-  Send,
-} from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { cn } from '@/lib/utils'
 import { type PurchaseWorkflow } from '../../types/workflow'
 import { isStageComplete, canAccessStage } from '../../utils/workflow'
 
 const STAGES = [
-  { number: 1, label: 'Purchase', icon: Receipt },
-  { number: 2, label: 'Transport', icon: Truck },
-  { number: 3, label: 'Payment', icon: CreditCard },
-  { number: 4, label: 'Repair', icon: Wrench },
-  { number: 5, label: 'Docs', icon: FileText },
-  { number: 6, label: 'Booking', icon: Ship },
-  { number: 7, label: 'Shipped', icon: Package },
-  { number: 8, label: 'DHL', icon: Send },
+  { number: 1, label: 'Purchase' },
+  { number: 2, label: 'Transport' },
+  { number: 3, label: 'Payment' },
+  { number: 4, label: 'Repair' },
+  { number: 5, label: 'Docs' },
+  { number: 6, label: 'Booking' },
+  { number: 7, label: 'Shipped' },
+  { number: 8, label: 'DHL' },
 ]
 
 // Container animation for staggered children
@@ -79,7 +68,7 @@ export function WorkflowStepper({
   className,
 }: WorkflowStepperProps) {
   return (
-    <div className={cn('w-full overflow-x-auto scrollbar-none', className)}>
+    <div className={cn('w-full overflow-x-auto scrollbar-none py-2', className)}>
       <motion.div
         className='flex items-center justify-between min-w-[700px] px-2'
         variants={containerVariants}
@@ -90,7 +79,6 @@ export function WorkflowStepper({
           const isCompleted = isStageComplete(workflow, stage.number)
           const isCurrent = workflow.currentStage === stage.number
           const isAccessible = canAccessStage(workflow, stage.number)
-          const Icon = stage.icon
 
           return (
             <motion.div
@@ -106,152 +94,114 @@ export function WorkflowStepper({
                   'flex flex-col items-center gap-2 group relative',
                   isAccessible ? 'cursor-pointer' : 'cursor-not-allowed'
                 )}
-                whileHover={isAccessible ? { scale: 1.08, y: -2 } : undefined}
+                whileHover={isAccessible ? { scale: 1.05 } : undefined}
                 whileTap={isAccessible ? { scale: 0.95 } : undefined}
               >
-                {/* Glow effect behind circle for current stage */}
-                {isCurrent && !isCompleted && (
-                  <motion.div
-                    className='absolute inset-0 top-0 left-1/2 -translate-x-1/2 w-14 h-14 rounded-full bg-primary/20 blur-xl'
-                    animate={{
-                      scale: [1, 1.3, 1],
-                      opacity: [0.5, 0.8, 0.5],
-                    }}
-                    transition={{
-                      duration: 2,
-                      repeat: Infinity,
-                      ease: 'easeInOut',
-                    }}
-                  />
-                )}
-
-                {/* Circle */}
+                {/* Circle - Material Design Style */}
                 <motion.div
                   className={cn(
-                    'relative h-12 w-12 rounded-full flex items-center justify-center transition-colors duration-300',
+                    'relative h-12 w-12 rounded-full flex items-center justify-center transition-all duration-300',
                     // Completed - emerald with shadow
-                    isCompleted && 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-lg shadow-emerald-500/30',
-                    // Current - primary with animated ring
-                    isCurrent && !isCompleted && 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/30',
-                    // Accessible but not current/completed - subtle border
-                    !isCompleted && !isCurrent && isAccessible && 'bg-background border-2 border-muted-foreground/20 text-muted-foreground group-hover:border-primary/50 group-hover:text-primary group-hover:shadow-md',
-                    // Inaccessible - faded
-                    !isCompleted && !isCurrent && !isAccessible && 'bg-muted/30 text-muted-foreground/30'
+                    isCompleted && 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-white shadow-md shadow-emerald-500/30',
+                    // Current - primary with elevated shadow
+                    isCurrent && !isCompleted && 'bg-primary text-primary-foreground shadow-lg shadow-primary/40',
+                    // Accessible - subtle border with hover effects
+                    !isCompleted && !isCurrent && isAccessible && 'bg-muted border-2 border-muted-foreground/20 text-muted-foreground group-hover:border-primary group-hover:text-primary group-hover:shadow-md transition-all',
+                    // Locked - faded appearance
+                    !isCompleted && !isCurrent && !isAccessible && 'bg-muted/50 text-muted-foreground/40'
                   )}
                   initial={false}
                   animate={
                     isCurrent && !isCompleted
                       ? {
                           boxShadow: [
-                            '0 0 0 0px rgba(var(--primary-rgb, 59, 130, 246), 0.4)',
-                            '0 0 0 8px rgba(var(--primary-rgb, 59, 130, 246), 0)',
+                            '0 4px 14px -3px rgba(59, 130, 246, 0.4)',
+                            '0 4px 20px -3px rgba(59, 130, 246, 0.6)',
+                            '0 4px 14px -3px rgba(59, 130, 246, 0.4)',
                           ],
                         }
                       : {}
                   }
                   transition={
                     isCurrent && !isCompleted
-                      ? {
-                          duration: 1.5,
-                          repeat: Infinity,
-                          ease: 'easeOut',
-                        }
+                      ? { duration: 2, repeat: Infinity, ease: 'easeInOut' }
                       : {}
                   }
                 >
-                  {/* Inner ring for current stage */}
-                  {isCurrent && !isCompleted && (
-                    <motion.div
-                      className='absolute inset-0 rounded-full border-2 border-primary-foreground/30'
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                      style={{
-                        borderTopColor: 'transparent',
-                        borderRightColor: 'transparent',
-                      }}
-                    />
-                  )}
-
-                  {isCompleted ? (
-                    <motion.div
-                      initial={{ scale: 0, rotate: -45 }}
-                      animate={{ scale: 1, rotate: 0 }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 400,
-                        damping: 15,
-                      }}
-                    >
-                      <svg
-                        className='h-6 w-6'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='currentColor'
-                        strokeWidth={3}
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
+                  <AnimatePresence mode='wait'>
+                    {isCompleted ? (
+                      <motion.div
+                        key='check'
+                        initial={{ scale: 0, rotate: -45 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                       >
-                        <motion.path
-                          d='M5 12l5 5L20 7'
-                          variants={checkVariants}
-                          initial='hidden'
-                          animate='visible'
-                        />
-                      </svg>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={{ scale: 0.8, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      transition={{ delay: 0.1 }}
-                    >
-                      <Icon className='h-5 w-5' />
-                    </motion.div>
-                  )}
+                        <svg
+                          className='h-6 w-6'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='currentColor'
+                          strokeWidth={2.5}
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <motion.path
+                            d='M5 12l5 5L20 7'
+                            variants={checkVariants}
+                            initial='hidden'
+                            animate='visible'
+                          />
+                        </svg>
+                      </motion.div>
+                    ) : (
+                      <motion.span
+                        key='number'
+                        className={cn(
+                          'text-base font-semibold',
+                          isCurrent && 'font-bold'
+                        )}
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.05 }}
+                      >
+                        {stage.number}
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
 
                 {/* Label */}
                 <motion.span
                   className={cn(
-                    'text-xs transition-colors whitespace-nowrap',
-                    isCurrent && 'font-bold text-primary',
-                    isCompleted && !isCurrent && 'font-semibold text-emerald-600 dark:text-emerald-400',
+                    'text-xs font-medium transition-colors whitespace-nowrap',
+                    isCurrent && 'text-primary font-semibold',
+                    isCompleted && !isCurrent && 'text-emerald-600 dark:text-emerald-400 font-medium',
                     !isCompleted && !isCurrent && isAccessible && 'text-muted-foreground group-hover:text-foreground',
-                    !isCompleted && !isCurrent && !isAccessible && 'text-muted-foreground/50'
+                    !isCompleted && !isCurrent && !isAccessible && 'text-muted-foreground/40'
                   )}
                 >
                   {stage.label}
                 </motion.span>
               </motion.button>
 
-              {/* Connector Line */}
+              {/* Connector Line - Material Design thin style */}
               {index < STAGES.length - 1 && (
-                <div className='flex-1 mx-3 h-1.5 relative overflow-hidden rounded-full'>
-                  {/* Background track */}
-                  <div className='absolute inset-0 bg-muted' />
-
-                  {/* Filled progress with gradient */}
+                <div className='flex-1 mx-3 h-0.5 relative overflow-hidden rounded-full self-start mt-6'>
+                  <div className='absolute inset-0 bg-muted-foreground/15' />
                   <motion.div
                     className='absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full'
                     initial={{ width: '0%' }}
-                    animate={{
-                      width: isCompleted ? '100%' : '0%',
-                    }}
+                    animate={{ width: isCompleted ? '100%' : '0%' }}
                     transition={{ duration: 0.5, ease: 'easeOut' }}
                   />
-
-                  {/* Shimmer effect on completed lines */}
+                  {/* Subtle shimmer on completed */}
                   {isCompleted && (
                     <motion.div
-                      className='absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent'
+                      className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent'
                       initial={{ x: '-100%' }}
                       animate={{ x: '200%' }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatDelay: 3,
-                        ease: 'easeInOut',
-                      }}
+                      transition={{ duration: 2.5, repeat: Infinity, repeatDelay: 5, ease: 'easeInOut' }}
                     />
                   )}
                 </div>

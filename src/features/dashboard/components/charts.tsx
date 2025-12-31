@@ -43,13 +43,13 @@ const LIGHT_COLORS = {
   accent3: 'hsl(0, 84%, 60%)',        // Red
 }
 
-// Dark mode colors - bright and vibrant for visibility
+// Dark mode colors - Vercel-inspired elegant palette for pure black backgrounds
 const DARK_COLORS = {
-  primary: 'hsl(217, 91%, 60%)',      // Bright blue
-  secondary: 'hsl(271, 91%, 65%)',    // Bright purple
-  accent1: 'hsl(142, 71%, 55%)',      // Bright green
-  accent2: 'hsl(38, 92%, 60%)',       // Bright orange
-  accent3: 'hsl(0, 84%, 65%)',        // Bright red
+  primary: 'hsl(160, 45%, 50%)',      // Emerald/teal
+  secondary: 'hsl(280, 35%, 58%)',    // Soft violet
+  accent1: 'hsl(45, 55%, 55%)',       // Warm gold
+  accent2: 'hsl(340, 45%, 60%)',      // Rose/pink
+  accent3: 'hsl(20, 50%, 55%)',       // Warm orange
 }
 
 function useChartColors() {
@@ -58,10 +58,13 @@ function useChartColors() {
 
   return {
     colors: isDark ? DARK_COLORS : LIGHT_COLORS,
-    gridColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-    tickColor: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.6)',
-    legendColor: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)',
-    pointBorderColor: isDark ? '#1f2937' : '#ffffff',
+    gridColor: isDark ? 'rgba(255, 255, 255, 0.06)' : 'rgba(0, 0, 0, 0.08)',
+    tickColor: isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(0, 0, 0, 0.6)',
+    legendColor: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.8)',
+    pointBorderColor: isDark ? '#0a0a0a' : '#ffffff',
+    tooltipBg: isDark ? 'rgba(20, 20, 20, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+    tooltipBorder: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
+    tooltipText: isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.9)',
   }
 }
 
@@ -70,7 +73,7 @@ interface ChartDataPoint {
 }
 
 export function UserGrowthChart({ data, loading }: { data?: ChartDataPoint[]; loading?: boolean }) {
-  const { colors, gridColor, tickColor, legendColor, pointBorderColor } = useChartColors()
+  const { colors, gridColor, tickColor, legendColor, pointBorderColor, tooltipBg, tooltipBorder, tooltipText } = useChartColors()
 
   if (loading) {
     return (
@@ -122,11 +125,13 @@ export function UserGrowthChart({ data, loading }: { data?: ChartDataPoint[]; lo
         },
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
       },
     },
     scales: {
@@ -172,7 +177,7 @@ export function UserGrowthChart({ data, loading }: { data?: ChartDataPoint[]; lo
 }
 
 export function AuctionPerformanceChart({ data, loading }: { data?: ChartDataPoint[]; loading?: boolean }) {
-  const { colors, gridColor, tickColor, legendColor } = useChartColors()
+  const { colors, gridColor, tickColor, legendColor, tooltipBg, tooltipBorder, tooltipText } = useChartColors()
 
   if (loading) {
     return (
@@ -219,11 +224,13 @@ export function AuctionPerformanceChart({ data, loading }: { data?: ChartDataPoi
         },
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
       },
     },
     scales: {
@@ -269,7 +276,7 @@ export function AuctionPerformanceChart({ data, loading }: { data?: ChartDataPoi
 }
 
 export function CountryDistributionChart({ data, loading }: { data?: ChartDataPoint[]; loading?: boolean }) {
-  const { colors, legendColor } = useChartColors()
+  const { colors, legendColor, tooltipBg, tooltipBorder, tooltipText } = useChartColors()
 
   if (loading) {
     return (
@@ -323,11 +330,13 @@ export function CountryDistributionChart({ data, loading }: { data?: ChartDataPo
         },
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function(context: { label?: string; parsed?: number; dataset: { data: number[] } }) {
             const label = context.label || '';
@@ -363,7 +372,7 @@ export function CountryDistributionChart({ data, loading }: { data?: ChartDataPo
 }
 
 export function VehicleInventoryChart({ data, loading }: { data?: ChartDataPoint[]; loading?: boolean }) {
-  const { colors, gridColor, tickColor } = useChartColors()
+  const { colors, gridColor, tickColor, tooltipBg, tooltipBorder, tooltipText } = useChartColors()
 
   if (loading) {
     return (
@@ -400,11 +409,13 @@ export function VehicleInventoryChart({ data, loading }: { data?: ChartDataPoint
         display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
       },
     },
     scales: {
@@ -450,7 +461,7 @@ export function VehicleInventoryChart({ data, loading }: { data?: ChartDataPoint
 }
 
 export function BidActivityChart({ data, loading }: { data?: ChartDataPoint[]; loading?: boolean }) {
-  const { colors, gridColor, tickColor, legendColor, pointBorderColor } = useChartColors()
+  const { colors, gridColor, tickColor, pointBorderColor, tooltipBg, tooltipBorder, tooltipText } = useChartColors()
 
   if (loading) {
     return (
@@ -497,11 +508,13 @@ export function BidActivityChart({ data, loading }: { data?: ChartDataPoint[]; l
         display: false,
       },
       tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white',
-        borderColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: tooltipBg,
+        titleColor: tooltipText,
+        bodyColor: tooltipText,
+        borderColor: tooltipBorder,
         borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
         callbacks: {
           label: function(context: { parsed: { y: number | null } }) {
             return `${context.parsed.y ?? 0} bids placed`

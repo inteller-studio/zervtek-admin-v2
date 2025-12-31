@@ -1,21 +1,21 @@
 'use client'
 
 import { format } from 'date-fns'
-import { X, Car, User, Calendar, MapPin, Copy, Check } from 'lucide-react'
+import { MdClose, MdDirectionsCar, MdPerson, MdCalendarToday, MdLocationOn, MdContentCopy, MdCheck } from 'react-icons/md'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../data/won-auctions'
+import { type Purchase } from '../../data/won-auctions'
 import { type PurchaseWorkflow } from '../../types/workflow'
 import { StageProgress } from '../workflow/shared/stage-progress'
 import { calculateWorkflowProgress, isStageComplete } from '../../utils/workflow'
 import { ModeToggle, type ModalMode } from './shared/mode-toggle'
 
 // Status styles
-const statusStyles: Record<WonAuction['status'], string> = {
+const statusStyles: Record<Purchase['status'], string> = {
   payment_pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
   processing: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
   documents_pending: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
@@ -24,7 +24,7 @@ const statusStyles: Record<WonAuction['status'], string> = {
   completed: 'bg-gray-500/10 text-gray-600 border-gray-500/20',
 }
 
-const statusLabels: Record<WonAuction['status'], string> = {
+const statusLabels: Record<Purchase['status'], string> = {
   payment_pending: 'Payment Pending',
   processing: 'Processing',
   documents_pending: 'Docs Pending',
@@ -34,7 +34,7 @@ const statusLabels: Record<WonAuction['status'], string> = {
 }
 
 interface UnifiedModalHeaderProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   mode: ModalMode
   onModeChange: (mode: ModalMode) => void
@@ -86,7 +86,7 @@ export function UnifiedModalHeader({
                 />
               ) : (
                 <div className='h-full w-full flex items-center justify-center'>
-                  <Car className='h-6 w-6 text-muted-foreground' />
+                  <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
                 </div>
               )}
             </div>
@@ -115,25 +115,25 @@ export function UnifiedModalHeader({
               >
                 <span className='truncate'>{auction.vehicleInfo.vin}</span>
                 {vinCopied ? (
-                  <Check className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
+                  <MdCheck className='h-3.5 w-3.5 text-emerald-500 shrink-0' />
                 ) : (
-                  <Copy className='h-3.5 w-3.5 shrink-0' />
+                  <MdContentCopy className='h-3.5 w-3.5 shrink-0' />
                 )}
               </button>
 
               {/* Meta info */}
               <div className='flex items-center gap-3 text-xs text-muted-foreground flex-wrap'>
                 <span className='flex items-center gap-1'>
-                  <User className='h-3 w-3' />
+                  <MdPerson className='h-3 w-3' />
                   {auction.winnerName}
                 </span>
                 <span className='flex items-center gap-1'>
-                  <Calendar className='h-3 w-3' />
+                  <MdCalendarToday className='h-3 w-3' />
                   {format(new Date(auction.auctionEndDate), 'MMM d, yyyy')}
                 </span>
                 {auction.destinationPort && (
                   <span className='flex items-center gap-1'>
-                    <MapPin className='h-3 w-3' />
+                    <MdLocationOn className='h-3 w-3' />
                     {auction.destinationPort.split(',')[0]}
                   </span>
                 )}
@@ -170,7 +170,7 @@ export function UnifiedModalHeader({
               onClick={onClose}
               className='h-8 w-8 shrink-0'
             >
-              <X className='h-4 w-4' />
+              <MdClose className='h-4 w-4' />
               <span className='sr-only'>Close</span>
             </Button>
           </div>

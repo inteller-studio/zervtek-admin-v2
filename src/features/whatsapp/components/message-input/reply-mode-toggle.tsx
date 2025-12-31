@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Archive, ChevronDown, Send } from 'lucide-react'
+import { MdArchive, MdExpandMore, MdSend } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -45,7 +45,7 @@ export function ReplyModeToggle({
           isArchiveMode && 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700'
         )}
       >
-        <Send className='mr-2 h-4 w-4' />
+        <MdSend className='mr-2 h-4 w-4' />
         {isArchiveMode ? 'Send & Archive' : 'Send'}
       </Button>
 
@@ -61,7 +61,7 @@ export function ReplyModeToggle({
               isArchiveMode && 'bg-amber-500 hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-700'
             )}
           >
-            <ChevronDown className='h-4 w-4' />
+            <MdExpandMore className='h-4 w-4' />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
@@ -69,7 +69,7 @@ export function ReplyModeToggle({
             onClick={() => onModeChange('reply')}
             className='flex items-center gap-2'
           >
-            <Send className='h-4 w-4' />
+            <MdSend className='h-4 w-4' />
             <div>
               <p className='font-medium'>Reply</p>
               <p className='text-xs text-muted-foreground'>
@@ -84,7 +84,7 @@ export function ReplyModeToggle({
             onClick={() => onModeChange('reply_and_archive')}
             className='flex items-center gap-2'
           >
-            <Archive className='h-4 w-4' />
+            <MdArchive className='h-4 w-4' />
             <div>
               <p className='font-medium'>Reply & Archive</p>
               <p className='text-xs text-muted-foreground'>
@@ -128,12 +128,12 @@ export function ReplyModeButton({ mode, onModeChange, className }: ReplyModeButt
     >
       {isArchiveMode ? (
         <>
-          <Archive className='h-3.5 w-3.5' />
+          <MdArchive className='h-3.5 w-3.5' />
           <span>Archive</span>
         </>
       ) : (
         <>
-          <Send className='h-3.5 w-3.5' />
+          <MdSend className='h-3.5 w-3.5' />
           <span>Reply</span>
         </>
       )}

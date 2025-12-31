@@ -1,14 +1,14 @@
 import {
-  ArrowDown,
-  ArrowRight,
-  ArrowUp,
-  Circle,
-  CheckCircle,
-  AlertCircle,
-  Timer,
-  HelpCircle,
-  CircleOff,
-} from 'lucide-react'
+  MdArrowDownward,
+  MdArrowForward,
+  MdArrowUpward,
+  MdRadioButtonUnchecked,
+  MdCheckCircle,
+  MdError,
+  MdTimer,
+  MdHelp,
+  MdCancel,
+} from 'react-icons/md'
 
 export const labels = [
   {
@@ -29,27 +29,27 @@ export const statuses = [
   {
     label: 'Backlog',
     value: 'backlog' as const,
-    icon: HelpCircle,
+    icon: MdHelp,
   },
   {
     label: 'Todo',
     value: 'todo' as const,
-    icon: Circle,
+    icon: MdRadioButtonUnchecked,
   },
   {
     label: 'In Progress',
     value: 'in progress' as const,
-    icon: Timer,
+    icon: MdTimer,
   },
   {
     label: 'Done',
     value: 'done' as const,
-    icon: CheckCircle,
+    icon: MdCheckCircle,
   },
   {
     label: 'Canceled',
     value: 'canceled' as const,
-    icon: CircleOff,
+    icon: MdCancel,
   },
 ]
 
@@ -57,21 +57,21 @@ export const priorities = [
   {
     label: 'Low',
     value: 'low' as const,
-    icon: ArrowDown,
+    icon: MdArrowDownward,
   },
   {
     label: 'Medium',
     value: 'medium' as const,
-    icon: ArrowRight,
+    icon: MdArrowForward,
   },
   {
     label: 'High',
     value: 'high' as const,
-    icon: ArrowUp,
+    icon: MdArrowUpward,
   },
   {
     label: 'Critical',
     value: 'critical' as const,
-    icon: AlertCircle,
+    icon: MdError,
   },
 ]

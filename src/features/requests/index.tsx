@@ -4,39 +4,40 @@ import { useCallback, useMemo, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { format } from 'date-fns'
 import {
-  AlertCircle,
-  Calendar,
-  CheckCircle,
-  ChevronDown,
-  ChevronUp,
-  Clock,
-  Download,
-  Edit,
-  Eye,
-  FileText,
-  Filter,
-  Languages,
-  LayoutGrid,
-  List,
-  MessageSquare,
-  MoreHorizontal,
-  Paperclip,
-  Plus,
-  RefreshCw,
-  Search,
-  Send,
-  Shield,
-  Trash2,
-  User,
-  Users,
-  X,
-  Zap,
-} from 'lucide-react'
+  MdError,
+  MdCalendarToday,
+  MdCheckCircle,
+  MdExpandMore,
+  MdExpandLess,
+  MdAccessTime,
+  MdDownload,
+  MdEdit,
+  MdVisibility,
+  MdDescription,
+  MdFilterList,
+  MdTranslate,
+  MdApps,
+  MdList,
+  MdMessage,
+  MdMoreHoriz,
+  MdAttachFile,
+  MdAdd,
+  MdRefresh,
+  MdSearch,
+  MdSend,
+  MdSecurity,
+  MdDelete,
+  MdPerson,
+  MdGroup,
+  MdClose,
+  MdFlashOn,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
+import { Search } from '@/components/search'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -71,7 +72,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Table,
@@ -210,6 +211,15 @@ export function Requests() {
     inspections: requests.filter((r) => r.type === 'inspection').length,
     translations: requests.filter((r) => r.type === 'translation').length,
   }), [requests])
+
+  // Main tabs configuration
+  const mainTabs: TabItem[] = useMemo(() => [
+    { id: 'all', label: 'All Requests', badge: requests.length },
+    { id: 'my_requests', label: 'My Requests' },
+    { id: 'unassigned', label: 'Unassigned', badge: requests.filter((r) => !r.assignedTo).length, badgeColor: 'amber' as const },
+    { id: 'inspection', label: 'Inspections', icon: MdSecurity },
+    { id: 'translation', label: 'Translations', icon: MdTranslate },
+  ], [requests])
 
   const handleAssignToMe = (request: ServiceRequest) => {
     setRequests(
@@ -382,11 +392,11 @@ export function Requests() {
           </div>
           <div className='flex gap-2'>
             <Button variant='outline' size='sm'>
-              <RefreshCw className='h-4 w-4 mr-2' />
+              <MdRefresh className='h-4 w-4 mr-2' />
               Refresh
             </Button>
             <Button size='sm' onClick={() => setIsNewRequestOpen(true)}>
-              <Plus className='h-4 w-4 mr-2' />
+              <MdAdd className='h-4 w-4 mr-2' />
               New Request
             </Button>
           </div>
@@ -426,7 +436,7 @@ export function Requests() {
             <CardContent className='p-4'>
               <div className='flex flex-wrap gap-4 items-center'>
                 <div className='relative flex-1 min-w-[200px]'>
-                  <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                  <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                   <Input
                     placeholder='Search requests...'
                     value={searchQuery}
@@ -436,7 +446,7 @@ export function Requests() {
                 </div>
                 <CollapsibleTrigger asChild>
                   <Button variant='outline' size='sm'>
-                    <Filter className='h-4 w-4 mr-2' />
+                    <MdFilterList className='h-4 w-4 mr-2' />
                     Filters
                     {hasActiveFilters && (
                       <Badge variant='secondary' className='ml-2'>
@@ -444,9 +454,9 @@ export function Requests() {
                       </Badge>
                     )}
                     {isFiltersOpen ? (
-                      <ChevronUp className='h-4 w-4 ml-2' />
+                      <MdExpandLess className='h-4 w-4 ml-2' />
                     ) : (
-                      <ChevronDown className='h-4 w-4 ml-2' />
+                      <MdExpandMore className='h-4 w-4 ml-2' />
                     )}
                   </Button>
                 </CollapsibleTrigger>
@@ -461,14 +471,14 @@ export function Requests() {
                     size='sm'
                     onClick={() => setViewMode('cards')}
                   >
-                    <LayoutGrid className='h-4 w-4' />
+                    <MdApps className='h-4 w-4' />
                   </Button>
                   <Button
                     variant={viewMode === 'table' ? 'secondary' : 'ghost'}
                     size='sm'
                     onClick={() => setViewMode('table')}
                   >
-                    <List className='h-4 w-4' />
+                    <MdList className='h-4 w-4' />
                   </Button>
                 </div>
               </div>
@@ -497,9 +507,9 @@ export function Requests() {
                             className='text-sm capitalize flex items-center gap-2'
                           >
                             {type === 'inspection' ? (
-                              <Shield className='h-4 w-4 text-blue-600' />
+                              <MdSecurity className='h-4 w-4 text-blue-600' />
                             ) : (
-                              <Languages className='h-4 w-4 text-purple-600' />
+                              <MdTranslate className='h-4 w-4 text-purple-600' />
                             )}
                             {type}
                           </label>
@@ -570,32 +580,13 @@ export function Requests() {
         </Collapsible>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setCurrentPage(1); }}>
-          <TabsList>
-            <TabsTrigger value='all'>
-              All Requests
-              <Badge variant='secondary' className='ml-2'>
-                {requests.length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value='my_requests'>My Requests</TabsTrigger>
-            <TabsTrigger value='unassigned'>
-              Unassigned
-              <Badge variant='secondary' className='ml-2'>
-                {requests.filter((r) => !r.assignedTo).length}
-              </Badge>
-            </TabsTrigger>
-            <TabsTrigger value='inspection'>
-              <Shield className='h-4 w-4 mr-1' />
-              Inspections
-            </TabsTrigger>
-            <TabsTrigger value='translation'>
-              <Languages className='h-4 w-4 mr-1' />
-              Translations
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className='space-y-4 mt-4'>
+        <AnimatedTabs
+          tabs={mainTabs}
+          value={activeTab}
+          onValueChange={(value) => { setActiveTab(value); setCurrentPage(1); }}
+          variant='compact'
+        >
+          <AnimatedTabsContent value={activeTab} className='space-y-4 mt-4'>
             {viewMode === 'cards' ? (
               /* Cards View */
               <div className='space-y-4'>
@@ -611,9 +602,9 @@ export function Requests() {
                               }`}
                             >
                               {request.type === 'inspection' ? (
-                                <Shield className='h-5 w-5 text-blue-600' />
+                                <MdSecurity className='h-5 w-5 text-blue-600' />
                               ) : (
-                                <Languages className='h-5 w-5 text-purple-600' />
+                                <MdTranslate className='h-5 w-5 text-purple-600' />
                               )}
                             </div>
                             <div className='flex-1'>
@@ -634,22 +625,22 @@ export function Requests() {
                               </p>
                               <div className='flex items-center gap-4 mt-2 text-sm text-muted-foreground flex-wrap'>
                                 <div className='flex items-center gap-1'>
-                                  <User className='h-3 w-3' />
+                                  <MdPerson className='h-3 w-3' />
                                   {request.customerName}
                                 </div>
                                 <div className='flex items-center gap-1'>
-                                  <Calendar className='h-3 w-3' />
+                                  <MdCalendarToday className='h-3 w-3' />
                                   {format(new Date(request.createdAt), 'MMM dd, yyyy')}
                                 </div>
                                 {request.assignedToName && (
                                   <div className='flex items-center gap-1'>
-                                    <Users className='h-3 w-3' />
+                                    <MdGroup className='h-3 w-3' />
                                     {request.assignedToName}
                                   </div>
                                 )}
                                 {request.threads.length > 0 && (
                                   <div className='flex items-center gap-1'>
-                                    <MessageSquare className='h-3 w-3' />
+                                    <MdMessage className='h-3 w-3' />
                                     {request.threads.length} messages
                                   </div>
                                 )}
@@ -686,7 +677,7 @@ export function Requests() {
                               setIsDetailsOpen(true)
                             }}
                           >
-                            <Eye className='h-4 w-4 mr-2' />
+                            <MdVisibility className='h-4 w-4 mr-2' />
                             View Details
                           </Button>
                           {!request.assignedTo && (
@@ -697,31 +688,31 @@ export function Requests() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant='ghost' size='sm'>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <MdMoreHoriz className='h-4 w-4' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem>
-                                <Edit className='h-4 w-4 mr-2' />
+                                <MdEdit className='h-4 w-4 mr-2' />
                                 Edit Request
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleStatusUpdate(request, 'in_progress')}
                               >
-                                <Zap className='h-4 w-4 mr-2' />
+                                <MdFlashOn className='h-4 w-4 mr-2' />
                                 Mark In Progress
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={() => handleStatusUpdate(request, 'completed')}
                               >
-                                <CheckCircle className='h-4 w-4 mr-2' />
+                                <MdCheckCircle className='h-4 w-4 mr-2' />
                                 Mark Complete
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem className='text-destructive'>
-                                <Trash2 className='h-4 w-4 mr-2' />
+                                <MdDelete className='h-4 w-4 mr-2' />
                                 Delete Request
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -756,9 +747,9 @@ export function Requests() {
                         <TableCell>
                           <Badge variant='outline' className='flex items-center gap-1 w-fit'>
                             {request.type === 'inspection' ? (
-                              <Shield className='h-3 w-3' />
+                              <MdSecurity className='h-3 w-3' />
                             ) : (
-                              <Languages className='h-3 w-3' />
+                              <MdTranslate className='h-3 w-3' />
                             )}
                             {request.type === 'inspection' ? 'Inspection' : 'Translation'}
                           </Badge>
@@ -810,12 +801,12 @@ export function Requests() {
                                 setIsDetailsOpen(true)
                               }}
                             >
-                              <Eye className='h-4 w-4' />
+                              <MdVisibility className='h-4 w-4' />
                             </Button>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant='ghost' size='sm'>
-                                  <MoreHorizontal className='h-4 w-4' />
+                                  <MdMoreHoriz className='h-4 w-4' />
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align='end'>
@@ -823,25 +814,25 @@ export function Requests() {
                                 <DropdownMenuSeparator />
                                 {!request.assignedTo && (
                                   <DropdownMenuItem onClick={() => handleAssignToMe(request)}>
-                                    <Users className='h-4 w-4 mr-2' />
+                                    <MdGroup className='h-4 w-4 mr-2' />
                                     Assign to Me
                                   </DropdownMenuItem>
                                 )}
                                 <DropdownMenuItem
                                   onClick={() => handleStatusUpdate(request, 'in_progress')}
                                 >
-                                  <Zap className='h-4 w-4 mr-2' />
+                                  <MdFlashOn className='h-4 w-4 mr-2' />
                                   Mark In Progress
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() => handleStatusUpdate(request, 'completed')}
                                 >
-                                  <CheckCircle className='h-4 w-4 mr-2' />
+                                  <MdCheckCircle className='h-4 w-4 mr-2' />
                                   Mark Complete
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className='text-destructive'>
-                                  <Trash2 className='h-4 w-4 mr-2' />
+                                  <MdDelete className='h-4 w-4 mr-2' />
                                   Delete Request
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
@@ -925,8 +916,8 @@ export function Requests() {
                 </div>
               </div>
             </div>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
 
         {/* New Request Dialog */}
         <Dialog open={isNewRequestOpen} onOpenChange={setIsNewRequestOpen}>
@@ -950,7 +941,7 @@ export function Requests() {
                       className='flex-1'
                       onClick={() => setNewRequest({ ...newRequest, type: 'inspection' })}
                     >
-                      <Shield className='h-4 w-4 mr-2' />
+                      <MdSecurity className='h-4 w-4 mr-2' />
                       Inspection
                     </Button>
                     <Button
@@ -959,7 +950,7 @@ export function Requests() {
                       className='flex-1'
                       onClick={() => setNewRequest({ ...newRequest, type: 'translation' })}
                     >
-                      <Languages className='h-4 w-4 mr-2' />
+                      <MdTranslate className='h-4 w-4 mr-2' />
                       Translation
                     </Button>
                   </div>
@@ -1141,7 +1132,7 @@ export function Requests() {
                 Cancel
               </Button>
               <Button onClick={handleCreateRequest}>
-                <Plus className='h-4 w-4 mr-2' />
+                <MdAdd className='h-4 w-4 mr-2' />
                 Create Request
               </Button>
             </div>
@@ -1250,13 +1241,13 @@ export function Requests() {
                                   key={attachment.id}
                                   className='flex items-center gap-2 text-xs'
                                 >
-                                  <Paperclip className='h-3 w-3' />
+                                  <MdAttachFile className='h-3 w-3' />
                                   <span>{attachment.name}</span>
                                   <span className='opacity-70'>
                                     ({formatFileSize(attachment.size)})
                                   </span>
                                   <Button variant='ghost' size='sm' className='h-auto p-0'>
-                                    <Download className='h-3 w-3' />
+                                    <MdDownload className='h-3 w-3' />
                                   </Button>
                                 </div>
                               ))}
@@ -1277,7 +1268,7 @@ export function Requests() {
                           key={index}
                           className='flex items-center gap-2 bg-muted px-3 py-1 rounded-lg text-sm'
                         >
-                          <Paperclip className='h-3 w-3' />
+                          <MdAttachFile className='h-3 w-3' />
                           <span>{file.name}</span>
                           <span className='text-xs text-muted-foreground'>
                             ({formatFileSize(file.size)})
@@ -1288,7 +1279,7 @@ export function Requests() {
                             className='h-auto p-0'
                             onClick={() => removeAttachment(index)}
                           >
-                            <X className='h-3 w-3' />
+                            <MdClose className='h-3 w-3' />
                           </Button>
                         </div>
                       ))}
@@ -1298,7 +1289,7 @@ export function Requests() {
                     <div {...getRootProps()} className='cursor-pointer'>
                       <input {...getInputProps()} />
                       <Button variant='outline' size='sm' type='button'>
-                        <Paperclip className='h-4 w-4' />
+                        <MdAttachFile className='h-4 w-4' />
                       </Button>
                     </div>
                     <Textarea
@@ -1314,7 +1305,7 @@ export function Requests() {
                       }}
                     />
                     <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                      <Send className='h-4 w-4' />
+                      <MdSend className='h-4 w-4' />
                     </Button>
                   </div>
                 </div>

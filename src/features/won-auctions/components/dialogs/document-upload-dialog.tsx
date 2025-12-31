@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { FileText, Upload, X } from 'lucide-react'
+import { MdDescription, MdUpload, MdClose, MdCheck, MdRadioButtonUnchecked } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -12,22 +12,29 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Input } from '@/components/ui/input'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
+import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
-import { type WonAuction, type Document } from '../../data/won-auctions'
-import { DOCUMENT_TYPE_LABELS } from '../../types'
+import { type Purchase, type Document } from '../../data/won-auctions'
+import { type DocumentChecklist } from '../../types/workflow'
+
+// Required document types that sync with workflow checklist
+const REQUIRED_DOCUMENT_TYPES: { key: Document['type']; label: string; checklistKey: keyof DocumentChecklist }[] = [
+  { key: 'invoice', label: 'Invoice', checklistKey: 'invoice' },
+  { key: 'export_certificate', label: 'Export Certificate', checklistKey: 'exportCertificate' },
+  { key: 'bill_of_lading', label: 'Bill of Lading', checklistKey: 'billOfLading' },
+  { key: 'insurance', label: 'Insurance Certificate', checklistKey: 'insurance' },
+  { key: 'inspection', label: 'Inspection Report', checklistKey: 'inspectionReport' },
+]
 
 interface DocumentUploadDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  auction: WonAuction | null
-  onUpload: (auctionId: string, documents: Document[]) => void
+  auction: Purchase | null
+  onUpload: (auctionId: string, documents: Document[], checklistKey?: keyof DocumentChecklist) => void
+  documentChecklist?: DocumentChecklist
 }
 
 export function DocumentUploadDialog({
@@ -35,9 +42,11 @@ export function DocumentUploadDialog({
   onOpenChange,
   auction,
   onUpload,
+  documentChecklist,
 }: DocumentUploadDialogProps) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
-  const [documentType, setDocumentType] = useState<Document['type']>('other')
+  const [documentType, setDocumentType] = useState<Document['type'] | 'custom'>('invoice')
+  const [customTypeName, setCustomTypeName] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,62 +58,144 @@ export function DocumentUploadDialog({
   const handleUpload = () => {
     if (!auction || uploadedFiles.length === 0) return
 
+    const finalType: Document['type'] = documentType === 'custom' ? 'other' : documentType
+
     const newDocuments: Document[] = uploadedFiles.map((file) => ({
       id: String(Date.now() + Math.random()),
-      name: file.name,
-      type: documentType,
+      name: documentType === 'custom' && customTypeName ? `${customTypeName} - ${file.name}` : file.name,
+      type: finalType,
       uploadedAt: new Date(),
       uploadedBy: 'Current Admin',
       size: file.size,
       url: URL.createObjectURL(file),
     }))
 
-    onUpload(auction.id, newDocuments)
+    // Find the checklist key if it's a required document type
+    const checklistKey = REQUIRED_DOCUMENT_TYPES.find(d => d.key === finalType)?.checklistKey
+
+    onUpload(auction.id, newDocuments, checklistKey)
 
     toast.success('Documents uploaded successfully', {
-      description: `${uploadedFiles.length} file(s) uploaded`,
+      description: `${uploadedFiles.length} file(s) uploaded as ${documentType === 'custom' ? customTypeName || 'Other' : REQUIRED_DOCUMENT_TYPES.find(d => d.key === documentType)?.label || 'Other'}`,
     })
 
     setUploadedFiles([])
-    setDocumentType('other')
+    setDocumentType('invoice')
+    setCustomTypeName('')
     onOpenChange(false)
+  }
+
+  // Check if a document type is already uploaded
+  const isDocumentUploaded = (checklistKey: keyof DocumentChecklist) => {
+    if (!documentChecklist) return false
+    return documentChecklist[checklistKey]?.received === true
+  }
+
+  // Check if document exists in auction documents
+  const hasDocument = (type: Document['type']) => {
+    if (!auction) return false
+    return auction.documents.some(d => d.type === type)
   }
 
   if (!auction) return null
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className='max-w-md'>
         <DialogHeader>
-          <DialogTitle>Upload Documents</DialogTitle>
+          <DialogTitle>Upload Document</DialogTitle>
           <DialogDescription>
-            Upload documents for {auction.vehicleInfo.year} {auction.vehicleInfo.make}{' '}
+            Select document type for {auction.vehicleInfo.year} {auction.vehicleInfo.make}{' '}
             {auction.vehicleInfo.model}
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-4'>
+          {/* Document Type Selection */}
           <div className='space-y-2'>
-            <Label>Document Type</Label>
-            <Select
+            <Label>What type of document is this?</Label>
+            <RadioGroup
               value={documentType}
-              onValueChange={(value) => setDocumentType(value as Document['type'])}
+              onValueChange={(value) => setDocumentType(value as Document['type'] | 'custom')}
+              className='space-y-2'
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(DOCUMENT_TYPE_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              {/* Required Documents - Show pending/uploaded status */}
+              {REQUIRED_DOCUMENT_TYPES.map((docType) => {
+                const isUploaded = isDocumentUploaded(docType.checklistKey) || hasDocument(docType.key)
+                return (
+                  <label
+                    key={docType.key}
+                    className={cn(
+                      'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all',
+                      documentType === docType.key
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                        : 'border-border hover:border-primary/50 hover:bg-muted/50',
+                      isUploaded && 'bg-emerald-50 dark:bg-emerald-900/20'
+                    )}
+                  >
+                    <RadioGroupItem value={docType.key} className='sr-only' />
+                    <div className='flex items-center gap-3 flex-1'>
+                      {isUploaded ? (
+                        <div className='h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0'>
+                          <MdCheck className='h-3 w-3 text-white' />
+                        </div>
+                      ) : (
+                        <MdRadioButtonUnchecked className='h-5 w-5 text-muted-foreground/40 shrink-0' />
+                      )}
+                      <span className={cn(
+                        'text-sm font-medium',
+                        isUploaded ? 'text-emerald-700 dark:text-emerald-400' : ''
+                      )}>
+                        {docType.label}
+                      </span>
+                    </div>
+                    {isUploaded ? (
+                      <Badge variant='secondary' className='text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400'>
+                        Uploaded
+                      </Badge>
+                    ) : (
+                      <Badge variant='outline' className='text-xs text-amber-600 border-amber-300'>
+                        Required
+                      </Badge>
+                    )}
+                  </label>
+                )
+              })}
+
+              {/* Other Option */}
+              <label
+                className={cn(
+                  'flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all',
+                  documentType === 'custom'
+                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                )}
+              >
+                <RadioGroupItem value='custom' className='sr-only' />
+                <div className='flex items-center gap-3 flex-1'>
+                  <MdDescription className='h-5 w-5 text-muted-foreground shrink-0' />
+                  <span className='text-sm font-medium'>Other Document</span>
+                </div>
+                <Badge variant='outline' className='text-xs'>
+                  Optional
+                </Badge>
+              </label>
+            </RadioGroup>
+
+            {/* Custom type name input */}
+            {documentType === 'custom' && (
+              <Input
+                placeholder='Enter document name (e.g., Customs Declaration)'
+                value={customTypeName}
+                onChange={(e) => setCustomTypeName(e.target.value)}
+                className='mt-2'
+              />
+            )}
           </div>
 
+          {/* File Upload Area */}
           <div
-            className='cursor-pointer rounded-lg border-2 border-dashed p-8 text-center transition-colors hover:border-primary/50'
+            className='cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors hover:border-primary/50'
             onClick={() => fileInputRef.current?.click()}
           >
             <input
@@ -115,7 +206,7 @@ export function DocumentUploadDialog({
               onChange={handleFileSelect}
               className='hidden'
             />
-            <Upload className='mx-auto mb-2 h-8 w-8 text-muted-foreground' />
+            <MdUpload className='mx-auto mb-2 h-8 w-8 text-muted-foreground' />
             <p className='text-sm text-muted-foreground'>
               Click to select files or drag & drop
             </p>
@@ -124,6 +215,7 @@ export function DocumentUploadDialog({
             </p>
           </div>
 
+          {/* Selected Files */}
           {uploadedFiles.length > 0 && (
             <div className='space-y-2'>
               {uploadedFiles.map((file, index) => (
@@ -132,20 +224,20 @@ export function DocumentUploadDialog({
                   className='flex items-center justify-between rounded-lg bg-muted p-2'
                 >
                   <div className='flex items-center gap-2'>
-                    <FileText className='h-4 w-4' />
-                    <span className='text-sm'>{file.name}</span>
+                    <MdDescription className='h-4 w-4' />
+                    <span className='text-sm truncate max-w-[200px]'>{file.name}</span>
                     <span className='text-xs text-muted-foreground'>
                       ({(file.size / 1024).toFixed(1)} KB)
                     </span>
                   </div>
                   <Button
                     variant='ghost'
-                    size='sm'
+                    size='icon-xs'
                     onClick={() =>
                       setUploadedFiles(uploadedFiles.filter((_, i) => i !== index))
                     }
                   >
-                    <X className='h-4 w-4' />
+                    <MdClose className='h-4 w-4' />
                   </Button>
                 </div>
               ))}
@@ -154,12 +246,12 @@ export function DocumentUploadDialog({
         </div>
 
         <DialogFooter>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
+          <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button onClick={handleUpload} disabled={uploadedFiles.length === 0}>
-            <Upload className='mr-2 h-4 w-4' />
-            Upload Documents
+          <Button size='sm' onClick={handleUpload} disabled={uploadedFiles.length === 0}>
+            <MdUpload className='mr-2 h-4 w-4' />
+            Upload
           </Button>
         </DialogFooter>
       </DialogContent>

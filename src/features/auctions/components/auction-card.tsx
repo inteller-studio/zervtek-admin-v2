@@ -1,7 +1,7 @@
 'use client'
 
 import { format, formatDistanceToNow } from 'date-fns'
-import { Clock } from 'lucide-react'
+import { MdAccessTime } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { type Auction } from '../data/auctions'
@@ -47,7 +47,7 @@ export function AuctionCard({
           {isActive && timeRemaining && (
             <div className='absolute right-2 top-2'>
               <Badge variant='secondary' className='flex items-center gap-1 bg-black/70 text-white'>
-                <Clock className='h-3 w-3' />
+                <MdAccessTime className='h-3 w-3' />
                 {timeRemaining}
               </Badge>
             </div>

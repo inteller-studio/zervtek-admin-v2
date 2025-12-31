@@ -2,12 +2,12 @@
 
 import Link from 'next/link'
 import {
-  BadgeCheck,
-  Bell,
-  ChevronsUpDown,
-  CreditCard,
-  LogOut,
-} from 'lucide-react'
+  MdVerified,
+  MdNotifications,
+  MdUnfoldMore,
+  MdCreditCard,
+  MdLogout,
+} from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -58,11 +58,11 @@ export function NavUser({ user }: NavUserProps) {
                 size='lg'
                 className={cn(
                   'group/user transition-all duration-200',
-                  'hover:bg-accent/50',
-                  'data-[state=open]:bg-accent data-[state=open]:text-accent-foreground'
+                  'hover:bg-muted/40',
+                  'data-[state=open]:bg-muted/60 data-[state=open]:text-accent-foreground'
                 )}
               >
-                <Avatar className='h-8 w-8 rounded-lg ring-2 ring-border/50 transition-all duration-200 group-hover/user:ring-primary/30'>
+                <Avatar className='h-8 w-8 rounded-lg transition-all duration-200'>
                   <AvatarImage src={user.avatar} alt={user.name} />
                   <AvatarFallback className='rounded-lg bg-primary/10 text-xs font-semibold text-primary'>
                     {initials}
@@ -76,7 +76,7 @@ export function NavUser({ user }: NavUserProps) {
                     {user.email}
                   </span>
                 </div>
-                <ChevronsUpDown className='ms-auto size-4 text-muted-foreground/50 transition-colors group-hover/user:text-muted-foreground' />
+                <MdUnfoldMore className='ms-auto size-4 text-muted-foreground/50 transition-colors group-hover/user:text-muted-foreground' />
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
@@ -87,7 +87,7 @@ export function NavUser({ user }: NavUserProps) {
             >
               <DropdownMenuLabel className='p-0 font-normal'>
                 <div className='flex items-center gap-3 px-2 py-2.5'>
-                  <Avatar className='h-10 w-10 rounded-lg ring-2 ring-border/50'>
+                  <Avatar className='h-10 w-10 rounded-lg'>
                     <AvatarImage src={user.avatar} alt={user.name} />
                     <AvatarFallback className='rounded-lg bg-primary/10 text-sm font-semibold text-primary'>
                       {initials}
@@ -107,19 +107,19 @@ export function NavUser({ user }: NavUserProps) {
               <DropdownMenuGroup className='p-1'>
                 <DropdownMenuItem asChild className='rounded-lg transition-colors'>
                   <Link href='/settings/account' className='flex items-center gap-2'>
-                    <BadgeCheck className='h-4 w-4 text-muted-foreground' />
+                    <MdVerified className='h-4 w-4 text-muted-foreground' />
                     <span>Account</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className='rounded-lg transition-colors'>
                   <Link href='/settings' className='flex items-center gap-2'>
-                    <CreditCard className='h-4 w-4 text-muted-foreground' />
+                    <MdCreditCard className='h-4 w-4 text-muted-foreground' />
                     <span>Billing</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild className='rounded-lg transition-colors'>
                   <Link href='/settings/notifications' className='flex items-center gap-2'>
-                    <Bell className='h-4 w-4 text-muted-foreground' />
+                    <MdNotifications className='h-4 w-4 text-muted-foreground' />
                     <span>Notifications</span>
                   </Link>
                 </DropdownMenuItem>
@@ -131,7 +131,7 @@ export function NavUser({ user }: NavUserProps) {
                   onClick={() => setOpen(true)}
                   className='rounded-lg transition-colors'
                 >
-                  <LogOut className='h-4 w-4' />
+                  <MdLogout className='h-4 w-4' />
                   <span>Sign out</span>
                 </DropdownMenuItem>
               </div>

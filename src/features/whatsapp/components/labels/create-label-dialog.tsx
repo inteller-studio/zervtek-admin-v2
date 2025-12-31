@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check } from 'lucide-react'
+import { MdCheck } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -116,7 +116,7 @@ export function CreateLabelDialog({
                       title={color}
                     >
                       {isSelected && (
-                        <Check className={cn('h-4 w-4', colorConfig.textClass)} />
+                        <MdCheck className={cn('h-4 w-4', colorConfig.textClass)} />
                       )}
                     </button>
                   )

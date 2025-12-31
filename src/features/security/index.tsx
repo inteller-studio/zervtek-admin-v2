@@ -4,24 +4,24 @@ import { useState } from 'react'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
 import {
-  Activity,
-  AlertTriangle,
-  Ban,
-  Database,
-  FileWarning,
-  Key,
-  Lock,
-  MapPin,
-  RefreshCw,
-  Save,
-  Server,
-  Shield,
-  ShieldAlert,
-  UserCheck,
-  UserX,
-  Wifi,
-  XCircle,
-} from 'lucide-react'
+  MdTrendingUp,
+  MdWarning,
+  MdBlock,
+  MdStorage,
+  MdWarningAmber,
+  MdVpnKey,
+  MdLock,
+  MdLocationOn,
+  MdRefresh,
+  MdSave,
+  MdDns,
+  MdSecurity,
+  MdShield,
+  MdVerifiedUser,
+  MdPersonOff,
+  MdWifi,
+  MdCancel,
+} from 'react-icons/md'
 
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -344,14 +344,14 @@ export function Security() {
             <p className='text-muted-foreground'>System security configuration and monitoring</p>
           </div>
           <Badge variant='outline' className='px-3 py-1'>
-            <Shield className='mr-2 h-3 w-3' />
+            <MdSecurity className='mr-2 h-3 w-3' />
             Protection Level: High
           </Badge>
         </div>
 
         {/* Security Overview Alert */}
         <Alert>
-          <ShieldAlert className='h-4 w-4' />
+          <MdShield className='h-4 w-4' />
           <AlertTitle>Security Status</AlertTitle>
           <AlertDescription>
             System security is operational. Last security scan: {format(new Date(), 'PPp')}
@@ -362,7 +362,7 @@ export function Security() {
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
-              <Shield className='h-5 w-5' />
+              <MdSecurity className='h-5 w-5' />
               <CardTitle>Security Configuration</CardTitle>
             </div>
             <CardDescription>
@@ -417,7 +417,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Lock className='h-4 w-4' />
+                      <MdLock className='h-4 w-4' />
                       Enforce Strong Passwords
                     </Label>
                     <p className='text-xs text-muted-foreground'>Require complex passwords</p>
@@ -433,7 +433,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Key className='h-4 w-4' />
+                      <MdVpnKey className='h-4 w-4' />
                       Require MFA
                     </Label>
                     <p className='text-xs text-muted-foreground'>Multi-factor authentication for all admins</p>
@@ -449,7 +449,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Wifi className='h-4 w-4' />
+                      <MdWifi className='h-4 w-4' />
                       IP Whitelisting
                     </Label>
                     <p className='text-xs text-muted-foreground'>Restrict access to specific IPs</p>
@@ -465,7 +465,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Activity className='h-4 w-4' />
+                      <MdTrendingUp className='h-4 w-4' />
                       Suspicious Activity Detection
                     </Label>
                     <p className='text-xs text-muted-foreground'>AI-powered threat detection</p>
@@ -481,7 +481,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Database className='h-4 w-4' />
+                      <MdStorage className='h-4 w-4' />
                       Data Encryption
                     </Label>
                     <p className='text-xs text-muted-foreground'>Encrypt sensitive data at rest</p>
@@ -497,7 +497,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <FileWarning className='h-4 w-4' />
+                      <MdWarningAmber className='h-4 w-4' />
                       Audit Logging
                     </Label>
                     <p className='text-xs text-muted-foreground'>Log all administrative actions</p>
@@ -513,7 +513,7 @@ export function Security() {
                 <div className='flex items-center justify-between'>
                   <div className='space-y-0.5'>
                     <Label className='flex items-center gap-2'>
-                      <Server className='h-4 w-4' />
+                      <MdDns className='h-4 w-4' />
                       Rate Limiting
                     </Label>
                     <p className='text-xs text-muted-foreground'>Prevent API abuse</p>
@@ -543,8 +543,8 @@ export function Security() {
 
             <div className='flex justify-end'>
               <Button onClick={handleSaveSecuritySettings} disabled={loading}>
-                {loading && <RefreshCw className='mr-2 h-4 w-4 animate-spin' />}
-                <Save className='mr-2 h-4 w-4' />
+                {loading && <MdRefresh className='mr-2 h-4 w-4 animate-spin' />}
+                <MdSave className='mr-2 h-4 w-4' />
                 Save Security Settings
               </Button>
             </div>
@@ -555,7 +555,7 @@ export function Security() {
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
-              <UserCheck className='h-5 w-5' />
+              <MdVerifiedUser className='h-5 w-5' />
               <CardTitle>Access Control</CardTitle>
             </div>
             <CardDescription>
@@ -623,8 +623,8 @@ export function Security() {
 
             <div className='flex justify-end'>
               <Button onClick={handleSaveAccessControl} disabled={loading}>
-                {loading && <RefreshCw className='mr-2 h-4 w-4 animate-spin' />}
-                <Save className='mr-2 h-4 w-4' />
+                {loading && <MdRefresh className='mr-2 h-4 w-4 animate-spin' />}
+                <MdSave className='mr-2 h-4 w-4' />
                 Save Access Control
               </Button>
             </div>
@@ -635,7 +635,7 @@ export function Security() {
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
-              <Activity className='h-5 w-5' />
+              <MdTrendingUp className='h-5 w-5' />
               <CardTitle>Active Admin Sessions</CardTitle>
             </div>
             <CardDescription>
@@ -670,7 +670,7 @@ export function Security() {
                     </TableCell>
                     <TableCell>
                       <div className='flex items-center gap-1 text-sm'>
-                        <MapPin className='h-3 w-3' />
+                        <MdLocationOn className='h-3 w-3' />
                         {session.location}
                       </div>
                     </TableCell>
@@ -690,7 +690,7 @@ export function Security() {
                           onClick={() => handleTerminateSession(session.id)}
                           disabled={loading}
                         >
-                          <UserX className='h-4 w-4' />
+                          <MdPersonOff className='h-4 w-4' />
                         </Button>
                       )}
                     </TableCell>
@@ -705,7 +705,7 @@ export function Security() {
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
-              <AlertTriangle className='h-5 w-5' />
+              <MdWarning className='h-5 w-5' />
               <CardTitle>Security Events</CardTitle>
             </div>
             <CardDescription>
@@ -755,7 +755,7 @@ export function Security() {
         <Card>
           <CardHeader>
             <div className='flex items-center gap-2'>
-              <Ban className='h-5 w-5' />
+              <MdBlock className='h-5 w-5' />
               <CardTitle>IP Blacklist</CardTitle>
             </div>
             <CardDescription>
@@ -810,7 +810,7 @@ export function Security() {
                 )}
               </div>
               <Button onClick={handleBlockIP} disabled={loading}>
-                <Ban className='mr-2 h-4 w-4' />
+                <MdBlock className='mr-2 h-4 w-4' />
                 Block IP Address
               </Button>
             </div>
@@ -852,7 +852,7 @@ export function Security() {
                         onClick={() => handleUnblockIP(ip.id)}
                         disabled={loading}
                       >
-                        <XCircle className='h-4 w-4' />
+                        <MdCancel className='h-4 w-4' />
                       </Button>
                     </TableCell>
                   </TableRow>

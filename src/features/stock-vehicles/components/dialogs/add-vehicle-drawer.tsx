@@ -2,21 +2,21 @@
 
 import { useState, useMemo, useRef, useCallback } from 'react'
 import {
-  ArrowLeft,
-  ArrowRight,
-  Car,
-  ChevronsUpDown,
-  FileText,
-  ImagePlus,
-  Loader2,
-  Plus,
-  Search,
-  Ship,
-  Trash2,
-  Upload,
-  User,
-  X,
-} from 'lucide-react'
+  MdArrowBack,
+  MdArrowForward,
+  MdDirectionsCar,
+  MdUnfoldMore,
+  MdDescription,
+  MdAddPhotoAlternate,
+  MdSync,
+  MdAdd,
+  MdSearch,
+  MdDirectionsBoat,
+  MdDelete,
+  MdUpload,
+  MdPerson,
+  MdClose,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -292,6 +292,14 @@ export function AddVehicleDrawer({
       tags: [],
       createdAt: new Date(),
       lastActivity: new Date(),
+      loginCount: 0,
+      failedLoginAttempts: 0,
+      riskLevel: 'low',
+      savedAddresses: [],
+      paymentMethods: [],
+      twoFactorEnabled: false,
+      activeSessions: [],
+      verificationDocuments: [],
     }
 
     // Set as selected customer
@@ -444,7 +452,7 @@ export function AddVehicleDrawer({
           <SheetHeader className='p-4'>
             <div className='flex items-center justify-between'>
               <SheetTitle className='flex items-center gap-2'>
-                <Car className='h-5 w-5' />
+                <MdDirectionsCar className='h-5 w-5' />
                 Add Stock Vehicle
               </SheetTitle>
               <Badge variant='outline'>Step {step} of 2</Badge>
@@ -462,7 +470,7 @@ export function AddVehicleDrawer({
               {/* Stock Source Selection */}
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
-                  <Car className='h-4 w-4 text-muted-foreground' />
+                  <MdDirectionsCar className='h-4 w-4 text-muted-foreground' />
                   <Label className='text-sm font-semibold'>
                     Stock Source <span className='text-red-500'>*</span>
                   </Label>
@@ -550,7 +558,7 @@ export function AddVehicleDrawer({
               {/* Vehicle Information */}
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>
-                  <Car className='h-4 w-4 text-muted-foreground' />
+                  <MdDirectionsCar className='h-4 w-4 text-muted-foreground' />
                   <Label className='text-sm font-semibold'>Vehicle Information</Label>
                 </div>
                 <div className='grid grid-cols-2 gap-3'>
@@ -682,7 +690,7 @@ export function AddVehicleDrawer({
                 <div className='space-y-3 pt-2'>
                   <div className='flex items-center justify-between'>
                     <div className='flex items-center gap-2'>
-                      <ImagePlus className='h-4 w-4 text-muted-foreground' />
+                      <MdAddPhotoAlternate className='h-4 w-4 text-muted-foreground' />
                       <Label className='text-sm font-medium'>Vehicle Photos</Label>
                     </div>
                     <span className='text-xs text-muted-foreground'>
@@ -712,7 +720,7 @@ export function AddVehicleDrawer({
                       className='hidden'
                       onChange={(e) => handleFileSelect(e.target.files)}
                     />
-                    <Upload className='mx-auto h-8 w-8 text-muted-foreground' />
+                    <MdUpload className='mx-auto h-8 w-8 text-muted-foreground' />
                     <p className='mt-2 text-sm font-medium'>
                       Drop photos here or click to upload
                     </p>
@@ -747,7 +755,7 @@ export function AddVehicleDrawer({
                             }}
                             className='absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white opacity-0 transition-opacity group-hover:opacity-100'
                           >
-                            <Trash2 className='h-3 w-3' />
+                            <MdDelete className='h-3 w-3' />
                           </button>
                         </div>
                       ))}
@@ -800,7 +808,7 @@ export function AddVehicleDrawer({
               <div className='space-y-4'>
                 <div className='flex items-center justify-between'>
                   <div className='flex items-center gap-2'>
-                    <User className='h-4 w-4 text-muted-foreground' />
+                    <MdPerson className='h-4 w-4 text-muted-foreground' />
                     <Label className='text-sm font-semibold'>Customer (Optional)</Label>
                   </div>
                   <Button
@@ -809,7 +817,7 @@ export function AddVehicleDrawer({
                     size='sm'
                     onClick={() => setIsCreateCustomerOpen(true)}
                   >
-                    <Plus className='mr-1 h-3 w-3' />
+                    <MdAdd className='mr-1 h-3 w-3' />
                     New
                   </Button>
                 </div>
@@ -823,7 +831,7 @@ export function AddVehicleDrawer({
                     <div className='flex items-center justify-between rounded-lg border bg-muted/30 p-3'>
                       <div className='flex items-center gap-3'>
                         <div className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/10'>
-                          <User className='h-4 w-4 text-primary' />
+                          <MdPerson className='h-4 w-4 text-primary' />
                         </div>
                         <div>
                           <p className='font-medium'>{selectedCustomer.name}</p>
@@ -838,7 +846,7 @@ export function AddVehicleDrawer({
                         size='sm'
                         onClick={handleClearCustomer}
                       >
-                        <X className='h-4 w-4' />
+                        <MdClose className='h-4 w-4' />
                       </Button>
                     </div>
                   ) : (
@@ -851,10 +859,10 @@ export function AddVehicleDrawer({
                           className='w-full justify-between'
                         >
                           <span className='flex items-center gap-2 text-muted-foreground'>
-                            <Search className='h-4 w-4' />
+                            <MdSearch className='h-4 w-4' />
                             Search customer...
                           </span>
-                          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+                          <MdUnfoldMore className='ml-2 h-4 w-4 shrink-0 opacity-50' />
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className='w-[400px] p-0' align='start'>
@@ -876,7 +884,7 @@ export function AddVehicleDrawer({
                                 >
                                   <div className='flex items-center gap-3'>
                                     <div className='flex h-8 w-8 items-center justify-center rounded-full bg-primary/10'>
-                                      <User className='h-4 w-4 text-primary' />
+                                      <MdPerson className='h-4 w-4 text-primary' />
                                     </div>
                                     <div className='flex-1'>
                                       <p className='font-medium'>{customer.name}</p>
@@ -948,7 +956,7 @@ export function AddVehicleDrawer({
               {/* Vehicle Card */}
               <div className='rounded-xl border border-border/50 p-4'>
                 <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
-                  <Car className='h-3.5 w-3.5' />
+                  <MdDirectionsCar className='h-3.5 w-3.5' />
                   Vehicle
                 </div>
                 <div className='flex items-center gap-3'>
@@ -960,7 +968,7 @@ export function AddVehicleDrawer({
                     />
                   ) : (
                     <div className='flex h-16 w-24 items-center justify-center rounded-lg bg-muted'>
-                      <Car className='h-8 w-8 text-muted-foreground/30' />
+                      <MdDirectionsCar className='h-8 w-8 text-muted-foreground/30' />
                     </div>
                   )}
                   <div>
@@ -979,7 +987,7 @@ export function AddVehicleDrawer({
               {selectedCustomer && (
                 <div className='rounded-xl border border-border/50 p-4'>
                   <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3'>
-                    <User className='h-3.5 w-3.5' />
+                    <MdPerson className='h-3.5 w-3.5' />
                     Customer
                   </div>
                   <div className='flex items-center gap-3'>
@@ -1000,7 +1008,7 @@ export function AddVehicleDrawer({
               {destinationPort && (
                 <div className='rounded-xl border border-border/50 p-4'>
                   <div className='flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2'>
-                    <Ship className='h-3.5 w-3.5' />
+                    <MdDirectionsBoat className='h-3.5 w-3.5' />
                     Destination
                   </div>
                   <p className='font-medium'>{destinationPort}</p>
@@ -1027,7 +1035,7 @@ export function AddVehicleDrawer({
               {/* Price Summary */}
               <div className='rounded-xl border border-primary/20 bg-primary/5 p-4'>
                 <div className='flex items-center gap-2 text-xs font-medium text-primary uppercase tracking-wider mb-3'>
-                  <FileText className='h-3.5 w-3.5' />
+                  <MdDescription className='h-3.5 w-3.5' />
                   {selectedCustomer ? 'Invoice Summary' : 'Price Summary'}
                 </div>
                 <div className='space-y-2'>
@@ -1088,7 +1096,7 @@ export function AddVehicleDrawer({
               {/* Email Preview (if customer selected) */}
               {selectedCustomer && (
                 <div className='flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground'>
-                  <FileText className='h-4 w-4 shrink-0' />
+                  <MdDescription className='h-4 w-4 shrink-0' />
                   <span>
                     Invoice will be sent to <span className='font-medium text-foreground'>{customerEmail}</span>
                   </span>
@@ -1111,13 +1119,13 @@ export function AddVehicleDrawer({
               </Button>
               <Button onClick={handleNext} disabled={isSubmitting}>
                 Next
-                <ArrowRight className='ml-2 h-4 w-4' />
+                <MdArrowForward className='ml-2 h-4 w-4' />
               </Button>
             </>
           ) : (
             <>
               <Button variant='outline' onClick={handleBack} disabled={isSubmitting}>
-                <ArrowLeft className='mr-2 h-4 w-4' />
+                <MdArrowBack className='mr-2 h-4 w-4' />
                 Back
               </Button>
               <div className='flex gap-2'>
@@ -1132,12 +1140,12 @@ export function AddVehicleDrawer({
                   <Button onClick={handleCreateInvoice} disabled={isSubmitting}>
                     {isSubmitting ? (
                       <>
-                        <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                        <MdSync className='mr-2 h-4 w-4 animate-spin' />
                         Creating...
                       </>
                     ) : (
                       <>
-                        <FileText className='mr-2 h-4 w-4' />
+                        <MdDescription className='mr-2 h-4 w-4' />
                         Create Invoice
                       </>
                     )}
@@ -1154,7 +1162,7 @@ export function AddVehicleDrawer({
         <DialogContent className='sm:max-w-md'>
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
-              <Plus className='h-5 w-5' />
+              <MdAdd className='h-5 w-5' />
               Create New Customer
             </DialogTitle>
             <DialogDescription>
@@ -1221,7 +1229,7 @@ export function AddVehicleDrawer({
               Cancel
             </Button>
             <Button onClick={handleCreateCustomer}>
-              <Plus className='mr-2 h-4 w-4' />
+              <MdAdd className='mr-2 h-4 w-4' />
               Create Customer
             </Button>
           </DialogFooter>

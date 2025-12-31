@@ -1,13 +1,13 @@
 'use client'
 
-import { Package, Upload, FileText, Check } from 'lucide-react'
+import { MdInventory2, MdUpload, MdDescription, MdCheck } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import {
   type PurchaseWorkflow,
   type BLDeliveryMethod,
@@ -18,7 +18,7 @@ import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 import { WorkflowFileUpload } from '../shared/workflow-file-upload'
 
 interface ShippedStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
@@ -106,7 +106,7 @@ export function ShippedStage({
     <div className='space-y-4'>
       {/* Info Alert */}
       <Alert>
-        <Package className='h-4 w-4' />
+        <MdInventory2 className='h-4 w-4' />
         <AlertDescription>
           Complete shipping documentation including Bill of Lading, export declaration, and recycle
           application.
@@ -119,7 +119,7 @@ export function ShippedStage({
           <Label className='text-sm font-medium'>Bill of Lading Copy</Label>
           {stage.blCopy.uploaded && (
             <Badge variant='default' className='bg-emerald-500'>
-              <Check className='h-3 w-3 mr-1' />
+              <MdCheck className='h-3 w-3 mr-1' />
               Uploaded
             </Badge>
           )}
@@ -136,7 +136,7 @@ export function ShippedStage({
         ) : (
           <div className='rounded-lg border p-3 bg-emerald-50/50 dark:bg-emerald-900/10'>
             <div className='flex items-center gap-2'>
-              <FileText className='h-4 w-4 text-emerald-600' />
+              <MdDescription className='h-4 w-4 text-emerald-600' />
               <span className='text-sm'>B/L document uploaded</span>
             </div>
             {stage.blCopy.uploadedAt && (
@@ -206,7 +206,7 @@ export function ShippedStage({
           <Label className='text-sm font-medium'>Export Declaration</Label>
           {stage.exportDeclaration.uploaded && (
             <Badge variant='default' className='bg-emerald-500'>
-              <Check className='h-3 w-3 mr-1' />
+              <MdCheck className='h-3 w-3 mr-1' />
               Uploaded
             </Badge>
           )}
@@ -223,7 +223,7 @@ export function ShippedStage({
         ) : (
           <div className='rounded-lg border p-3 bg-emerald-50/50 dark:bg-emerald-900/10'>
             <div className='flex items-center gap-2'>
-              <FileText className='h-4 w-4 text-emerald-600' />
+              <MdDescription className='h-4 w-4 text-emerald-600' />
               <span className='text-sm'>Export declaration uploaded</span>
             </div>
             {stage.exportDeclaration.uploadedAt && (

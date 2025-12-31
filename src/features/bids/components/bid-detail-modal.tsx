@@ -4,29 +4,29 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  User,
-  Clock,
-  Gavel,
-  Trophy,
-  FileText,
-  Handshake,
-  MessageSquare,
-  Users,
-  CircleSlash,
-  XCircle,
-  Ban,
-  HelpCircle,
-  Check,
-  UserCog,
-  Car,
-  ChevronLeft,
-  ChevronRight,
-  AlertTriangle,
-  Copy,
-  X,
-  ZoomIn,
-  Maximize2,
-} from 'lucide-react'
+  MdPerson,
+  MdAccessTime,
+  MdGavel,
+  MdEmojiEvents,
+  MdDescription,
+  MdHandshake,
+  MdMessage,
+  MdGroup,
+  MdNotInterested,
+  MdCancel,
+  MdBlock,
+  MdHelp,
+  MdCheck,
+  MdManageAccounts,
+  MdDirectionsCar,
+  MdChevronLeft,
+  MdChevronRight,
+  MdWarning,
+  MdContentCopy,
+  MdClose,
+  MdZoomIn,
+  MdFullscreen,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -221,7 +221,7 @@ function ImageGallery({ images, alt, onOpenLightbox }: ImageGalleryProps) {
     return (
       <div className="relative h-72 md:h-80 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900">
         <div className="flex h-full w-full items-center justify-center">
-          <Car className="h-20 w-20 text-muted-foreground/30" />
+          <MdDirectionsCar className="h-20 w-20 text-muted-foreground/30" />
         </div>
       </div>
     )
@@ -264,7 +264,7 @@ function ImageGallery({ images, alt, onOpenLightbox }: ImageGalleryProps) {
           {/* Zoom hint overlay */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
             <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3 backdrop-blur-sm">
-              <ZoomIn className="h-6 w-6 text-white" />
+              <MdZoomIn className="h-6 w-6 text-white" />
             </div>
           </div>
 
@@ -279,7 +279,7 @@ function ImageGallery({ images, alt, onOpenLightbox }: ImageGalleryProps) {
                 className="absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="h-6 w-6" />
+                <MdChevronLeft className="h-6 w-6" />
               </button>
               <button
                 onClick={(e) => {
@@ -289,7 +289,7 @@ function ImageGallery({ images, alt, onOpenLightbox }: ImageGalleryProps) {
                 className="absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100"
                 aria-label="Next image"
               >
-                <ChevronRight className="h-6 w-6" />
+                <MdChevronRight className="h-6 w-6" />
               </button>
             </>
           )}
@@ -319,7 +319,7 @@ function ImageGallery({ images, alt, onOpenLightbox }: ImageGalleryProps) {
           {/* Fullscreen hint */}
           <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm">
-              <Maximize2 className="h-3.5 w-3.5" />
+              <MdFullscreen className="h-3.5 w-3.5" />
               <span>Click to expand</span>
             </div>
           </div>
@@ -449,7 +449,7 @@ function Lightbox({ images, initialIndex, alt, open, onClose }: LightboxProps) {
             className="absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20"
             aria-label="Close lightbox"
           >
-            <X className="h-6 w-6" />
+            <MdClose className="h-6 w-6" />
           </button>
 
           {/* Counter */}
@@ -481,14 +481,14 @@ function Lightbox({ images, initialIndex, alt, open, onClose }: LightboxProps) {
                 className="absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
                 aria-label="Previous image"
               >
-                <ChevronLeft className="h-8 w-8" />
+                <MdChevronLeft className="h-8 w-8" />
               </button>
               <button
                 onClick={goToNext}
                 className="absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20 hover:scale-110"
                 aria-label="Next image"
               >
-                <ChevronRight className="h-8 w-8" />
+                <MdChevronRight className="h-8 w-8" />
               </button>
             </>
           )}
@@ -596,7 +596,7 @@ function InfoRow({ label, value, mono, copyable }: { label: string; value: strin
             className="p-1 rounded hover:bg-muted transition-colors"
             aria-label="Copy to clipboard"
           >
-            <Copy className="h-3 w-3 text-muted-foreground" />
+            <MdContentCopy className="h-3 w-3 text-muted-foreground" />
           </button>
         )}
       </div>
@@ -802,7 +802,7 @@ export function BidDetailModal({
                               {bid.bidder.level === 'unverified' ? (
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                                    <MdWarning className="h-4 w-4 text-muted-foreground" />
                                   </TooltipTrigger>
                                   <TooltipContent>
                                     <p>Unverified user</p>
@@ -846,7 +846,7 @@ export function BidDetailModal({
                               label="Type"
                               value={
                                 <span className="flex items-center gap-1.5">
-                                  {bid.type === 'assisted' ? <UserCog className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                                  {bid.type === 'assisted' ? <MdManageAccounts className="h-3.5 w-3.5" /> : <MdPerson className="h-3.5 w-3.5" />}
                                   {bid.type === 'assisted' ? 'Assisted' : 'Manual'}
                                 </span>
                               }
@@ -860,7 +860,7 @@ export function BidDetailModal({
                               value={
                                 isAuctionEnded ? (
                                   <span className="flex items-center gap-1.5 text-muted-foreground">
-                                    <Clock className="h-3.5 w-3.5" />
+                                    <MdAccessTime className="h-3.5 w-3.5" />
                                     Ended
                                   </span>
                                 ) : (
@@ -917,7 +917,7 @@ export function BidDetailModal({
                               className="h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
                               disabled={isApproving}
                             >
-                              <Check className="mr-2 h-4 w-4" />
+                              <MdCheck className="mr-2 h-4 w-4" />
                               {isApproving ? 'Approving...' : 'Approve'}
                             </Button>
                           </AlertDialogTrigger>
@@ -948,7 +948,7 @@ export function BidDetailModal({
                               className="h-10 rounded-lg bg-red-500/10 text-red-500 border-red-500/20 hover:bg-red-500/20 hover:text-red-600"
                               disabled={isDeclining}
                             >
-                              <XCircle className="mr-2 h-4 w-4" />
+                              <MdCancel className="mr-2 h-4 w-4" />
                               {isDeclining ? 'Declining...' : 'Decline'}
                             </Button>
                           </AlertDialogTrigger>
@@ -983,22 +983,22 @@ export function BidDetailModal({
                               size="default"
                               className="h-10 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white"
                             >
-                              <Trophy className="mr-2 h-4 w-4" />
+                              <MdEmojiEvents className="mr-2 h-4 w-4" />
                               Mark Won
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-48">
                             <DropdownMenuLabel className="text-xs text-muted-foreground">Won Results</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => onMarkWon?.(bid, 'bid_accepted')}>
-                              <Trophy className="mr-2 h-4 w-4 text-emerald-600" />
+                              <MdEmojiEvents className="mr-2 h-4 w-4 text-emerald-600" />
                               Bid Accepted
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onMarkWon?.(bid, 'contract')}>
-                              <Handshake className="mr-2 h-4 w-4 text-emerald-600" />
+                              <MdHandshake className="mr-2 h-4 w-4 text-emerald-600" />
                               Contract
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onMarkWon?.(bid, 'contract_nego')}>
-                              <MessageSquare className="mr-2 h-4 w-4 text-emerald-600" />
+                              <MdMessage className="mr-2 h-4 w-4 text-emerald-600" />
                               Contract by Nego
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -1011,32 +1011,32 @@ export function BidDetailModal({
                               variant="outline"
                               className="h-10 rounded-lg"
                             >
-                              <XCircle className="mr-2 h-4 w-4" />
+                              <MdCancel className="mr-2 h-4 w-4" />
                               Mark Lost
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent className="w-48">
                             <DropdownMenuLabel className="text-xs text-muted-foreground">Lost Results</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => onSoldToOthers?.(bid)}>
-                              <Users className="mr-2 h-4 w-4 text-red-500" />
+                              <MdGroup className="mr-2 h-4 w-4 text-red-500" />
                               Sold to Others
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onMarkUnsold?.(bid)}>
-                              <CircleSlash className="mr-2 h-4 w-4 text-orange-500" />
+                              <MdNotInterested className="mr-2 h-4 w-4 text-orange-500" />
                               Unsold
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuLabel className="text-xs text-muted-foreground">Other</DropdownMenuLabel>
                             <DropdownMenuItem onClick={() => onCancelBid?.(bid)}>
-                              <XCircle className="mr-2 h-4 w-4" />
+                              <MdCancel className="mr-2 h-4 w-4" />
                               Bid Canceled
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => onAuctionCancelled?.(bid)}>
-                              <Ban className="mr-2 h-4 w-4" />
+                              <MdBlock className="mr-2 h-4 w-4" />
                               Auction Cancelled
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              <HelpCircle className="mr-2 h-4 w-4" />
+                              <MdHelp className="mr-2 h-4 w-4" />
                               Unknown
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -1052,7 +1052,7 @@ export function BidDetailModal({
                         className="h-10 rounded-lg"
                         onClick={() => onCreateInvoice(bid)}
                       >
-                        <FileText className="mr-2 h-4 w-4" />
+                        <MdDescription className="mr-2 h-4 w-4" />
                         Create Invoice
                       </Button>
                     )}
@@ -1065,7 +1065,7 @@ export function BidDetailModal({
                         className="h-10 rounded-lg"
                         onClick={() => onIncreaseBid(bid)}
                       >
-                        <Gavel className="mr-2 h-4 w-4" />
+                        <MdGavel className="mr-2 h-4 w-4" />
                         Increase Bid
                       </Button>
                     )}

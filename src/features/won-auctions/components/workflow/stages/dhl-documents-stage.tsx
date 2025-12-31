@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Send, Package, Check, ExternalLink } from 'lucide-react'
+import { MdSend, MdInventory2, MdCheck, MdOpenInNew } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
@@ -17,13 +17,13 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { type WonAuction } from '../../../data/won-auctions'
+import { type Purchase } from '../../../data/won-auctions'
 import { type PurchaseWorkflow } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 
 interface DHLDocumentsStageProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
@@ -83,7 +83,7 @@ export function DHLDocumentsStage({
     <div className='space-y-4'>
       {/* Info Alert */}
       <Alert>
-        <Send className='h-4 w-4' />
+        <MdSend className='h-4 w-4' />
         <AlertDescription>
           Send the final documents to the customer via DHL. This is the last step in the workflow.
         </AlertDescription>
@@ -94,7 +94,7 @@ export function DHLDocumentsStage({
         <div className='rounded-lg border bg-emerald-50/50 dark:bg-emerald-900/10 p-4'>
           <div className='flex items-center gap-2 mb-3'>
             <div className='h-8 w-8 rounded-full bg-emerald-500 flex items-center justify-center'>
-              <Check className='h-5 w-5 text-white' />
+              <MdCheck className='h-5 w-5 text-white' />
             </div>
             <div>
               <h4 className='font-medium text-emerald-700 dark:text-emerald-400'>
@@ -132,7 +132,7 @@ export function DHLDocumentsStage({
                     )
                   }
                 >
-                  <ExternalLink className='h-3 w-3 mr-1' />
+                  <MdOpenInNew className='h-3 w-3 mr-1' />
                   Track
                 </Button>
               </div>
@@ -165,7 +165,7 @@ export function DHLDocumentsStage({
           {/* Send Documents Card */}
           <div className='rounded-lg border p-4 bg-muted/30'>
             <div className='flex items-center gap-3 mb-3'>
-              <Package className='h-8 w-8 text-muted-foreground' />
+              <MdInventory2 className='h-8 w-8 text-muted-foreground' />
               <div>
                 <h4 className='font-medium'>Ready to Send Documents</h4>
                 <p className='text-sm text-muted-foreground'>
@@ -177,7 +177,7 @@ export function DHLDocumentsStage({
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button className='w-full'>
-                  <Send className='h-4 w-4 mr-2' />
+                  <MdSend className='h-4 w-4 mr-2' />
                   Send Documents via DHL
                 </Button>
               </DialogTrigger>
@@ -227,7 +227,7 @@ export function DHLDocumentsStage({
                     onClick={handleSendDocuments}
                     disabled={!trackingNumber.trim()}
                   >
-                    <Send className='h-4 w-4 mr-2' />
+                    <MdSend className='h-4 w-4 mr-2' />
                     Confirm Sent
                   </Button>
                 </DialogFooter>
@@ -258,7 +258,7 @@ export function DHLDocumentsStage({
       {/* Final Message */}
       {stage.documentsSent.completed && (
         <Alert className='bg-emerald-50 border-emerald-200 dark:bg-emerald-900/20 dark:border-emerald-800'>
-          <Check className='h-4 w-4 text-emerald-600' />
+          <MdCheck className='h-4 w-4 text-emerald-600' />
           <AlertDescription className='text-emerald-700 dark:text-emerald-400'>
             <strong>Workflow Complete!</strong> All documents have been sent to the customer.
           </AlertDescription>

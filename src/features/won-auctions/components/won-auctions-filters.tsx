@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Filter, RotateCcw, Search as SearchIcon, X } from 'lucide-react'
+import { MdFilterList, MdReplay, MdSearch, MdClose } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -49,7 +49,7 @@ export function WonAuctionsFilters({
       {/* Search and Sort Bar */}
       <div className='flex flex-col gap-4 sm:flex-row'>
         <div className='relative flex-1'>
-          <SearchIcon className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+          <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
           <Input
             placeholder='Search by vehicle, customer, or auction ID...'
             value={filters.search}
@@ -75,7 +75,7 @@ export function WonAuctionsFilters({
             onClick={() => setIsFilterOpen(!isFilterOpen)}
             className='relative'
           >
-            <Filter className='mr-2 h-4 w-4' />
+            <MdFilterList className='mr-2 h-4 w-4' />
             Advanced Filters
             {hasActiveFilters && (
               <span className='absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary' />
@@ -83,7 +83,7 @@ export function WonAuctionsFilters({
           </Button>
           {hasActiveFilters && (
             <Button variant='ghost' size='sm' onClick={onReset}>
-              <RotateCcw className='mr-2 h-4 w-4' />
+              <MdReplay className='mr-2 h-4 w-4' />
               Clear All
             </Button>
           )}
@@ -97,7 +97,7 @@ export function WonAuctionsFilters({
           {filters.vinSearch && (
             <Badge variant='secondary' className='gap-1'>
               VIN: {filters.vinSearch}
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('vinSearch', '')}
               />
@@ -106,7 +106,7 @@ export function WonAuctionsFilters({
           {filters.status !== 'all' && (
             <Badge variant='secondary' className='gap-1'>
               Status: {filters.status.replace(/_/g, ' ')}
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('status', 'all')}
               />
@@ -115,7 +115,7 @@ export function WonAuctionsFilters({
           {filters.paymentStatus !== 'all' && (
             <Badge variant='secondary' className='gap-1'>
               Payment: {filters.paymentStatus}
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('paymentStatus', 'all')}
               />
@@ -124,7 +124,7 @@ export function WonAuctionsFilters({
           {filters.destinationPort.length > 0 && (
             <Badge variant='secondary' className='gap-1'>
               Ports: {filters.destinationPort.length}
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('destinationPort', [])}
               />
@@ -133,7 +133,7 @@ export function WonAuctionsFilters({
           {(filters.dateRange.from || filters.dateRange.to) && (
             <Badge variant='secondary' className='gap-1'>
               Date Range
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('dateRange', {})}
               />
@@ -142,7 +142,7 @@ export function WonAuctionsFilters({
           {(filters.valueRange.min !== undefined || filters.valueRange.max !== undefined) && (
             <Badge variant='secondary' className='gap-1'>
               Value: ¥{valueMin.toLocaleString()} - ¥{valueMax.toLocaleString()}
-              <X
+              <MdClose
                 className='h-3 w-3 cursor-pointer'
                 onClick={() => onFilterChange('valueRange', {})}
               />

@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { TrendingUp, TrendingDown } from 'lucide-react'
+import { MdTrendingUp, MdTrendingDown } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 
 interface StatsCardProps {
@@ -123,9 +123,9 @@ export function StatsCard({
                 )}
               >
                 {isPositive ? (
-                  <TrendingUp className='h-3 w-3' />
+                  <MdTrendingUp className='h-3 w-3' />
                 ) : !isNeutral ? (
-                  <TrendingDown className='h-3 w-3' />
+                  <MdTrendingDown className='h-3 w-3' />
                 ) : null}
                 {isPositive ? '+' : ''}
                 {change}%

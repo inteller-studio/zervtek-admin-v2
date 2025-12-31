@@ -13,7 +13,7 @@ import {
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { type NavigateFn, useTableUrlState } from '@/hooks/use-table-url-state'
-import { Users } from 'lucide-react'
+import { MdPeople } from 'react-icons/md'
 import {
   Table,
   TableBody,
@@ -183,7 +183,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
                   className='h-48'
                 >
                   <EmptyState
-                    icon={Users}
+                    icon={MdPeople}
                     title='No users found'
                     description='Try adjusting your filters or invite a new user to get started.'
                     size='sm'

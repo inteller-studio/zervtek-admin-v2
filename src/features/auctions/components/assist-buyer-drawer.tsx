@@ -3,19 +3,19 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import {
-  ArrowLeft,
-  ArrowRight,
-  Check,
-  Gavel,
-  Loader2,
-  Mail,
-  MapPin,
-  Phone,
-  Search,
-  User,
-  UserCheck,
-  X,
-} from 'lucide-react'
+  MdArrowBack,
+  MdArrowForward,
+  MdCheck,
+  MdGavel,
+  MdSync,
+  MdEmail,
+  MdLocationOn,
+  MdPhone,
+  MdSearch,
+  MdPerson,
+  MdVerifiedUser,
+  MdClose,
+} from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -159,7 +159,7 @@ export function AssistBuyerDrawer({
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4 pb-0'>
             <SheetTitle className='flex items-center gap-2'>
-              <Gavel className='h-5 w-5' />
+              <MdGavel className='h-5 w-5' />
               Assist Customer Bid
             </SheetTitle>
             <SheetDescription>
@@ -207,7 +207,7 @@ export function AssistBuyerDrawer({
                 ? 'bg-primary text-primary-foreground'
                 : 'bg-primary/20 text-primary'
             }`}>
-              {selectedCustomer && step === 'bid' ? <Check className='h-4 w-4' /> : '1'}
+              {selectedCustomer && step === 'bid' ? <MdCheck className='h-4 w-4' /> : '1'}
             </div>
             <span className={`text-sm ${step === 'search' ? 'font-medium' : 'text-muted-foreground'}`}>
               Select Customer
@@ -235,7 +235,7 @@ export function AssistBuyerDrawer({
                 <Label className='text-sm font-medium'>Find Customer</Label>
                 <div className='flex gap-2'>
                   <div className='relative flex-1'>
-                    <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
+                    <MdSearch className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground' />
                     <Input
                       placeholder='Search by name, email, or phone...'
                       value={searchQuery}
@@ -246,7 +246,7 @@ export function AssistBuyerDrawer({
                   </div>
                   <Button onClick={handleSearch} disabled={isSearching}>
                     {isSearching ? (
-                      <Loader2 className='h-4 w-4 animate-spin' />
+                      <MdSync className='h-4 w-4 animate-spin' />
                     ) : (
                       'Search'
                     )}
@@ -270,20 +270,20 @@ export function AssistBuyerDrawer({
                         <CardContent className='p-3'>
                           <div className='flex items-center gap-3'>
                             <div className='flex h-10 w-10 items-center justify-center rounded-full bg-muted'>
-                              <User className='h-5 w-5 text-muted-foreground' />
+                              <MdPerson className='h-5 w-5 text-muted-foreground' />
                             </div>
                             <div className='flex-1'>
                               <div className='flex items-center gap-2'>
                                 <p className='font-medium'>{customer.name}</p>
                                 {customer.verificationStatus === 'verified' && (
-                                  <UserCheck className='h-4 w-4 text-green-600' />
+                                  <MdVerifiedUser className='h-4 w-4 text-green-600' />
                                 )}
                               </div>
                               <p className='text-sm text-muted-foreground'>
                                 {customer.email}
                               </p>
                             </div>
-                            <ArrowRight className='h-4 w-4 text-muted-foreground' />
+                            <MdArrowForward className='h-4 w-4 text-muted-foreground' />
                           </div>
                         </CardContent>
                       </Card>
@@ -303,7 +303,7 @@ export function AssistBuyerDrawer({
                       className='h-auto p-1 text-xs text-muted-foreground hover:text-foreground'
                       onClick={() => setSelectedCustomer(null)}
                     >
-                      <X className='mr-1 h-3 w-3' />
+                      <MdClose className='mr-1 h-3 w-3' />
                       Change
                     </Button>
                   </div>
@@ -311,29 +311,29 @@ export function AssistBuyerDrawer({
                     <CardContent className='p-4'>
                       <div className='flex items-start gap-3'>
                         <div className='flex h-12 w-12 items-center justify-center rounded-full bg-primary/10'>
-                          <User className='h-6 w-6 text-primary' />
+                          <MdPerson className='h-6 w-6 text-primary' />
                         </div>
                         <div className='flex-1'>
                           <div className='flex items-center gap-2'>
                             <p className='font-semibold'>{selectedCustomer.name}</p>
                             {selectedCustomer.verificationStatus === 'verified' && (
                               <Badge variant='default' className='h-5 text-xs'>
-                                <UserCheck className='mr-1 h-3 w-3' />
+                                <MdVerifiedUser className='mr-1 h-3 w-3' />
                                 Verified
                               </Badge>
                             )}
                           </div>
                           <div className='mt-1 space-y-1 text-sm text-muted-foreground'>
                             <div className='flex items-center gap-2'>
-                              <Mail className='h-3 w-3' />
+                              <MdEmail className='h-3 w-3' />
                               {selectedCustomer.email}
                             </div>
                             <div className='flex items-center gap-2'>
-                              <Phone className='h-3 w-3' />
+                              <MdPhone className='h-3 w-3' />
                               {selectedCustomer.phone}
                             </div>
                             <div className='flex items-center gap-2'>
-                              <MapPin className='h-3 w-3' />
+                              <MdLocationOn className='h-3 w-3' />
                               {selectedCustomer.country}
                             </div>
                           </div>
@@ -366,7 +366,7 @@ export function AssistBuyerDrawer({
               {!selectedCustomer && searchResults.length === 0 && (
                 <div className='flex flex-col items-center justify-center py-8 text-center'>
                   <div className='flex h-16 w-16 items-center justify-center rounded-full bg-muted'>
-                    <Search className='h-8 w-8 text-muted-foreground' />
+                    <MdSearch className='h-8 w-8 text-muted-foreground' />
                   </div>
                   <p className='mt-4 font-medium'>Search for a customer</p>
                   <p className='mt-1 text-sm text-muted-foreground'>
@@ -381,7 +381,7 @@ export function AssistBuyerDrawer({
               {selectedCustomer && (
                 <div className='flex items-center gap-3 rounded-lg border bg-muted/30 p-3'>
                   <div className='flex h-10 w-10 items-center justify-center rounded-full bg-primary/10'>
-                    <User className='h-5 w-5 text-primary' />
+                    <MdPerson className='h-5 w-5 text-primary' />
                   </div>
                   <div className='flex-1'>
                     <p className='font-medium'>{selectedCustomer.name}</p>
@@ -389,7 +389,7 @@ export function AssistBuyerDrawer({
                   </div>
                   {selectedCustomer.verificationStatus === 'verified' && (
                     <Badge variant='outline' className='text-xs'>
-                      <UserCheck className='mr-1 h-3 w-3' />
+                      <MdVerifiedUser className='mr-1 h-3 w-3' />
                       Verified
                     </Badge>
                   )}
@@ -448,7 +448,7 @@ export function AssistBuyerDrawer({
 
               {/* Assisted Bid Indicator */}
               <div className='flex items-center gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground'>
-                <UserCheck className='h-4 w-4 shrink-0' />
+                <MdVerifiedUser className='h-4 w-4 shrink-0' />
                 <span>
                   Bid placed on behalf of <span className='font-medium text-foreground'>{selectedCustomer?.name}</span>
                 </span>
@@ -474,7 +474,7 @@ export function AssistBuyerDrawer({
                 disabled={!selectedCustomer}
               >
                 Continue
-                <ArrowRight className='ml-2 h-4 w-4' />
+                <MdArrowForward className='ml-2 h-4 w-4' />
               </Button>
             </>
           ) : (
@@ -485,7 +485,7 @@ export function AssistBuyerDrawer({
                 onClick={() => setStep('search')}
                 disabled={isSubmitting}
               >
-                <ArrowLeft className='mr-2 h-4 w-4' />
+                <MdArrowBack className='mr-2 h-4 w-4' />
                 Back
               </Button>
               <Button
@@ -495,12 +495,12 @@ export function AssistBuyerDrawer({
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                    <MdSync className='mr-2 h-4 w-4 animate-spin' />
                     Placing...
                   </>
                 ) : (
                   <>
-                    <Gavel className='mr-2 h-4 w-4' />
+                    <MdGavel className='mr-2 h-4 w-4' />
                     Place Bid
                   </>
                 )}

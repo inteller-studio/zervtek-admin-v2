@@ -1,6 +1,6 @@
 'use client'
 
-import { MessageSquare, Settings } from 'lucide-react'
+import { MdMessage, MdSettings } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import {
@@ -26,7 +26,7 @@ export function IconSidebar({ isOnline }: IconSidebarProps) {
               size='icon'
               className='h-12 w-12 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 hover:text-primary'
             >
-              <MessageSquare className='h-5 w-5' />
+              <MdMessage className='h-5 w-5' />
             </Button>
           </TooltipTrigger>
           <TooltipContent side='right' sideOffset={8}>
@@ -64,7 +64,7 @@ export function IconSidebar({ isOnline }: IconSidebarProps) {
               size='icon'
               className='h-12 w-12 rounded-xl text-muted-foreground transition-all hover:bg-muted hover:text-foreground'
             >
-              <Settings className='h-5 w-5' />
+              <MdSettings className='h-5 w-5' />
             </Button>
           </TooltipTrigger>
           <TooltipContent side='right' sideOffset={8}>

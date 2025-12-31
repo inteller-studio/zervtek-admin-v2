@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent } from '@/components/ui/animated-tabs'
 import {
   Table,
   TableBody,
@@ -45,27 +45,28 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import {
-  Users,
-  UserCheck,
-  UserPlus,
-  Search as SearchIcon,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  ArrowUpDown,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
-  Trash2,
-  Ban,
-  CheckCircle,
-  Clock,
-  XCircle,
-  Building2,
-  AlertCircle,
-  FileQuestion,
-  Award,
-} from 'lucide-react'
+  MdPeople,
+  MdPersonAdd,
+  MdSearch,
+  MdMoreHoriz,
+  MdEmail,
+  MdPhone,
+  MdChevronLeft,
+  MdChevronRight,
+  MdVisibility,
+  MdDelete,
+  MdCheckCircle,
+  MdAccessTime,
+  MdCancel,
+  MdBusiness,
+  MdError,
+  MdVerifiedUser,
+  MdBlock,
+  MdHelpOutline,
+  MdWorkspacePremium,
+  MdSwapVert,
+} from 'react-icons/md'
+import { ArrowUpDown, Award, CheckCircle, UserCheck, XCircle, Clock, MoreHorizontal, Eye, CreditCard, Send, ChevronDown, ChevronUp } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { customers as initialCustomers, type Customer, type UserLevel } from '@/features/customers/data/customers'
@@ -189,17 +190,18 @@ export function MyCustomers() {
       active: { label: 'Active', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
       inactive: { label: 'Inactive', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20' },
       pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-      suspended: { label: 'Suspended', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
+      suspended: { label: 'Suspended', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+      banned: { label: 'Banned', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
     }
     return <Badge variant='outline' className={config[status].className}>{config[status].label}</Badge>
   }
 
   const getVerificationBadge = (status: Customer['verificationStatus']) => {
     const config = {
-      verified: { label: 'Verified', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: CheckCircle },
-      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: Clock },
-      unverified: { label: 'Unverified', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20', icon: XCircle },
-      documents_requested: { label: 'Docs Requested', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: FileQuestion },
+      verified: { label: 'Verified', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20', icon: MdCheckCircle },
+      pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20', icon: MdAccessTime },
+      unverified: { label: 'Unverified', className: 'bg-slate-500/10 text-slate-600 border-slate-500/20', icon: MdCancel },
+      documents_requested: { label: 'Docs Requested', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20', icon: MdHelpOutline },
     }
     const Icon = config[status].icon
     return (
@@ -220,7 +222,7 @@ export function MyCustomers() {
     }
     return (
       <Badge variant='outline' className={config[level].className}>
-        <Award className='mr-1 h-3 w-3' />
+        <MdWorkspacePremium className='mr-1 h-3 w-3' />
         {config[level].label}
       </Badge>
     )
@@ -321,31 +323,21 @@ export function MyCustomers() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(value) => { setActiveTab(value); setCurrentPage(1); }}>
-          <TabsList>
-            <TabsTrigger value='my-customers' className='gap-2'>
-              <UserCheck className='h-4 w-4' />
-              My Customers
-              {myCustomers.length > 0 && (
-                <Badge variant='secondary' className='ml-1'>{myCustomers.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value='unclaimed' className='gap-2'>
-              <UserPlus className='h-4 w-4' />
-              Unclaimed
-              {unclaimedCustomers.length > 0 && (
-                <Badge variant='amber' className='ml-1'>{unclaimedCustomers.length}</Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value={activeTab} className='mt-4 space-y-4'>
+        <AnimatedTabs
+          tabs={[
+            { id: 'my-customers', label: 'My Customers', icon: MdVerifiedUser, badge: myCustomers.length > 0 ? myCustomers.length : undefined },
+            { id: 'unclaimed', label: 'Unclaimed', icon: MdPersonAdd, badge: unclaimedCustomers.length > 0 ? unclaimedCustomers.length : undefined, badgeColor: 'amber' },
+          ]}
+          value={activeTab}
+          onValueChange={(value) => { setActiveTab(value); setCurrentPage(1); }}
+        >
+          <AnimatedTabsContent value={activeTab} className='mt-4 space-y-4'>
         {/* Search and Filters */}
         <Card>
           <CardContent className='p-4'>
             <div className='flex flex-wrap items-center gap-3'>
               <div className='relative flex-1 min-w-[200px]'>
-                <SearchIcon className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
+                <MdSearch className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
                 <Input
                   placeholder='Search by name, email, phone, or company...'
                   value={searchTerm}
@@ -413,18 +405,18 @@ export function MyCustomers() {
                   <TableRow>
                     <TableHead className='w-[280px]'>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('name')}>
-                        Customer <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Customer <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('totalSpent')}>
-                        Total Spent <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Total Spent <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>
                       <Button variant='ghost' size='sm' className='-ml-3' onClick={() => toggleSort('depositAmount')}>
-                        Deposit <ArrowUpDown className='ml-2 h-4 w-4' />
+                        Deposit <MdSwapVert className='ml-2 h-4 w-4' />
                       </Button>
                     </TableHead>
                     <TableHead>Purchases</TableHead>
@@ -452,7 +444,7 @@ export function MyCustomers() {
                               <div className='text-muted-foreground text-sm truncate'>{customer.email}</div>
                               {customer.company && (
                                 <div className='text-muted-foreground text-xs flex items-center gap-1'>
-                                  <Building2 className='h-3 w-3' />
+                                  <MdBusiness className='h-3 w-3' />
                                   {customer.company}
                                 </div>
                               )}
@@ -469,7 +461,7 @@ export function MyCustomers() {
                           <div className='font-medium'>¥{customer.totalSpent.toLocaleString()}</div>
                           {customer.outstandingBalance > 0 && (
                             <div className='text-orange-600 text-xs flex items-center gap-1'>
-                              <AlertCircle className='h-3 w-3' />
+                              <MdError className='h-3 w-3' />
                               Due: ¥{customer.outstandingBalance.toLocaleString()}
                             </div>
                           )}
@@ -498,56 +490,56 @@ export function MyCustomers() {
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button variant='ghost' size='icon'>
-                                <MoreHorizontal className='h-4 w-4' />
+                                <MdMoreHoriz className='h-4 w-4' />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align='end'>
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
                               <DropdownMenuSeparator />
                               <DropdownMenuItem onClick={() => handleViewCustomer(customer)}>
-                                <Eye className='mr-2 h-4 w-4' />
+                                <MdVisibility className='mr-2 h-4 w-4' />
                                 View Profile
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleSendEmail(customer)}>
-                                <Mail className='mr-2 h-4 w-4' />
+                                <MdEmail className='mr-2 h-4 w-4' />
                                 Send Email
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={() => handleCallCustomer(customer)}>
-                                <Phone className='mr-2 h-4 w-4' />
+                                <MdPhone className='mr-2 h-4 w-4' />
                                 Call
                               </DropdownMenuItem>
                               {customer.verificationStatus !== 'verified' && (
                                 <DropdownMenuItem onClick={() => handleVerifyCustomer(customer)}>
-                                  <CheckCircle className='mr-2 h-4 w-4' />
+                                  <MdCheckCircle className='mr-2 h-4 w-4' />
                                   Verify
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {activeTab === 'unclaimed' ? (
                                 <DropdownMenuItem onClick={() => { setCustomerToClaim(customer); setClaimDialogOpen(true); }} className='text-emerald-600'>
-                                  <UserPlus className='mr-2 h-4 w-4' />
+                                  <MdPersonAdd className='mr-2 h-4 w-4' />
                                   Claim Customer
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem onClick={() => handleUnclaimCustomer(customer)} className='text-amber-600'>
-                                  <UserPlus className='mr-2 h-4 w-4' />
+                                  <MdPersonAdd className='mr-2 h-4 w-4' />
                                   Release Customer
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuSeparator />
                               {customer.status === 'suspended' ? (
                                 <DropdownMenuItem onClick={() => handleActivateCustomer(customer)}>
-                                  <UserCheck className='mr-2 h-4 w-4' />
+                                  <MdVerifiedUser className='mr-2 h-4 w-4' />
                                   Activate
                                 </DropdownMenuItem>
                               ) : (
                                 <DropdownMenuItem onClick={() => handleSuspendCustomer(customer)} className='text-orange-600'>
-                                  <Ban className='mr-2 h-4 w-4' />
+                                  <MdBlock className='mr-2 h-4 w-4' />
                                   Suspend
                                 </DropdownMenuItem>
                               )}
                               <DropdownMenuItem onClick={() => handleDeleteCustomer(customer)} className='text-destructive'>
-                                <Trash2 className='mr-2 h-4 w-4' />
+                                <MdDelete className='mr-2 h-4 w-4' />
                                 Delete
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -559,7 +551,7 @@ export function MyCustomers() {
                     <TableRow>
                       <TableCell colSpan={8} className='h-24 text-center'>
                         <div className='flex flex-col items-center justify-center'>
-                          <Users className='h-8 w-8 text-muted-foreground/50 mb-2' />
+                          <MdPeople className='h-8 w-8 text-muted-foreground/50 mb-2' />
                           <p className='text-muted-foreground'>
                             {activeTab === 'unclaimed'
                               ? 'No unclaimed customers available'
@@ -593,19 +585,19 @@ export function MyCustomers() {
                 </div>
                 <div className='flex items-center gap-2'>
                   <Button variant='outline' size='sm' onClick={() => setCurrentPage(currentPage - 1)} disabled={currentPage === 1}>
-                    <ChevronLeft className='h-4 w-4' />
+                    <MdChevronLeft className='h-4 w-4' />
                   </Button>
                   <span className='text-sm'>Page {currentPage} of {totalPages || 1}</span>
                   <Button variant='outline' size='sm' onClick={() => setCurrentPage(currentPage + 1)} disabled={currentPage === totalPages || totalPages === 0}>
-                    <ChevronRight className='h-4 w-4' />
+                    <MdChevronRight className='h-4 w-4' />
                   </Button>
                 </div>
               </div>
             )}
           </CardContent>
         </Card>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
       </Main>
 
       {/* View Customer Modal */}
@@ -642,7 +634,7 @@ export function MyCustomers() {
                 setCustomerToClaim(null)
               }}
             >
-              <UserPlus className='mr-2 h-4 w-4' />
+              <MdPersonAdd className='mr-2 h-4 w-4' />
               Claim Customer
             </AlertDialogAction>
           </AlertDialogFooter>

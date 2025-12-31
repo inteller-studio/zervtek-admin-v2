@@ -1,5 +1,5 @@
-import { WonAuctions } from '@/features/won-auctions'
+import { Purchases } from '@/features/won-auctions'
 
-export default function WonAuctionsPage() {
-  return <WonAuctions />
+export default function PurchasesPage() {
+  return <Purchases />
 }

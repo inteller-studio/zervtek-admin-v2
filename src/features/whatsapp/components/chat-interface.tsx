@@ -3,12 +3,12 @@
 import { useState, useRef, useEffect } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
-  ArrowLeft,
-  MoreVertical,
-  Search,
-  Tag,
-  UserPlus,
-} from 'lucide-react'
+  MdArrowBack,
+  MdMoreVert,
+  MdSearch,
+  MdLocalOffer,
+  MdPersonAdd,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
@@ -295,7 +295,7 @@ export function ChatInterface() {
                     className='size-9 md:hidden'
                     onClick={() => setShowMobileChat(false)}
                   >
-                    <ArrowLeft className='h-5 w-5' />
+                    <MdArrowBack className='h-5 w-5' />
                   </Button>
                   <Avatar className='size-10'>
                     <AvatarImage src={selectedChat.contact.profilePicUrl} />
@@ -322,7 +322,7 @@ export function ChatInterface() {
                 </div>
                 <div className='flex items-center gap-1'>
                   <Button variant='ghost' size='icon' className='size-10 text-muted-foreground hover:text-foreground'>
-                    <Search className='h-5 w-5' />
+                    <MdSearch className='h-5 w-5' />
                   </Button>
 
                   <ChatLabelPopover
@@ -333,7 +333,7 @@ export function ChatInterface() {
                     onRemoveLabel={handleRemoveLabel}
                   >
                     <Button variant='ghost' size='icon' className='size-10 text-muted-foreground hover:text-foreground'>
-                      <Tag className='h-5 w-5' />
+                      <MdLocalOffer className='h-5 w-5' />
                     </Button>
                   </ChatLabelPopover>
 
@@ -344,14 +344,14 @@ export function ChatInterface() {
                     onAssign={handleAssign}
                   >
                     <Button variant='ghost' size='icon' className='size-10 text-muted-foreground hover:text-foreground'>
-                      <UserPlus className='h-5 w-5' />
+                      <MdPersonAdd className='h-5 w-5' />
                     </Button>
                   </ChatAssignPopover>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <Button variant='ghost' size='icon' className='size-10 text-muted-foreground hover:text-foreground'>
-                        <MoreVertical className='h-5 w-5' />
+                        <MdMoreVert className='h-5 w-5' />
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align='end'>

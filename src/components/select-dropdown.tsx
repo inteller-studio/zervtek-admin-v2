@@ -1,4 +1,4 @@
-import { Loader } from 'lucide-react'
+import { MdSync } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 import { FormControl } from '@/components/ui/form'
 import {
@@ -44,7 +44,7 @@ export function SelectDropdown({
         {isPending ? (
           <SelectItem disabled value='loading' className='h-14'>
             <div className='flex items-center justify-center gap-2'>
-              <Loader className='h-5 w-5 animate-spin' />
+              <MdSync className='h-5 w-5 animate-spin' />
               {'  '}
               Loading...
             </div>

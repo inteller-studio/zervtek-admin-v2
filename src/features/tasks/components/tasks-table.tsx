@@ -16,7 +16,7 @@ import {
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { useTableUrlState, type NavigateFn } from '@/hooks/use-table-url-state'
-import { ClipboardList } from 'lucide-react'
+import { MdAssignment } from 'react-icons/md'
 import {
   Table,
   TableBody,
@@ -206,7 +206,7 @@ export function TasksTable({ data }: DataTableProps) {
                   className='h-48'
                 >
                   <EmptyState
-                    icon={ClipboardList}
+                    icon={MdAssignment}
                     title='No tasks found'
                     description='Try adjusting your filters or create a new task to get started.'
                     size='sm'

@@ -1,6 +1,6 @@
 'use client'
 
-import { Eye, ClipboardList } from 'lucide-react'
+import { MdVisibility, MdFactCheck } from 'react-icons/md'
 import { cn } from '@/lib/utils'
 
 export type ModalMode = 'overview' | 'workflow'
@@ -27,7 +27,7 @@ export function ModeToggle({
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
-        <Eye className='h-4 w-4' />
+        <MdVisibility className='h-4 w-4' />
         <span className='hidden sm:inline'>Overview</span>
       </button>
       <button
@@ -39,7 +39,7 @@ export function ModeToggle({
             : 'text-muted-foreground hover:text-foreground'
         )}
       >
-        <ClipboardList className='h-4 w-4' />
+        <MdFactCheck className='h-4 w-4' />
         <span className='hidden sm:inline'>Workflow</span>
         {workflowProgress > 0 && workflowProgress < 100 && (
           <span className='ml-1 rounded-full bg-primary/10 px-1.5 py-0.5 text-xs text-primary'>

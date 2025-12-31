@@ -1,7 +1,7 @@
 'use client'
 
 import { format, formatDistanceToNow } from 'date-fns'
-import { Bell, Clock, X } from 'lucide-react'
+import { MdNotifications, MdAccessTime, MdClose } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -55,7 +55,7 @@ export function SnoozeIndicator({
                 className
               )}
             >
-              <Clock className='h-3 w-3' />
+              <MdAccessTime className='h-3 w-3' />
               {getShortText()}
             </span>
           </TooltipTrigger>
@@ -78,7 +78,7 @@ export function SnoozeIndicator({
           className
         )}
       >
-        <Clock className='h-3 w-3' />
+        <MdAccessTime className='h-3 w-3' />
         Returns {getReturnText()}
       </span>
     )
@@ -104,7 +104,7 @@ export function SnoozeIndicator({
               : 'bg-amber-100/50 text-amber-500 dark:bg-amber-900/30 dark:text-amber-400'
           )}
         >
-          {isPast ? <Bell className='h-4 w-4' /> : <Clock className='h-4 w-4' />}
+          {isPast ? <MdNotifications className='h-4 w-4' /> : <MdAccessTime className='h-4 w-4' />}
         </div>
         <div>
           <p className='text-sm font-medium text-amber-800 dark:text-amber-200'>
@@ -122,7 +122,7 @@ export function SnoozeIndicator({
           className='h-7 text-amber-700 hover:bg-amber-100 hover:text-amber-800 dark:text-amber-400 dark:hover:bg-amber-900/30'
           onClick={onCancel}
         >
-          <X className='mr-1 h-3 w-3' />
+          <MdClose className='mr-1 h-3 w-3' />
           Cancel
         </Button>
       )}

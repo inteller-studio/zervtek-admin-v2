@@ -1,14 +1,31 @@
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+interface TableProps extends React.ComponentProps<'table'> {
+  /** Makes table extend into container gutters */
+  bleed?: boolean
+  /** Applies condensed vertical spacing */
+  dense?: boolean
+  /** Renders vertical divider lines between columns */
+  grid?: boolean
+  /** Alternating row backgrounds */
+  striped?: boolean
+}
+
+function Table({ className, bleed, dense, grid, striped, ...props }: TableProps) {
   return (
     <div
       data-slot='table-container'
-      className='relative w-full overflow-x-auto'
+      className={cn(
+        'relative w-full overflow-x-auto',
+        bleed && '-mx-4 sm:-mx-6'
+      )}
     >
       <table
         data-slot='table'
+        data-dense={dense || undefined}
+        data-grid={grid || undefined}
+        data-striped={striped || undefined}
         className={cn('w-full caption-bottom text-sm', className)}
         {...props}
       />
@@ -20,7 +37,10 @@ function TableHeader({ className, ...props }: React.ComponentProps<'thead'>) {
   return (
     <thead
       data-slot='table-header'
-      className={cn('[&_tr]:border-b', className)}
+      className={cn(
+        'bg-muted/40 [&_tr]:border-b [&_tr]:border-border/60',
+        className
+      )}
       {...props}
     />
   )
@@ -30,7 +50,12 @@ function TableBody({ className, ...props }: React.ComponentProps<'tbody'>) {
   return (
     <tbody
       data-slot='table-body'
-      className={cn('[&_tr:last-child]:border-0', className)}
+      className={cn(
+        '[&_tr:last-child]:border-0',
+        // Striped rows
+        '[[data-striped]_&_tr:nth-child(even)]:bg-muted/30',
+        className
+      )}
       {...props}
     />
   )
@@ -54,8 +79,8 @@ function TableRow({ className, ...props }: React.ComponentProps<'tr'>) {
     <tr
       data-slot='table-row'
       className={cn(
-        'border-b transition-all duration-150 ease-out',
-        'hover:bg-muted/50',
+        'border-b border-border/50 transition-colors duration-150',
+        'hover:bg-muted/60',
         'data-[state=selected]:bg-primary/5 data-[state=selected]:border-primary/20',
         className
       )}
@@ -69,7 +94,12 @@ function TableHead({ className, ...props }: React.ComponentProps<'th'>) {
     <th
       data-slot='table-head'
       className={cn(
-        'text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap [&>[role=checkbox]]:translate-y-[2px]',
+        'h-11 px-4 text-start align-middle text-xs font-semibold uppercase tracking-wide text-muted-foreground',
+        'whitespace-nowrap [&>[role=checkbox]]:translate-y-[2px]',
+        // Dense mode
+        '[[data-dense]_&]:h-9 [[data-dense]_&]:px-3',
+        // Grid mode
+        '[[data-grid]_&]:border-r [[data-grid]_&]:border-border/40 [[data-grid]_&:last-child]:border-r-0',
         className
       )}
       {...props}
@@ -82,7 +112,12 @@ function TableCell({ className, ...props }: React.ComponentProps<'td'>) {
     <td
       data-slot='table-cell'
       className={cn(
-        'p-2 align-middle whitespace-nowrap [&>[role=checkbox]]:translate-y-[2px]',
+        'px-4 py-3.5 align-middle text-sm',
+        'whitespace-nowrap [&>[role=checkbox]]:translate-y-[2px]',
+        // Dense mode
+        '[[data-dense]_&]:px-3 [[data-dense]_&]:py-2',
+        // Grid mode
+        '[[data-grid]_&]:border-r [[data-grid]_&]:border-border/40 [[data-grid]_&:last-child]:border-r-0',
         className
       )}
       {...props}

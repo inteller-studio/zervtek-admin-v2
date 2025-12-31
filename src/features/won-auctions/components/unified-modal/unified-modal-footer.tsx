@@ -1,20 +1,20 @@
 'use client'
 
 import {
-  CreditCard,
-  Ship,
-  FileText,
-  CheckCircle2,
-  ArrowRight,
-} from 'lucide-react'
+  MdCreditCard,
+  MdDirectionsBoat,
+  MdDescription,
+  MdCheckCircle,
+  MdArrowForward,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
-import { type WonAuction } from '../../data/won-auctions'
+import { type Purchase } from '../../data/won-auctions'
 import { type PurchaseWorkflow, WORKFLOW_STAGES } from '../../types/workflow'
 import { isStageComplete } from '../../utils/workflow'
 import { type ModalMode } from './shared/mode-toggle'
 
 interface UnifiedModalFooterProps {
-  auction: WonAuction
+  auction: Purchase
   workflow: PurchaseWorkflow
   mode: ModalMode
   onClose: () => void
@@ -47,19 +47,19 @@ export function UnifiedModalFooter({
         <div className='flex items-center gap-2 flex-wrap'>
           {onRecordPayment && auction.paymentStatus !== 'completed' && (
             <Button size='sm' onClick={onRecordPayment}>
-              <CreditCard className='mr-2 h-4 w-4' />
+              <MdCreditCard className='mr-2 h-4 w-4' />
               Record Payment
             </Button>
           )}
           {onUpdateShipping && auction.status !== 'completed' && (
             <Button size='sm' variant='outline' onClick={onUpdateShipping}>
-              <Ship className='mr-2 h-4 w-4' />
+              <MdDirectionsBoat className='mr-2 h-4 w-4' />
               Update Shipping
             </Button>
           )}
           {onGenerateInvoice && (
             <Button size='sm' variant='outline' onClick={onGenerateInvoice}>
-              <FileText className='mr-2 h-4 w-4' />
+              <MdDescription className='mr-2 h-4 w-4' />
               Generate Invoice
             </Button>
           )}
@@ -75,20 +75,20 @@ export function UnifiedModalFooter({
               Stage {workflow.currentStage}: {currentStage?.label}
             </span>
             {isCurrentStageComplete && (
-              <CheckCircle2 className='h-4 w-4 text-emerald-500' />
+              <MdCheckCircle className='h-4 w-4 text-emerald-500' />
             )}
           </div>
 
           {/* Status-based actions */}
           {auction.status === 'shipping' && onMarkDelivered && (
             <Button size='sm' onClick={onMarkDelivered}>
-              <CheckCircle2 className='mr-2 h-4 w-4' />
+              <MdCheckCircle className='mr-2 h-4 w-4' />
               Mark as Delivered
             </Button>
           )}
           {auction.status === 'delivered' && onMarkCompleted && (
             <Button size='sm' onClick={onMarkCompleted}>
-              <CheckCircle2 className='mr-2 h-4 w-4' />
+              <MdCheckCircle className='mr-2 h-4 w-4' />
               Mark as Completed
             </Button>
           )}
@@ -96,7 +96,7 @@ export function UnifiedModalFooter({
           {/* Next stage hint when current is complete */}
           {isCurrentStageComplete && workflow.currentStage < 8 && (
             <div className='flex items-center gap-1 text-xs text-emerald-600'>
-              <ArrowRight className='h-3 w-3' />
+              <MdArrowForward className='h-3 w-3' />
               <span>Ready for next stage</span>
             </div>
           )}

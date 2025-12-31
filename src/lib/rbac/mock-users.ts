@@ -68,6 +68,15 @@ export const MOCK_USERS: Record<string, MockUser> = {
     role: [ROLES.BACKOFFICE_STAFF],
     exp: getExpiry(),
   },
+  tvdisplay: {
+    id: '8',
+    accountNo: 'ACC008',
+    email: 'tvdisplay@zervtek.com',
+    firstName: 'TV Display',
+    lastName: 'User',
+    role: [ROLES.TV_DISPLAY],
+    exp: getExpiry(),
+  },
   // Multi-role user example
   multiRole: {
     id: '7',

@@ -2,18 +2,17 @@
 
 import { motion } from 'framer-motion'
 import {
-  BarChart3,
-  TrendingUp,
-  Globe,
-  Search,
-  Eye,
-  MousePointer,
-  Clock,
-  FileText,
-  ArrowUpRight,
-  ArrowDownRight,
-  ExternalLink,
-} from 'lucide-react'
+  MdBarChart,
+  MdTrendingUp,
+  MdAccessTime,
+  MdDescription,
+  MdPublic,
+  MdSearch,
+  MdVisibility,
+  MdMouse,
+  MdTrendingDown,
+  MdOpenInNew,
+} from 'react-icons/md'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
@@ -98,7 +97,7 @@ function StatCard({ title, value, change, suffix = '', icon: Icon }: {
             <Icon className="h-5 w-5 text-primary" />
           </div>
           <div className={`flex items-center gap-1 text-xs ${showPositiveColor ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {isPositive ? <MdTrendingUp className="h-3 w-3" /> : <MdTrendingDown className="h-3 w-3" />}
             {Math.abs(change)}%
           </div>
         </div>
@@ -126,26 +125,26 @@ export function ContentManagerDashboard() {
           title="Organic Traffic"
           value={seoStats.organicTraffic}
           change={seoStats.organicTrafficChange}
-          icon={TrendingUp}
+          icon={MdTrendingUp}
         />
         <StatCard
           title="Page Views"
           value={seoStats.pageViews}
           change={seoStats.pageViewsChange}
-          icon={Eye}
+          icon={MdVisibility}
         />
         <StatCard
           title="Avg Session Duration"
           value={formatDuration(seoStats.avgSessionDuration)}
           change={seoStats.avgSessionDurationChange}
-          icon={Clock}
+          icon={MdAccessTime}
         />
         <StatCard
           title="Bounce Rate"
           value={seoStats.bounceRate}
           change={seoStats.bounceRateChange}
           suffix="%"
-          icon={MousePointer}
+          icon={MdMouse}
         />
       </div>
 
@@ -155,7 +154,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-500" />
+              <MdSearch className="h-5 w-5 text-blue-500" />
               Top Keywords
             </CardTitle>
             <CardDescription>Your best performing search terms</CardDescription>
@@ -178,7 +177,7 @@ export function ContentManagerDashboard() {
                     <div className="text-right">
                       <p className="text-sm font-semibold">#{kw.position}</p>
                       <div className={`flex items-center gap-1 text-xs ${kw.change > 0 ? 'text-emerald-600' : kw.change < 0 ? 'text-red-600' : 'text-muted-foreground'}`}>
-                        {kw.change > 0 ? <ArrowUpRight className="h-3 w-3" /> : kw.change < 0 ? <ArrowDownRight className="h-3 w-3" /> : null}
+                        {kw.change > 0 ? <MdTrendingUp className="h-3 w-3" /> : kw.change < 0 ? <MdTrendingDown className="h-3 w-3" /> : null}
                         {kw.change !== 0 ? Math.abs(kw.change) : '-'}
                       </div>
                     </div>
@@ -194,7 +193,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5 text-purple-500" />
+              <MdDescription className="h-5 w-5 text-purple-500" />
               Top Pages
             </CardTitle>
             <CardDescription>Most visited pages on your site</CardDescription>
@@ -213,7 +212,7 @@ export function ContentManagerDashboard() {
                     <p className="text-sm font-medium truncate">{page.page}</p>
                     <div className="flex items-center gap-3 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
+                        <MdAccessTime className="h-3 w-3" />
                         {page.avgTime}
                       </span>
                       <span>Bounce: {page.bounceRate}%</span>
@@ -230,7 +229,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-emerald-500" />
+              <MdBarChart className="h-5 w-5 text-emerald-500" />
               Traffic Sources
             </CardTitle>
             <CardDescription>Where your visitors come from</CardDescription>
@@ -263,7 +262,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5 text-cyan-500" />
+              <MdPublic className="h-5 w-5 text-cyan-500" />
               Traffic by Country
             </CardTitle>
             <CardDescription>Geographic distribution of visitors</CardDescription>
@@ -293,7 +292,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-pink-500" />
+              <MdTrendingUp className="h-5 w-5 text-pink-500" />
               Content Performance
             </CardTitle>
             <CardDescription>How your content is performing</CardDescription>
@@ -331,7 +330,7 @@ export function ContentManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-orange-500" />
+              <MdSearch className="h-5 w-5 text-orange-500" />
               Search Console Data
             </CardTitle>
             <CardDescription>Recent search queries from Google</CardDescription>

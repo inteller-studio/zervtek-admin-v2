@@ -2,14 +2,14 @@
 
 import { ReactNode } from 'react'
 import {
-  Archive,
-  ArchiveRestore,
-  Bell,
-  Clock,
-  Eye,
-  Tag,
-  UserPlus,
-} from 'lucide-react'
+  MdArchive,
+  MdUnarchive,
+  MdNotifications,
+  MdAccessTime,
+  MdVisibility,
+  MdLocalOffer,
+  MdPersonAdd,
+} from 'react-icons/md'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -50,7 +50,7 @@ export function ConversationRowActions({
         {/* Label */}
         {onLabel && (
           <DropdownMenuItem onClick={onLabel}>
-            <Tag className='mr-2 h-4 w-4' />
+            <MdLocalOffer className='mr-2 h-4 w-4' />
             Add label
           </DropdownMenuItem>
         )}
@@ -58,7 +58,7 @@ export function ConversationRowActions({
         {/* Assign */}
         {onAssign && (
           <DropdownMenuItem onClick={onAssign}>
-            <UserPlus className='mr-2 h-4 w-4' />
+            <MdPersonAdd className='mr-2 h-4 w-4' />
             {chat.assignment ? 'Reassign' : 'Assign to...'}
           </DropdownMenuItem>
         )}
@@ -66,7 +66,7 @@ export function ConversationRowActions({
         {/* Snooze */}
         {onSnooze && !isSnoozed && (
           <DropdownMenuItem onClick={onSnooze}>
-            <Clock className='mr-2 h-4 w-4' />
+            <MdAccessTime className='mr-2 h-4 w-4' />
             Snooze
           </DropdownMenuItem>
         )}
@@ -74,7 +74,7 @@ export function ConversationRowActions({
         {/* Cancel snooze */}
         {isSnoozed && onSnooze && (
           <DropdownMenuItem onClick={onSnooze}>
-            <Bell className='mr-2 h-4 w-4' />
+            <MdNotifications className='mr-2 h-4 w-4' />
             Cancel snooze
           </DropdownMenuItem>
         )}
@@ -84,7 +84,7 @@ export function ConversationRowActions({
         {/* Mark unread */}
         {onMarkUnread && !chat.isUnread && (
           <DropdownMenuItem onClick={onMarkUnread}>
-            <Eye className='mr-2 h-4 w-4' />
+            <MdVisibility className='mr-2 h-4 w-4' />
             Mark as unread
           </DropdownMenuItem>
         )}
@@ -93,14 +93,14 @@ export function ConversationRowActions({
         {isArchived ? (
           onUnarchive && (
             <DropdownMenuItem onClick={onUnarchive}>
-              <ArchiveRestore className='mr-2 h-4 w-4' />
+              <MdUnarchive className='mr-2 h-4 w-4' />
               Unarchive
             </DropdownMenuItem>
           )
         ) : (
           onArchive && (
             <DropdownMenuItem onClick={onArchive}>
-              <Archive className='mr-2 h-4 w-4' />
+              <MdArchive className='mr-2 h-4 w-4' />
               Archive
             </DropdownMenuItem>
           )

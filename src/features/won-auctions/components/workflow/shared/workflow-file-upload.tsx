@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Upload, FileText, X, Image as ImageIcon, File } from 'lucide-react'
+import { MdUpload, MdDescription, MdClose, MdImage, MdInsertDriveFile } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -34,9 +34,9 @@ const formatFileSize = (bytes: number): string => {
 }
 
 const getFileIcon = (type: string) => {
-  if (type.startsWith('image/')) return ImageIcon
-  if (type.includes('pdf')) return FileText
-  return File
+  if (type.startsWith('image/')) return MdImage
+  if (type.includes('pdf')) return MdDescription
+  return MdInsertDriveFile
 }
 
 export function WorkflowFileUpload({
@@ -163,7 +163,7 @@ export function WorkflowFileUpload({
         />
         <div className='flex flex-col items-center justify-center py-6 px-4'>
           <div className='h-10 w-10 rounded-full bg-muted flex items-center justify-center mb-3'>
-            <Upload className='h-5 w-5 text-muted-foreground' />
+            <MdUpload className='h-5 w-5 text-muted-foreground' />
           </div>
           <p className='text-sm font-medium'>{label}</p>
           <p className='text-xs text-muted-foreground mt-1'>{description}</p>
@@ -211,7 +211,7 @@ export function WorkflowFileUpload({
                   className='h-8 w-8 text-muted-foreground hover:text-destructive'
                   onClick={() => removeFile(file.id)}
                 >
-                  <X className='h-4 w-4' />
+                  <MdClose className='h-4 w-4' />
                 </Button>
               </div>
             )

@@ -39,26 +39,26 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
 import {
-  ArrowLeft,
-  Send,
-  Clock,
-  User,
-  Mail,
-  Phone,
-  Calendar,
-  Tag,
-  Car,
-  MoreVertical,
-  UserPlus,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
-  MessageSquare,
-  Paperclip,
-  Eye,
-  EyeOff,
-  RefreshCw,
-} from 'lucide-react'
+  MdArrowBack,
+  MdSend,
+  MdAccessTime,
+  MdPerson,
+  MdEmail,
+  MdPhone,
+  MdCalendarToday,
+  MdLocalOffer,
+  MdDirectionsCar,
+  MdMoreVert,
+  MdPersonAdd,
+  MdCheckCircle,
+  MdCancel,
+  MdError,
+  MdChat,
+  MdAttachFile,
+  MdVisibility,
+  MdVisibilityOff,
+  MdRefresh,
+} from 'react-icons/md'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 
@@ -108,11 +108,11 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
         </Header>
         <Main className='flex flex-1 items-center justify-center'>
           <div className='text-center'>
-            <AlertCircle className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
+            <MdError className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
             <h2 className='text-xl font-semibold mb-2'>Ticket Not Found</h2>
             <p className='text-muted-foreground mb-4'>The ticket you're looking for doesn't exist.</p>
             <Button onClick={() => router.push('/support')}>
-              <ArrowLeft className='mr-2 h-4 w-4' />
+              <MdArrowBack className='mr-2 h-4 w-4' />
               Back to Tickets
             </Button>
           </div>
@@ -239,7 +239,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
         <div className='flex flex-wrap items-center justify-between gap-4'>
           <div className='flex items-center gap-4'>
             <Button variant='ghost' size='sm' onClick={() => router.push('/support')}>
-              <ArrowLeft className='mr-2 h-4 w-4' />
+              <MdArrowBack className='mr-2 h-4 w-4' />
               Back
             </Button>
             <div>
@@ -255,23 +255,23 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant='outline' size='sm'>
-                  <MoreVertical className='h-4 w-4' />
+                  <MdMoreVert className='h-4 w-4' />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align='end'>
                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => setShowResolveDialog(true)}>
-                  <CheckCircle className='mr-2 h-4 w-4' />
+                  <MdCheckCircle className='mr-2 h-4 w-4' />
                   Mark as Resolved
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowCloseDialog(true)}>
-                  <XCircle className='mr-2 h-4 w-4' />
+                  <MdCancel className='mr-2 h-4 w-4' />
                   Close Ticket
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => handleStatusChange('open')}>
-                  <RefreshCw className='mr-2 h-4 w-4' />
+                  <MdRefresh className='mr-2 h-4 w-4' />
                   Reopen Ticket
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -310,7 +310,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
             <Card>
               <CardHeader className='pb-3'>
                 <CardTitle className='text-base flex items-center gap-2'>
-                  <MessageSquare className='h-4 w-4' />
+                  <MdChat className='h-4 w-4' />
                   Conversation ({ticket.messages.length} messages)
                 </CardTitle>
               </CardHeader>
@@ -352,7 +352,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                             <span className='text-sm font-medium'>{message.senderName}</span>
                             {message.isInternal && (
                               <Badge variant='outline' className='text-xs'>
-                                <EyeOff className='h-3 w-3 mr-1' />
+                                <MdVisibilityOff className='h-3 w-3 mr-1' />
                                 Internal
                               </Badge>
                             )}
@@ -390,7 +390,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                         size='sm'
                         onClick={() => setIsInternalNote(false)}
                       >
-                        <Send className='mr-2 h-4 w-4' />
+                        <MdSend className='mr-2 h-4 w-4' />
                         Reply
                       </Button>
                       <Button
@@ -398,7 +398,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                         size='sm'
                         onClick={() => setIsInternalNote(true)}
                       >
-                        <EyeOff className='mr-2 h-4 w-4' />
+                        <MdVisibilityOff className='mr-2 h-4 w-4' />
                         Internal Note
                       </Button>
                     </div>
@@ -411,7 +411,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                     />
                     <div className='flex items-center justify-between'>
                       <Button variant='outline' size='sm'>
-                        <Paperclip className='mr-2 h-4 w-4' />
+                        <MdAttachFile className='mr-2 h-4 w-4' />
                         Attach File
                       </Button>
                       <Button
@@ -422,7 +422,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                           <>Sending...</>
                         ) : (
                           <>
-                            <Send className='mr-2 h-4 w-4' />
+                            <MdSend className='mr-2 h-4 w-4' />
                             {isInternalNote ? 'Add Note' : 'Send Reply'}
                           </>
                         )}
@@ -492,16 +492,16 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
 
                 <div className='space-y-2 text-sm'>
                   <div className='flex items-center gap-2 text-muted-foreground'>
-                    <Calendar className='h-4 w-4' />
+                    <MdCalendarToday className='h-4 w-4' />
                     <span>Created: {format(ticket.createdAt, 'MMM dd, yyyy HH:mm')}</span>
                   </div>
                   <div className='flex items-center gap-2 text-muted-foreground'>
-                    <Clock className='h-4 w-4' />
+                    <MdAccessTime className='h-4 w-4' />
                     <span>Updated: {formatDistanceToNow(ticket.updatedAt, { addSuffix: true })}</span>
                   </div>
                   {ticket.firstResponseAt && (
                     <div className='flex items-center gap-2 text-muted-foreground'>
-                      <MessageSquare className='h-4 w-4' />
+                      <MdChat className='h-4 w-4' />
                       <span>First Response: {format(ticket.firstResponseAt, 'MMM dd, HH:mm')}</span>
                     </div>
                   )}
@@ -547,12 +547,12 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                 <Separator />
                 <div className='space-y-2 text-sm'>
                   <div className='flex items-center gap-2'>
-                    <Mail className='h-4 w-4 text-muted-foreground' />
+                    <MdEmail className='h-4 w-4 text-muted-foreground' />
                     <span>{ticket.customerEmail}</span>
                   </div>
                   {ticket.customerPhone && (
                     <div className='flex items-center gap-2'>
-                      <Phone className='h-4 w-4 text-muted-foreground' />
+                      <MdPhone className='h-4 w-4 text-muted-foreground' />
                       <span>{ticket.customerPhone}</span>
                     </div>
                   )}
@@ -569,7 +569,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                 <CardContent>
                   <div className='flex items-center gap-3'>
                     <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-muted'>
-                      <Car className='h-5 w-5 text-muted-foreground' />
+                      <MdDirectionsCar className='h-5 w-5 text-muted-foreground' />
                     </div>
                     <div>
                       <p className='text-sm font-medium'>{ticket.relatedVehicleName}</p>
@@ -597,7 +597,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleResolveTicket} className='bg-emerald-600 hover:bg-emerald-700'>
-              <CheckCircle className='mr-2 h-4 w-4' />
+              <MdCheckCircle className='mr-2 h-4 w-4' />
               Mark Resolved
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -616,7 +616,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleCloseTicket}>
-              <XCircle className='mr-2 h-4 w-4' />
+              <MdCancel className='mr-2 h-4 w-4' />
               Close Ticket
             </AlertDialogAction>
           </AlertDialogFooter>

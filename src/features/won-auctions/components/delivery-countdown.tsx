@@ -1,7 +1,7 @@
 'use client'
 
 import { differenceInDays, formatDistanceToNow, isPast } from 'date-fns'
-import { Clock, AlertTriangle, Ship } from 'lucide-react'
+import { MdAccessTime, MdWarning, MdDirectionsBoat } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 
 interface DeliveryCountdownProps {
@@ -22,7 +22,7 @@ export function DeliveryCountdown({ estimatedDelivery, status }: DeliveryCountdo
   if (isOverdue) {
     return (
       <Badge variant='destructive' className='flex items-center gap-1'>
-        <AlertTriangle className='h-3 w-3' />
+        <MdWarning className='h-3 w-3' />
         Overdue
       </Badge>
     )
@@ -34,7 +34,7 @@ export function DeliveryCountdown({ estimatedDelivery, status }: DeliveryCountdo
         variant='outline'
         className='flex items-center gap-1 border-orange-300 text-orange-600'
       >
-        <Clock className='h-3 w-3' />
+        <MdAccessTime className='h-3 w-3' />
         {daysLeft === 0 ? 'Today' : daysLeft === 1 ? '1 day left' : `${daysLeft} days left`}
       </Badge>
     )
@@ -42,7 +42,7 @@ export function DeliveryCountdown({ estimatedDelivery, status }: DeliveryCountdo
 
   return (
     <Badge variant='outline' className='flex items-center gap-1'>
-      <Ship className='h-3 w-3' />
+      <MdDirectionsBoat className='h-3 w-3' />
       {formatDistanceToNow(deliveryDate, { addSuffix: false })}
     </Badge>
   )

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Check, ChevronsUpDown } from 'lucide-react'
+import { MdCheck, MdUnfoldMore } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Command,
@@ -60,7 +60,7 @@ export function CountryCodeSelector({
           ) : (
             <span className='text-muted-foreground'>Select</span>
           )}
-          <ChevronsUpDown className='ml-2 h-4 w-4 shrink-0 opacity-50' />
+          <MdUnfoldMore className='ml-2 h-4 w-4 shrink-0 opacity-50' />
         </Button>
       </PopoverTrigger>
       <PopoverContent className='w-[280px] p-0' align='start'>
@@ -127,7 +127,7 @@ function CountryItem({ country, isSelected, onSelect }: CountryItemProps) {
       <span className='text-base'>{country.flag}</span>
       <span className='flex-1 truncate'>{country.country}</span>
       <span className='text-muted-foreground'>{country.code}</span>
-      {isSelected && <Check className='h-4 w-4 text-primary' />}
+      {isSelected && <MdCheck className='h-4 w-4 text-primary' />}
     </CommandItem>
   )
 }

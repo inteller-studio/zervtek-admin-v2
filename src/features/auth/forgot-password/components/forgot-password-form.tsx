@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRouter } from 'next/navigation'
-import { ArrowRight, Loader2 } from 'lucide-react'
+import { MdArrowForward, MdSync } from 'react-icons/md'
 import { toast } from 'sonner'
 import { sleep, cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
@@ -74,7 +74,7 @@ export function ForgotPasswordForm({
         />
         <Button className='mt-2' disabled={isLoading}>
           Continue
-          {isLoading ? <Loader2 className='animate-spin' /> : <ArrowRight />}
+          {isLoading ? <MdSync className='animate-spin' /> : <MdArrowForward />}
         </Button>
       </form>
     </Form>

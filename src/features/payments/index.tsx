@@ -4,28 +4,30 @@ import { useCallback, useState } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { toast } from 'sonner'
 import {
-  ArrowDown,
-  BanknoteIcon,
-  Calendar,
-  CheckCircle,
-  Clock,
-  CreditCard,
-  Download,
-  Edit,
-  Eye,
-  FileText,
-  MoreHorizontal,
-  Search,
-  Send,
-  Shield,
-  TrendingUp,
-  Wallet,
-  XCircle,
-} from 'lucide-react'
+  MdArrowDownward,
+  MdAccountBalance,
+  MdCalendarToday,
+  MdCheckCircle,
+  MdAccessTime,
+  MdCreditCard,
+  MdDownload,
+  MdEdit,
+  MdVisibility,
+  MdDescription,
+  MdMoreHoriz,
+  MdSearch,
+  MdSend,
+  MdSecurity,
+  MdTrendingUp,
+  MdAccountBalanceWallet,
+  MdCancel,
+} from 'react-icons/md'
+import { Eye, MoreHorizontal, CheckCircle, RefreshCw, Plus, Filter, Clock, CreditCard, Send, Download, X, XCircle } from 'lucide-react'
 
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
+import { Search } from '@/components/search'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -63,7 +65,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { StatsCard } from '@/features/dashboard/components/stats-card'
 
@@ -327,11 +329,11 @@ export function Payments() {
   const getPaymentTypeIcon = (type: Payment['type']) => {
     switch (type) {
       case 'stripe':
-        return <CreditCard className='h-4 w-4' />
+        return <MdCreditCard className='h-4 w-4' />
       case 'paypal':
-        return <Wallet className='h-4 w-4' />
+        return <MdAccountBalanceWallet className='h-4 w-4' />
       case 'bank_transfer':
-        return <BanknoteIcon className='h-4 w-4' />
+        return <MdAccountBalance className='h-4 w-4' />
     }
   }
 
@@ -358,6 +360,13 @@ export function Payments() {
       .reduce((sum, p) => sum + p.amount, 0),
   }
 
+  // Main tabs configuration
+  const mainTabs: TabItem[] = [
+    { id: 'payments', label: 'Payment History', icon: MdCreditCard },
+    { id: 'balances', label: 'Customer Balances', icon: MdAccountBalanceWallet },
+    { id: 'pending', label: 'Pending Review', icon: MdAccessTime, badge: stats.pendingPayments > 0 ? stats.pendingPayments : undefined, badgeColor: 'amber' as const },
+  ]
+
   return (
     <>
       <Header fixed>
@@ -373,7 +382,7 @@ export function Payments() {
             <p className='text-muted-foreground'>Manage payments and customer balances</p>
           </div>
           <Button variant='outline' size='sm'>
-            <Download className='mr-2 h-4 w-4' />
+            <MdDownload className='mr-2 h-4 w-4' />
             Export
           </Button>
         </div>
@@ -409,28 +418,20 @@ export function Payments() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList>
-            <TabsTrigger value='payments'>Payment History</TabsTrigger>
-            <TabsTrigger value='balances'>Customer Balances</TabsTrigger>
-            <TabsTrigger value='pending'>
-              Pending Review
-              {stats.pendingPayments > 0 && (
-                <Badge variant='secondary' className='ml-2'>
-                  {stats.pendingPayments}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-
+        <AnimatedTabs
+          tabs={mainTabs}
+          value={activeTab}
+          onValueChange={setActiveTab}
+          variant='compact'
+        >
           {/* Payment History Tab */}
-          <TabsContent value='payments' className='space-y-4'>
+          <AnimatedTabsContent value='payments' className='space-y-4'>
             {/* Filters */}
             <Card>
               <CardContent className='p-4'>
                 <div className='flex flex-wrap gap-4'>
                   <div className='relative flex-1 min-w-[200px]'>
-                    <Search className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
+                    <MdSearch className='text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2' />
                     <Input
                       placeholder='Search by customer, email, or transaction ID...'
                       value={searchQuery}
@@ -521,7 +522,7 @@ export function Payments() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant='ghost' size='sm'>
-                              <MoreHorizontal className='h-4 w-4' />
+                              <MdMoreHoriz className='h-4 w-4' />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end'>
@@ -533,7 +534,7 @@ export function Payments() {
                                 setIsDetailsOpen(true)
                               }}
                             >
-                              <Eye className='mr-2 h-4 w-4' />
+                              <MdVisibility className='mr-2 h-4 w-4' />
                               View Details
                             </DropdownMenuItem>
                             {payment.status === 'pending' && payment.type === 'bank_transfer' && (
@@ -543,23 +544,23 @@ export function Payments() {
                                   setIsReviewOpen(true)
                                 }}
                               >
-                                <Shield className='mr-2 h-4 w-4' />
+                                <MdSecurity className='mr-2 h-4 w-4' />
                                 Review Payment
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem>
-                              <FileText className='mr-2 h-4 w-4' />
+                              <MdDescription className='mr-2 h-4 w-4' />
                               View Invoice
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              <Download className='mr-2 h-4 w-4' />
+                              <MdDownload className='mr-2 h-4 w-4' />
                               Download Receipt
                             </DropdownMenuItem>
                             {payment.status === 'completed' && (
                               <>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className='text-destructive'>
-                                  <ArrowDown className='mr-2 h-4 w-4' />
+                                  <MdArrowDownward className='mr-2 h-4 w-4' />
                                   Issue Refund
                                 </DropdownMenuItem>
                               </>
@@ -572,10 +573,10 @@ export function Payments() {
                 </TableBody>
               </Table>
             </Card>
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Customer Balances Tab */}
-          <TabsContent value='balances' className='space-y-4'>
+          <AnimatedTabsContent value='balances' className='space-y-4'>
             <Card>
               <Table>
                 <TableHeader>
@@ -630,18 +631,18 @@ export function Payments() {
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant='ghost' size='sm'>
-                              <MoreHorizontal className='h-4 w-4' />
+                              <MdMoreHoriz className='h-4 w-4' />
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align='end'>
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem>
-                              <Eye className='mr-2 h-4 w-4' />
+                              <MdVisibility className='mr-2 h-4 w-4' />
                               View History
                             </DropdownMenuItem>
                             <DropdownMenuItem>
-                              <Edit className='mr-2 h-4 w-4' />
+                              <MdEdit className='mr-2 h-4 w-4' />
                               Adjust Balance
                             </DropdownMenuItem>
                             <DropdownMenuItem>
@@ -656,10 +657,10 @@ export function Payments() {
                 </TableBody>
               </Table>
             </Card>
-          </TabsContent>
+          </AnimatedTabsContent>
 
           {/* Pending Review Tab */}
-          <TabsContent value='pending' className='space-y-4'>
+          <AnimatedTabsContent value='pending' className='space-y-4'>
             <div className='grid gap-4'>
               {payments
                 .filter((p) => p.status === 'pending')
@@ -713,11 +714,11 @@ export function Payments() {
                       {payment.receipt && (
                         <div className='bg-muted flex items-center justify-between rounded-lg p-3'>
                           <div className='flex items-center gap-2'>
-                            <FileText className='text-muted-foreground h-4 w-4' />
+                            <MdDescription className='text-muted-foreground h-4 w-4' />
                             <span className='text-sm'>{payment.receipt.name}</span>
                           </div>
                           <Button variant='ghost' size='sm'>
-                            <Download className='h-4 w-4' />
+                            <MdDownload className='h-4 w-4' />
                           </Button>
                         </div>
                       )}
@@ -734,7 +735,7 @@ export function Payments() {
                             setIsReviewOpen(true)
                           }}
                         >
-                          <Eye className='mr-2 h-4 w-4' />
+                          <MdVisibility className='mr-2 h-4 w-4' />
                           Review Details
                         </Button>
                       </div>
@@ -751,8 +752,8 @@ export function Payments() {
                 </Card>
               )}
             </div>
-          </TabsContent>
-        </Tabs>
+          </AnimatedTabsContent>
+        </AnimatedTabs>
 
         {/* Payment Details Dialog */}
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
@@ -902,12 +903,12 @@ export function Payments() {
                       <div className='mb-2 flex items-center justify-between'>
                         <span className='text-sm font-medium'>{selectedPayment.receipt.name}</span>
                         <Button variant='outline' size='sm'>
-                          <Download className='mr-2 h-4 w-4' />
+                          <MdDownload className='mr-2 h-4 w-4' />
                           Download
                         </Button>
                       </div>
                       <div className='bg-background text-muted-foreground rounded-lg p-8 text-center'>
-                        <FileText className='mx-auto mb-2 h-12 w-12' />
+                        <MdDescription className='mx-auto mb-2 h-12 w-12' />
                         <p className='text-sm'>Receipt preview would appear here</p>
                       </div>
                     </div>
@@ -936,7 +937,7 @@ export function Payments() {
                     className='flex-1'
                     onClick={() => handleRejectPayment(selectedPayment)}
                   >
-                    <XCircle className='mr-2 h-4 w-4' />
+                    <MdCancel className='mr-2 h-4 w-4' />
                     Reject Payment
                   </Button>
                   <Button

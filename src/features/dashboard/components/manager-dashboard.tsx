@@ -2,21 +2,20 @@
 
 import { motion } from 'framer-motion'
 import {
-  DollarSign,
-  TrendingUp,
-  Users,
-  Ship,
-  ClipboardList,
-  CreditCard,
-  Calendar,
-  BarChart3,
-  UserX,
-  ArrowUpRight,
-  ArrowDownRight,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-} from 'lucide-react'
+  MdAttachMoney,
+  MdTrendingUp,
+  MdPeople,
+  MdCalendarToday,
+  MdBarChart,
+  MdAccessTime,
+  MdCheckCircle,
+  MdError,
+  MdDirectionsBoat,
+  MdAssignment,
+  MdCreditCard,
+  MdPersonOff,
+  MdTrendingDown,
+} from 'react-icons/md'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -101,7 +100,7 @@ function StatCard({ title, value, change, prefix = '', suffix = '' }: {
         <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
           <div className={`flex items-center gap-1 text-xs ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {isPositive ? <MdTrendingUp className="h-3 w-3" /> : <MdTrendingDown className="h-3 w-3" />}
             {Math.abs(change)}%
           </div>
         </div>
@@ -169,7 +168,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-blue-500" />
+              <MdPeople className="h-5 w-5 text-blue-500" />
               Team Performance
             </CardTitle>
             <CardDescription>Sales performance by team member</CardDescription>
@@ -210,7 +209,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Ship className="h-5 w-5 text-cyan-500" />
+              <MdDirectionsBoat className="h-5 w-5 text-cyan-500" />
               Vehicles Being Shipped
             </CardTitle>
             <CardDescription>Current shipment status</CardDescription>
@@ -243,7 +242,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-purple-500" />
+              <MdAssignment className="h-5 w-5 text-purple-500" />
               Backoffice Tasks
             </CardTitle>
             <CardDescription>Team workload overview</CardDescription>
@@ -276,7 +275,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-emerald-500" />
+              <MdCreditCard className="h-5 w-5 text-emerald-500" />
               Payments Due
             </CardTitle>
             <CardDescription>Upcoming and overdue payments</CardDescription>
@@ -312,7 +311,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-orange-500" />
+              <MdCalendarToday className="h-5 w-5 text-orange-500" />
               Shipping Timeline
             </CardTitle>
             <CardDescription>Upcoming shipping events</CardDescription>
@@ -349,7 +348,7 @@ export function ManagerDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5 text-pink-500" />
+              <MdBarChart className="h-5 w-5 text-pink-500" />
               SEO Analytics
             </CardTitle>
             <CardDescription>Website performance overview</CardDescription>
@@ -397,7 +396,7 @@ export function ManagerDashboard() {
         <Card className="lg:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <UserX className="h-5 w-5 text-red-500" />
+              <MdPersonOff className="h-5 w-5 text-red-500" />
               Customers Without Agent
             </CardTitle>
             <CardDescription>New signups that need to be assigned to sales staff</CardDescription>
@@ -414,7 +413,7 @@ export function ManagerDashboard() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-red-100 dark:bg-red-950">
-                      <UserX className="h-4 w-4 text-red-600" />
+                      <MdPersonOff className="h-4 w-4 text-red-600" />
                     </div>
                     <div>
                       <p className="text-sm font-medium">{customer.name}</p>

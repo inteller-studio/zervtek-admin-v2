@@ -14,7 +14,7 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, type TabItem } from '@/components/ui/animated-tabs'
 import {
   Table,
   TableBody,
@@ -47,30 +47,30 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import {
-  FileText,
-  Eye,
-  ThumbsUp,
-  Clock,
-  Search as SearchIcon,
-  Plus,
-  MoreHorizontal,
-  Edit,
-  Trash2,
-  Grid3X3,
-  List,
-  Calendar,
-  User,
-  Tag,
-  MessageSquare,
-  Save,
-  Image as ImageIcon,
-  X,
-  ExternalLink,
-  Archive,
-  CheckCircle,
-  ChevronLeft,
-  ChevronRight,
-} from 'lucide-react'
+  MdDescription,
+  MdVisibility,
+  MdThumbUp,
+  MdAccessTime,
+  MdSearch,
+  MdAdd,
+  MdMoreHoriz,
+  MdEdit,
+  MdDelete,
+  MdGridView,
+  MdViewList,
+  MdCalendarToday,
+  MdPerson,
+  MdLocalOffer,
+  MdChat,
+  MdSave,
+  MdImage,
+  MdClose,
+  MdOpenInNew,
+  MdArchive,
+  MdCheckCircle,
+  MdChevronLeft,
+  MdChevronRight,
+} from 'react-icons/md'
 import { RichTextEditor } from '@/components/ui/rich-text-editor'
 import { format } from 'date-fns'
 import { toast } from 'sonner'
@@ -488,7 +488,7 @@ export function Blogs() {
             <p className='text-muted-foreground'>Create and manage blog posts</p>
           </div>
           <Button onClick={handleNewPost}>
-            <Plus className='mr-2 h-4 w-4' />
+            <MdAdd className='mr-2 h-4 w-4' />
             New Post
           </Button>
         </div>
@@ -496,7 +496,7 @@ export function Blogs() {
         {/* Filters and View Mode */}
         <div className='flex flex-wrap items-center gap-4'>
           <div className='relative flex-1 min-w-[200px]'>
-            <SearchIcon className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
+            <MdSearch className='text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2' />
             <Input
               placeholder='Search posts...'
               value={searchTerm}
@@ -532,31 +532,31 @@ export function Blogs() {
               size='icon'
               onClick={() => setViewMode('grid')}
             >
-              <Grid3X3 className='h-4 w-4' />
+              <MdGridView className='h-4 w-4' />
             </Button>
             <Button
               variant={viewMode === 'list' ? 'default' : 'outline'}
               size='icon'
               onClick={() => setViewMode('list')}
             >
-              <List className='h-4 w-4' />
+              <MdViewList className='h-4 w-4' />
             </Button>
           </div>
-          <Tabs
+          <AnimatedTabs
+            tabs={[
+              { id: 'all', label: 'All' },
+              { id: 'published', label: 'Published' },
+              { id: 'draft', label: 'Drafts' },
+              { id: 'scheduled', label: 'Scheduled' },
+              { id: 'archived', label: 'Archived' },
+            ] as TabItem[]}
             value={activeTab}
             onValueChange={(value) => {
               setActiveTab(value)
               setCurrentPage(1)
             }}
-          >
-            <TabsList>
-              <TabsTrigger value='all'>All</TabsTrigger>
-              <TabsTrigger value='published'>Published</TabsTrigger>
-              <TabsTrigger value='draft'>Drafts</TabsTrigger>
-              <TabsTrigger value='scheduled'>Scheduled</TabsTrigger>
-              <TabsTrigger value='archived'>Archived</TabsTrigger>
-            </TabsList>
-          </Tabs>
+            variant='compact'
+          />
         </div>
 
         {/* Blog Posts Grid/List */}
@@ -589,15 +589,15 @@ export function Blogs() {
                     </div>
                     <div className='text-muted-foreground flex items-center gap-4 text-xs'>
                       <span className='flex items-center gap-1'>
-                        <FileText className='h-3 w-3' />
+                        <MdDescription className='h-3 w-3' />
                         {post.category}
                       </span>
                       <span className='flex items-center gap-1'>
-                        <Eye className='h-3 w-3' />
+                        <MdVisibility className='h-3 w-3' />
                         {post.views}
                       </span>
                       <span className='flex items-center gap-1'>
-                        <MessageSquare className='h-3 w-3' />
+                        <MdChat className='h-3 w-3' />
                         {post.comments}
                       </span>
                     </div>
@@ -621,7 +621,7 @@ export function Blogs() {
                           className='h-8 w-8 p-0'
                           onClick={() => handleViewPost(post)}
                         >
-                          <Eye className='h-3 w-3' />
+                          <MdVisibility className='h-3 w-3' />
                         </Button>
                         <Button
                           variant='ghost'
@@ -629,7 +629,7 @@ export function Blogs() {
                           className='h-8 w-8 p-0'
                           onClick={() => handleEditPost(post)}
                         >
-                          <Edit className='h-3 w-3' />
+                          <MdEdit className='h-3 w-3' />
                         </Button>
                         <Button
                           variant='ghost'
@@ -637,7 +637,7 @@ export function Blogs() {
                           className='h-8 w-8 p-0'
                           onClick={() => handleDeletePost(post.id)}
                         >
-                          <Trash2 className='text-destructive h-3 w-3' />
+                          <MdDelete className='text-destructive h-3 w-3' />
                         </Button>
                       </div>
                     </div>
@@ -679,21 +679,21 @@ export function Blogs() {
                       <p className='text-muted-foreground text-sm'>{post.excerpt}</p>
                       <div className='text-muted-foreground flex items-center gap-4 text-sm'>
                         <span className='flex items-center gap-1'>
-                          <FileText className='h-3 w-3' />
+                          <MdDescription className='h-3 w-3' />
                           {post.category}
                         </span>
                         <span className='flex items-center gap-1'>
-                          <Calendar className='h-3 w-3' />
+                          <MdCalendarToday className='h-3 w-3' />
                           {post.publishedAt
                             ? format(post.publishedAt, 'MMM dd, yyyy')
                             : 'Not published'}
                         </span>
                         <span className='flex items-center gap-1'>
-                          <Eye className='h-3 w-3' />
+                          <MdVisibility className='h-3 w-3' />
                           {post.views} views
                         </span>
                         <span className='flex items-center gap-1'>
-                          <MessageSquare className='h-3 w-3' />
+                          <MdChat className='h-3 w-3' />
                           {post.comments} comments
                         </span>
                       </div>
@@ -707,15 +707,15 @@ export function Blogs() {
                     </div>
                     <div className='flex gap-2'>
                       <Button variant='ghost' size='sm' onClick={() => handleViewPost(post)}>
-                        <Eye className='h-4 w-4' />
+                        <MdVisibility className='h-4 w-4' />
                       </Button>
                       <Button variant='ghost' size='sm' onClick={() => handleEditPost(post)}>
-                        <Edit className='h-4 w-4' />
+                        <MdEdit className='h-4 w-4' />
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant='ghost' size='sm'>
-                            <MoreHorizontal className='h-4 w-4' />
+                            <MdMoreHoriz className='h-4 w-4' />
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align='end'>
@@ -723,13 +723,13 @@ export function Blogs() {
                           <DropdownMenuSeparator />
                           {post.status === 'draft' && (
                             <DropdownMenuItem onClick={() => handlePublishPost(post)}>
-                              <CheckCircle className='mr-2 h-4 w-4' />
+                              <MdCheckCircle className='mr-2 h-4 w-4' />
                               Publish
                             </DropdownMenuItem>
                           )}
                           {post.status !== 'archived' && (
                             <DropdownMenuItem onClick={() => handleArchivePost(post)}>
-                              <Archive className='mr-2 h-4 w-4' />
+                              <MdArchive className='mr-2 h-4 w-4' />
                               Archive
                             </DropdownMenuItem>
                           )}
@@ -737,7 +737,7 @@ export function Blogs() {
                             onClick={() => handleDeletePost(post.id)}
                             className='text-destructive'
                           >
-                            <Trash2 className='mr-2 h-4 w-4' />
+                            <MdDelete className='mr-2 h-4 w-4' />
                             Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
@@ -754,7 +754,7 @@ export function Blogs() {
         {paginatedPosts.length === 0 && (
           <Card>
             <CardContent className='py-12 text-center'>
-              <FileText className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
+              <MdDescription className='text-muted-foreground mx-auto mb-4 h-12 w-12' />
               <h3 className='text-lg font-semibold'>No posts found</h3>
               <p className='text-muted-foreground'>Try adjusting your search or filter criteria</p>
             </CardContent>
@@ -776,7 +776,7 @@ export function Blogs() {
                 onClick={() => setCurrentPage(currentPage - 1)}
                 disabled={currentPage === 1}
               >
-                <ChevronLeft className='h-4 w-4' />
+                <MdChevronLeft className='h-4 w-4' />
                 Previous
               </Button>
               <div className='text-sm'>
@@ -789,7 +789,7 @@ export function Blogs() {
                 disabled={currentPage === totalPages}
               >
                 Next
-                <ChevronRight className='h-4 w-4' />
+                <MdChevronRight className='h-4 w-4' />
               </Button>
             </div>
           </div>
@@ -821,21 +821,21 @@ export function Blogs() {
 
                 <div className='text-muted-foreground flex items-center gap-4 text-sm'>
                   <span className='flex items-center gap-1'>
-                    <User className='h-4 w-4' />
+                    <MdPerson className='h-4 w-4' />
                     {selectedPost.author}
                   </span>
                   <span className='flex items-center gap-1'>
-                    <Calendar className='h-4 w-4' />
+                    <MdCalendarToday className='h-4 w-4' />
                     {selectedPost.publishedAt
                       ? format(selectedPost.publishedAt, 'MMMM dd, yyyy')
                       : 'Not published'}
                   </span>
                   <span className='flex items-center gap-1'>
-                    <Eye className='h-4 w-4' />
+                    <MdVisibility className='h-4 w-4' />
                     {selectedPost.views} views
                   </span>
                   <span className='flex items-center gap-1'>
-                    <ThumbsUp className='h-4 w-4' />
+                    <MdThumbUp className='h-4 w-4' />
                     {selectedPost.likes} likes
                   </span>
                 </div>
@@ -877,7 +877,7 @@ export function Blogs() {
                     handleEditPost(selectedPost)
                   }}
                 >
-                  <Edit className='mr-2 h-4 w-4' />
+                  <MdEdit className='mr-2 h-4 w-4' />
                   Edit Post
                 </Button>
               </DialogFooter>
@@ -952,7 +952,7 @@ export function Blogs() {
                         className='absolute right-2 top-2 opacity-0 transition-opacity group-hover:opacity-100'
                         onClick={handleRemoveImage}
                       >
-                        <X className='h-4 w-4' />
+                        <MdClose className='h-4 w-4' />
                       </Button>
                     </div>
                   ) : (
@@ -960,7 +960,7 @@ export function Blogs() {
                       className='hover:bg-accent/50 cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors'
                       onClick={() => fileInputRef.current?.click()}
                     >
-                      <ImageIcon className='text-muted-foreground mx-auto mb-2 h-8 w-8' />
+                      <MdImage className='text-muted-foreground mx-auto mb-2 h-8 w-8' />
                       <p className='text-muted-foreground text-sm'>Click to upload</p>
                     </div>
                   )}
@@ -1020,7 +1020,7 @@ export function Blogs() {
                           onClick={() => handleRemoveTag(tag)}
                         >
                           {tag}
-                          <X className='ml-1 h-3 w-3' />
+                          <MdClose className='ml-1 h-3 w-3' />
                         </Badge>
                       ))}
                     </div>
@@ -1048,11 +1048,11 @@ export function Blogs() {
               Cancel
             </Button>
             <Button variant='outline' onClick={() => handleSavePost('draft')}>
-              <Save className='mr-2 h-4 w-4' />
+              <MdSave className='mr-2 h-4 w-4' />
               Save Draft
             </Button>
             <Button onClick={() => handleSavePost('published')}>
-              <CheckCircle className='mr-2 h-4 w-4' />
+              <MdCheckCircle className='mr-2 h-4 w-4' />
               {selectedPost?.status === 'published' ? 'Update' : 'Publish'}
             </Button>
           </DialogFooter>

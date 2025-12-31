@@ -1,6 +1,6 @@
 'use client'
 
-import { Monitor, Bell, Palette, Wrench, UserCog } from 'lucide-react'
+import { MdDesktopMac, MdNotifications, MdPalette, MdBuild, MdManageAccounts, MdSecurity } from 'react-icons/md'
 import { Separator } from '@/components/ui/separator'
 import { ConfigDrawer } from '@/components/config-drawer'
 import { Header } from '@/components/layout/header'
@@ -14,27 +14,32 @@ const sidebarNavItems = [
   {
     title: 'Profile',
     href: '/settings',
-    icon: <UserCog size={18} />,
+    icon: <MdManageAccounts size={18} />,
   },
   {
     title: 'Account',
     href: '/settings/account',
-    icon: <Wrench size={18} />,
+    icon: <MdBuild size={18} />,
   },
   {
     title: 'Appearance',
     href: '/settings/appearance',
-    icon: <Palette size={18} />,
+    icon: <MdPalette size={18} />,
   },
   {
     title: 'Notifications',
     href: '/settings/notifications',
-    icon: <Bell size={18} />,
+    icon: <MdNotifications size={18} />,
   },
   {
     title: 'Display',
     href: '/settings/display',
-    icon: <Monitor size={18} />,
+    icon: <MdDesktopMac size={18} />,
+  },
+  {
+    title: 'Security',
+    href: '/settings/security',
+    icon: <MdSecurity size={18} />,
   },
 ]
 

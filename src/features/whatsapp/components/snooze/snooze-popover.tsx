@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { addDays, addHours, nextSaturday, nextMonday, setHours, setMinutes, format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Calendar, Clock, Moon, Sun, Sunrise } from 'lucide-react'
+import { MdCalendarToday, MdAccessTime, MdBedtime, MdWbSunny, MdWbTwilight } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -50,28 +50,28 @@ function getSnoozeOptions(): SnoozeOption[] {
       preset: 'later_today',
       label: 'Later today',
       sublabel: format(laterToday, 'h:mm a'),
-      icon: <Clock className='h-4 w-4' />,
+      icon: <MdAccessTime className='h-4 w-4' />,
       getDate: () => laterToday,
     },
     {
       preset: 'tomorrow',
       label: 'Tomorrow',
       sublabel: format(tomorrow, 'EEE h:mm a'),
-      icon: <Sunrise className='h-4 w-4' />,
+      icon: <MdWbTwilight className='h-4 w-4' />,
       getDate: () => tomorrow,
     },
     {
       preset: 'weekend',
       label: 'This weekend',
       sublabel: format(weekend, 'EEE h:mm a'),
-      icon: <Sun className='h-4 w-4' />,
+      icon: <MdWbSunny className='h-4 w-4' />,
       getDate: () => weekend,
     },
     {
       preset: 'next_week',
       label: 'Next week',
       sublabel: format(nextWeek, 'EEE, MMM d'),
-      icon: <Moon className='h-4 w-4' />,
+      icon: <MdBedtime className='h-4 w-4' />,
       getDate: () => nextWeek,
     },
   ]
@@ -166,7 +166,7 @@ export function SnoozePopover({
                 className='rounded-md border'
               />
               <div className='mt-3 flex items-center gap-2'>
-                <Clock className='h-4 w-4 text-muted-foreground' />
+                <MdAccessTime className='h-4 w-4 text-muted-foreground' />
                 <Select value={customTime} onValueChange={setCustomTime}>
                   <SelectTrigger className='flex-1'>
                     <SelectValue />
@@ -228,7 +228,7 @@ export function SnoozePopover({
                 onClick={() => setShowCustom(true)}
                 className='flex w-full items-center gap-3 px-3 py-2 text-left hover:bg-muted transition-colors duration-150'
               >
-                <Calendar className='h-4 w-4 text-muted-foreground' />
+                <MdCalendarToday className='h-4 w-4 text-muted-foreground' />
                 <span className='text-sm font-medium'>Pick date & time</span>
               </motion.button>
             </motion.div>

@@ -2,19 +2,19 @@
 
 import { motion } from 'framer-motion'
 import {
-  Gavel,
-  Search,
-  Languages,
-  Car,
-  ClipboardList,
-  Calendar,
-  Ship,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-} from 'lucide-react'
+  MdGavel,
+  MdDirectionsCar,
+  MdCalendarToday,
+  MdAccessTime,
+  MdCheckCircle,
+  MdError,
+  MdSearch,
+  MdTranslate,
+  MdAssignment,
+  MdDirectionsBoat,
+  MdTrendingUp,
+  MdTrendingDown,
+} from 'react-icons/md'
 import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -104,7 +104,7 @@ function StatCard({ title, value, change, icon: Icon, iconColor }: {
             <Icon className="h-5 w-5" />
           </div>
           <div className={`flex items-center gap-1 text-xs ${isPositive ? 'text-emerald-600' : 'text-red-600'}`}>
-            {isPositive ? <ArrowUpRight className="h-3 w-3" /> : <ArrowDownRight className="h-3 w-3" />}
+            {isPositive ? <MdTrendingUp className="h-3 w-3" /> : <MdTrendingDown className="h-3 w-3" />}
             {Math.abs(change)}%
           </div>
         </div>
@@ -180,28 +180,28 @@ export function BackofficeDashboard() {
           title="Pending Bids"
           value={backofficeStats.pendingBids}
           change={backofficeStats.pendingBidsChange}
-          icon={Gavel}
+          icon={MdGavel}
           iconColor="bg-purple-100 text-purple-600 dark:bg-purple-950"
         />
         <StatCard
           title="Pending Inspections"
           value={backofficeStats.pendingInspections}
           change={backofficeStats.pendingInspectionsChange}
-          icon={Search}
+          icon={MdSearch}
           iconColor="bg-blue-100 text-blue-600 dark:bg-blue-950"
         />
         <StatCard
           title="Pending Translations"
           value={backofficeStats.pendingTranslations}
           change={backofficeStats.pendingTranslationsChange}
-          icon={Languages}
+          icon={MdTranslate}
           iconColor="bg-orange-100 text-orange-600 dark:bg-orange-950"
         />
         <StatCard
           title="Completed Today"
           value={backofficeStats.completedToday}
           change={backofficeStats.completedTodayChange}
-          icon={CheckCircle}
+          icon={MdCheckCircle}
           iconColor="bg-green-100 text-green-600 dark:bg-green-950"
         />
       </div>
@@ -212,7 +212,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Gavel className="h-5 w-5 text-purple-500" />
+              <MdGavel className="h-5 w-5 text-purple-500" />
               Upcoming Bids
             </CardTitle>
             <CardDescription>Auctions requiring bidding action</CardDescription>
@@ -245,7 +245,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Search className="h-5 w-5 text-blue-500" />
+              <MdSearch className="h-5 w-5 text-blue-500" />
               Pending Inspections
             </CardTitle>
             <CardDescription>Vehicle inspections awaiting completion</CardDescription>
@@ -278,7 +278,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Languages className="h-5 w-5 text-orange-500" />
+              <MdTranslate className="h-5 w-5 text-orange-500" />
               Pending Translations
             </CardTitle>
             <CardDescription>Documents awaiting translation</CardDescription>
@@ -311,7 +311,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Car className="h-5 w-5 text-emerald-500" />
+              <MdDirectionsCar className="h-5 w-5 text-emerald-500" />
               Recently Purchased
             </CardTitle>
             <CardDescription>Cars won at auction</CardDescription>
@@ -344,7 +344,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-indigo-500" />
+              <MdAssignment className="h-5 w-5 text-indigo-500" />
               My Tasks
             </CardTitle>
             <CardDescription>Your assigned work items</CardDescription>
@@ -364,7 +364,7 @@ export function BackofficeDashboard() {
                     <div className="mt-1 flex items-center gap-2">
                       <Badge variant="outline" className="text-xs">{task.type}</Badge>
                       <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
+                        <MdAccessTime className="h-3 w-3" />
                         {task.dueIn}
                       </span>
                     </div>
@@ -380,7 +380,7 @@ export function BackofficeDashboard() {
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Ship className="h-5 w-5 text-cyan-500" />
+              <MdDirectionsBoat className="h-5 w-5 text-cyan-500" />
               Shipping Calendar
             </CardTitle>
             <CardDescription>Upcoming shipping events</CardDescription>

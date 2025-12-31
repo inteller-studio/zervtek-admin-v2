@@ -16,7 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { MoreHorizontal, Eye, XCircle, Hand } from 'lucide-react'
+import { MdMoreHoriz, MdVisibility, MdCancel, MdPanTool } from 'react-icons/md'
 import { type Bid } from '../data/bids'
 import { format } from 'date-fns'
 
@@ -98,19 +98,19 @@ export function BidsTable({ data }: BidsTableProps) {
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant='ghost' size='sm'>
-                      <MoreHorizontal className='h-4 w-4' />
+                      <MdMoreHoriz className='h-4 w-4' />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align='end'>
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Eye className='mr-2 h-4 w-4' />
+                      <MdVisibility className='mr-2 h-4 w-4' />
                       View Auction
                     </DropdownMenuItem>
                     {(bid.status === 'active' || bid.status === 'winning') && (
                       <DropdownMenuItem>
-                        <Hand className='mr-2 h-4 w-4' />
+                        <MdPanTool className='mr-2 h-4 w-4' />
                         Increase Bid
                       </DropdownMenuItem>
                     )}
@@ -118,7 +118,7 @@ export function BidsTable({ data }: BidsTableProps) {
                       <>
                         <DropdownMenuSeparator />
                         <DropdownMenuItem className='text-destructive'>
-                          <XCircle className='mr-2 h-4 w-4' />
+                          <MdCancel className='mr-2 h-4 w-4' />
                           Cancel Bid
                         </DropdownMenuItem>
                       </>

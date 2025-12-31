@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Loader2, LogIn } from 'lucide-react'
+import { MdSync, MdLogin } from 'react-icons/md'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
 import { sleep, cn } from '@/lib/utils'
@@ -150,7 +150,7 @@ export function UserAuthForm({
           )}
         />
         <Button className='mt-2' disabled={isLoading}>
-          {isLoading ? <Loader2 className='animate-spin' /> : <LogIn />}
+          {isLoading ? <MdSync className='animate-spin' /> : <MdLogin />}
           Sign in
         </Button>
 

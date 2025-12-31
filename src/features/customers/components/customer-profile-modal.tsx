@@ -4,27 +4,28 @@ import { useEffect, useRef, useState } from 'react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  X,
-  Mail,
-  Phone,
-  MapPin,
-  Building2,
-  Globe,
-  ShoppingBag,
-  Gavel,
-  CheckCircle,
-  XCircle,
-  Clock,
-  Award,
-  FileQuestion,
-  Pencil,
-  UserPlus,
-  UserCheck,
-} from 'lucide-react'
+  MdClose,
+  MdEmail,
+  MdPhone,
+  MdLocationOn,
+  MdBusiness,
+  MdPublic,
+  MdShoppingCart,
+  MdCheckCircle,
+  MdCancel,
+  MdAccessTime,
+  MdEdit,
+  MdPersonAdd,
+  MdSchedule,
+  MdGavel,
+  MdWorkspacePremium,
+  MdHelpOutline,
+  MdVerifiedUser,
+} from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { AnimatedTabs, AnimatedTabsContent } from '@/components/ui/animated-tabs'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   AlertDialog,
@@ -57,7 +58,8 @@ const statusStyles = {
   active: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
   inactive: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
   pending: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-  suspended: 'bg-red-500/10 text-red-600 border-red-500/20',
+  suspended: 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+  banned: 'bg-red-500/10 text-red-600 border-red-500/20',
 }
 
 const verificationStyles = {
@@ -76,10 +78,10 @@ const levelStyles = {
 }
 
 const verificationIcons = {
-  verified: CheckCircle,
-  pending: Clock,
-  unverified: XCircle,
-  documents_requested: FileQuestion,
+  verified: MdCheckCircle,
+  pending: MdAccessTime,
+  unverified: MdCancel,
+  documents_requested: MdHelpOutline,
 }
 
 const levelLabels: Record<UserLevel, string> = {
@@ -174,6 +176,7 @@ export function CustomerProfileModal({
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [levelDialogOpen, setLevelDialogOpen] = useState(false)
   const [claimDialogOpen, setClaimDialogOpen] = useState(false)
+  const [activeProfileTab, setActiveProfileTab] = useState('overview')
 
   // Handle ESC key
   useEffect(() => {
@@ -218,7 +221,7 @@ export function CustomerProfileModal({
     return `${Math.floor(days / 30)} months ago`
   }
 
-  const VerificationIcon = customer ? verificationIcons[customer.verificationStatus] : Clock
+  const VerificationIcon = customer ? verificationIcons[customer.verificationStatus] : MdAccessTime
 
   return (
     <AnimatePresence>
@@ -266,7 +269,7 @@ export function CustomerProfileModal({
               )}
               aria-label="Close dialog"
             >
-              <X className="h-5 w-5" />
+              <MdClose className="h-5 w-5" />
             </button>
 
             {/* Content with scroll */}
@@ -297,7 +300,7 @@ export function CustomerProfileModal({
                               'bg-primary/10 text-primary border-primary/20 hover:bg-primary/20'
                             )}
                           >
-                            <CheckCircle className="h-3 w-3" />
+                            <MdCheckCircle className="h-3 w-3" />
                             Verify Now
                           </button>
                         ) : (
@@ -309,9 +312,9 @@ export function CustomerProfileModal({
                               levelStyles[customer.userLevel]
                             )}
                           >
-                            <Award className="h-3 w-3" />
+                            <MdWorkspacePremium className="h-3 w-3" />
                             {levelLabels[customer.userLevel]}
-                            <Pencil className="h-3 w-3 ml-0.5" />
+                            <MdEdit className="h-3 w-3 ml-0.5" />
                           </button>
                         )}
                       </div>
@@ -332,48 +335,31 @@ export function CustomerProfileModal({
                   </div>
 
                   {/* Tabs with better active state */}
-                  <Tabs defaultValue="overview" className="w-full">
-                    <TabsList className="w-full justify-start bg-muted/50 p-1">
-                      <TabsTrigger
-                        value="overview"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                      >
-                        Overview
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="financial"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                      >
-                        Financial
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="inquiries"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                      >
-                        Inquiries
-                      </TabsTrigger>
-                      <TabsTrigger
-                        value="activity"
-                        className="data-[state=active]:bg-background data-[state=active]:shadow-sm"
-                      >
-                        Activity
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="overview" className="mt-6 space-y-6">
+                  <AnimatedTabs
+                    tabs={[
+                      { id: 'overview', label: 'Overview' },
+                      { id: 'financial', label: 'Financial' },
+                      { id: 'leads', label: 'Leads' },
+                      { id: 'activity', label: 'Activity' },
+                    ]}
+                    value={activeProfileTab}
+                    onValueChange={setActiveProfileTab}
+                    variant="compact"
+                  >
+                    <AnimatedTabsContent value="overview" className="mt-6 space-y-6">
                       {/* Info cards */}
                       <div className="grid gap-4 md:grid-cols-2">
                         {/* Contact Information */}
                         <div className="rounded-xl border border-border/50 bg-card/50 p-4 space-y-3">
                           <h3 className="text-sm font-medium text-muted-foreground">Contact Information</h3>
                           <div className="space-y-2.5">
-                            <InfoRow icon={Mail}>{customer.email}</InfoRow>
-                            <InfoRow icon={Phone}>{customer.phone}</InfoRow>
-                            <InfoRow icon={MapPin}>{customer.city}, {customer.country}</InfoRow>
+                            <InfoRow icon={MdEmail}>{customer.email}</InfoRow>
+                            <InfoRow icon={MdPhone}>{customer.phone}</InfoRow>
+                            <InfoRow icon={MdLocationOn}>{customer.city}, {customer.country}</InfoRow>
                             {customer.company && (
-                              <InfoRow icon={Building2}>{customer.company}</InfoRow>
+                              <InfoRow icon={MdBusiness}>{customer.company}</InfoRow>
                             )}
-                            <InfoRow icon={Globe}>{customer.preferredLanguage}</InfoRow>
+                            <InfoRow icon={MdPublic}>{customer.preferredLanguage}</InfoRow>
                           </div>
                         </div>
 
@@ -385,7 +371,7 @@ export function CustomerProfileModal({
                               <span className="text-muted-foreground">Assigned To</span>
                               {customer.assignedToName ? (
                                 <span className="font-medium flex items-center gap-1.5">
-                                  <UserCheck className="h-3.5 w-3.5 text-emerald-500" />
+                                  <MdVerifiedUser className="h-3.5 w-3.5 text-emerald-500" />
                                   {customer.assignedToName}
                                 </span>
                               ) : onClaimCustomer ? (
@@ -395,7 +381,7 @@ export function CustomerProfileModal({
                                   className="h-7 text-xs text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 dark:border-emerald-800 dark:hover:bg-emerald-950"
                                   onClick={() => setClaimDialogOpen(true)}
                                 >
-                                  <UserPlus className="mr-1.5 h-3.5 w-3.5" />
+                                  <MdPersonAdd className="mr-1.5 h-3.5 w-3.5" />
                                   Claim
                                 </Button>
                               ) : (
@@ -431,14 +417,14 @@ export function CustomerProfileModal({
 
                       {/* Stats cards - improved hierarchy */}
                       <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-                        <StatCard icon={ShoppingBag} label="Purchases" value={customer.wonAuctions} />
-                        <StatCard icon={Gavel} label="Total Bids" value={customer.totalBids} />
-                        <StatCard icon={CheckCircle} label="Won" value={customer.wonAuctions} />
-                        <StatCard icon={XCircle} label="Lost" value={customer.lostAuctions} />
+                        <StatCard icon={MdShoppingCart} label="Purchases" value={customer.wonAuctions} />
+                        <StatCard icon={MdGavel} label="Total Bids" value={customer.totalBids} />
+                        <StatCard icon={MdCheckCircle} label="Won" value={customer.wonAuctions} />
+                        <StatCard icon={MdCancel} label="Lost" value={customer.lostAuctions} />
                       </div>
-                    </TabsContent>
+                    </AnimatedTabsContent>
 
-                    <TabsContent value="financial" className="mt-6 space-y-6">
+                    <AnimatedTabsContent value="financial" className="mt-6 space-y-6">
                       {/* Financial stats */}
                       <div className="grid gap-4 md:grid-cols-3">
                         <div className="rounded-xl border border-border/50 bg-card/50 p-4">
@@ -471,53 +457,53 @@ export function CustomerProfileModal({
                           <p className="text-sm">{customer.notes}</p>
                         </div>
                       )}
-                    </TabsContent>
+                    </AnimatedTabsContent>
 
-                    <TabsContent value="inquiries" className="mt-6 space-y-4">
-                      {/* Mock inquiries - in production this would come from API */}
+                    <AnimatedTabsContent value="leads" className="mt-6 space-y-4">
+                      {/* Mock leads - in production this would come from API */}
                       {[
                         { id: '1', vehicle: '2023 Toyota Supra GR', type: 'Price Inquiry', date: '2 days ago', status: 'pending' },
                         { id: '2', vehicle: '2022 Nissan GT-R Nismo', type: 'Availability', date: '5 days ago', status: 'responded' },
                         { id: '3', vehicle: '2021 Honda NSX', type: 'Shipping Quote', date: '1 week ago', status: 'closed' },
-                      ].map((inquiry) => (
+                      ].map((lead) => (
                         <div
-                          key={inquiry.id}
+                          key={lead.id}
                           className="flex items-center justify-between rounded-lg border border-border/50 bg-card/50 p-3"
                         >
                           <div className="space-y-1">
-                            <p className="text-sm font-medium">{inquiry.vehicle}</p>
-                            <p className="text-xs text-muted-foreground">{inquiry.type}</p>
+                            <p className="text-sm font-medium">{lead.vehicle}</p>
+                            <p className="text-xs text-muted-foreground">{lead.type}</p>
                           </div>
                           <div className="text-right">
                             <Badge
                               variant="outline"
                               className={cn(
                                 'text-xs',
-                                inquiry.status === 'pending' && 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-                                inquiry.status === 'responded' && 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-                                inquiry.status === 'closed' && 'bg-slate-500/10 text-slate-600 border-slate-500/20'
+                                lead.status === 'pending' && 'bg-amber-500/10 text-amber-600 border-amber-500/20',
+                                lead.status === 'responded' && 'bg-blue-500/10 text-blue-600 border-blue-500/20',
+                                lead.status === 'closed' && 'bg-slate-500/10 text-slate-600 border-slate-500/20'
                               )}
                             >
-                              {inquiry.status.charAt(0).toUpperCase() + inquiry.status.slice(1)}
+                              {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
                             </Badge>
-                            <p className="mt-1 text-xs text-muted-foreground">{inquiry.date}</p>
+                            <p className="mt-1 text-xs text-muted-foreground">{lead.date}</p>
                           </div>
                         </div>
                       ))}
-                      {/* Empty state if no inquiries */}
+                      {/* Empty state if no leads */}
                       {false && (
                         <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
-                          <p className="text-sm text-muted-foreground">No inquiries yet</p>
+                          <p className="text-sm text-muted-foreground">No leads yet</p>
                         </div>
                       )}
-                    </TabsContent>
+                    </AnimatedTabsContent>
 
-                    <TabsContent value="activity" className="mt-6">
+                    <AnimatedTabsContent value="activity" className="mt-6">
                       <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
                         <p className="text-sm text-muted-foreground">Activity history coming soon...</p>
                       </div>
-                    </TabsContent>
-                  </Tabs>
+                    </AnimatedTabsContent>
+                  </AnimatedTabs>
 
                   {/* Action buttons - improved spacing */}
                   <div className="flex flex-col gap-3 border-t border-border/50 pt-6 sm:flex-row sm:flex-wrap">
@@ -527,7 +513,7 @@ export function CustomerProfileModal({
                       className="flex-1 sm:flex-none"
                       onClick={() => onSendEmail(customer)}
                     >
-                      <Mail className="mr-2 h-4 w-4" />
+                      <MdEmail className="mr-2 h-4 w-4" />
                       Email
                     </Button>
                     <Button
@@ -536,7 +522,7 @@ export function CustomerProfileModal({
                       className="flex-1 sm:flex-none"
                       onClick={() => onCallCustomer(customer)}
                     >
-                      <Phone className="mr-2 h-4 w-4" />
+                      <MdPhone className="mr-2 h-4 w-4" />
                       Call
                     </Button>
                     {customer.verificationStatus !== 'verified' && (
@@ -546,7 +532,7 @@ export function CustomerProfileModal({
                         className="flex-1 sm:flex-none"
                         onClick={() => onVerifyCustomer(customer)}
                       >
-                        <CheckCircle className="mr-2 h-4 w-4" />
+                        <MdCheckCircle className="mr-2 h-4 w-4" />
                         Verify
                       </Button>
                     )}
@@ -592,7 +578,7 @@ export function CustomerProfileModal({
                 setClaimDialogOpen(false)
               }}
             >
-              <UserPlus className="mr-2 h-4 w-4" />
+              <MdPersonAdd className="mr-2 h-4 w-4" />
               Claim Customer
             </AlertDialogAction>
           </AlertDialogFooter>
