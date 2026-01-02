@@ -19,10 +19,18 @@ export function PasswordInput({
   const [showPassword, setShowPassword] = React.useState(false)
 
   return (
-    <div className={cn('relative rounded-md', className)}>
+    <div className='relative w-full'>
       <input
         type={showPassword ? 'text' : 'password'}
-        className='border-input placeholder:text-muted-foreground focus-visible:ring-ring flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm shadow-xs transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-1 focus-visible:outline-hidden disabled:cursor-not-allowed disabled:opacity-50'
+        className={cn(
+          'flex h-14 w-full rounded-xl border-2 border-border/60 bg-transparent px-4 pr-12 text-base',
+          'placeholder:text-muted-foreground/50',
+          'transition-all duration-200',
+          'hover:border-border',
+          'focus:border-primary focus:outline-none',
+          'disabled:cursor-not-allowed disabled:opacity-50',
+          className
+        )}
         ref={ref}
         disabled={disabled}
         {...props}
@@ -32,10 +40,10 @@ export function PasswordInput({
         size='icon'
         variant='ghost'
         disabled={disabled}
-        className='text-muted-foreground absolute end-1 top-1/2 h-6 w-6 -translate-y-1/2 rounded-md'
+        className='absolute right-3 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg text-muted-foreground/70 hover:text-foreground hover:bg-muted/50'
         onClick={() => setShowPassword((prev) => !prev)}
       >
-        {showPassword ? <MdVisibility size={18} /> : <MdVisibilityOff size={18} />}
+        {showPassword ? <MdVisibility size={20} /> : <MdVisibilityOff size={20} />}
       </Button>
     </div>
   )

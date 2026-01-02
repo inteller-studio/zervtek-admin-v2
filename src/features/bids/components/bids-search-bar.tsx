@@ -1,7 +1,6 @@
 'use client'
 
-import { MdFilterList, MdGridView, MdList, MdRefresh, MdSearch } from 'react-icons/md'
-import { Button } from '@/components/ui/button'
+import { MdSearch } from 'react-icons/md'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -10,20 +9,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { cn } from '@/lib/utils'
-import type { SortOption, ViewMode } from '../types'
+import type { SortOption } from '../types'
 
 interface BidsSearchBarProps {
   searchQuery: string
   onSearchChange: (value: string) => void
   sortBy: SortOption
   onSortChange: (value: SortOption) => void
-  viewMode: ViewMode
-  onViewModeChange: (mode: ViewMode) => void
-  isFilterOpen: boolean
-  onFilterToggle: () => void
-  hasActiveFilters: boolean
-  onClearFilters: () => void
 }
 
 export function BidsSearchBar({
@@ -31,12 +23,6 @@ export function BidsSearchBar({
   onSearchChange,
   sortBy,
   onSortChange,
-  viewMode,
-  onViewModeChange,
-  isFilterOpen,
-  onFilterToggle,
-  hasActiveFilters,
-  onClearFilters,
 }: BidsSearchBarProps) {
   return (
     <div className='flex flex-wrap items-center gap-3'>
@@ -64,50 +50,6 @@ export function BidsSearchBar({
           <SelectItem value='amount-low'>Lowest Amount</SelectItem>
         </SelectContent>
       </Select>
-
-      {/* View Toggle */}
-      <div className='flex items-center border rounded-lg p-1'>
-        <Button
-          variant={viewMode === 'table' ? 'default' : 'ghost'}
-          size='sm'
-          className='h-8 px-3'
-          onClick={() => onViewModeChange('table')}
-        >
-          <MdList className='h-4 w-4' />
-        </Button>
-        <Button
-          variant={viewMode === 'cards' ? 'default' : 'ghost'}
-          size='sm'
-          className='h-8 px-3'
-          onClick={() => onViewModeChange('cards')}
-        >
-          <MdGridView className='h-4 w-4' />
-        </Button>
-      </div>
-
-      {/* Filter Button */}
-      <Button
-        variant={isFilterOpen ? 'default' : 'outline'}
-        size='sm'
-        onClick={onFilterToggle}
-        className='gap-2'
-      >
-        <MdFilterList className='h-4 w-4' />
-        Filters
-        {hasActiveFilters && (
-          <span className='ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-medium'>
-            !
-          </span>
-        )}
-      </Button>
-
-      {/* Clear Filters */}
-      {hasActiveFilters && (
-        <Button variant='ghost' size='sm' onClick={onClearFilters} className='gap-2'>
-          <MdRefresh className='h-4 w-4' />
-          Clear
-        </Button>
-      )}
     </div>
   )
 }

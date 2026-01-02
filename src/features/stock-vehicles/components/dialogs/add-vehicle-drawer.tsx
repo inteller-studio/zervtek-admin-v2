@@ -87,8 +87,8 @@ export function AddVehicleDrawer({
   const [step, setStep] = useState<1 | 2>(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  // Source Selection (required)
-  const [source, setSource] = useState<VehicleSource | ''>(defaultSource || '')
+  // Source Selection (default to 'vendor' for stock vehicles)
+  const [source, setSource] = useState<VehicleSource>(defaultSource || 'vendor')
   const [selectedVendor, setSelectedVendor] = useState('')
 
   // Photo Upload
@@ -209,7 +209,7 @@ export function AddVehicleDrawer({
   const resetForm = () => {
     setStep(1)
     // Reset source
-    setSource(defaultSource || '')
+    setSource(defaultSource || 'vendor')
     setSelectedVendor('')
     // Clean up image previews
     vehicleImages.forEach(img => URL.revokeObjectURL(img.preview))
@@ -373,21 +373,13 @@ export function AddVehicleDrawer({
       images: imageUrls,
       history: notes || '',
       dateAvailable: new Date().toISOString().split('T')[0],
-      source: source as VehicleSource,
+      source: source,
       vendorName: vendor?.name,
       vendorContact: vendor?.contact,
     }
   }
 
   const handleNext = () => {
-    if (!source) {
-      toast.error('Please select the stock source (Auction or Vendor)')
-      return
-    }
-    if (source === 'vendor' && !selectedVendor) {
-      toast.error('Please select a vendor partner')
-      return
-    }
     if (!make || !model) {
       toast.error('Please fill in required fields: Make and Model')
       return
@@ -467,94 +459,6 @@ export function AddVehicleDrawer({
         <div className='flex-1 overflow-y-auto p-4'>
           {step === 1 ? (
             <div className='space-y-6'>
-              {/* Stock Source Selection */}
-              <div className='space-y-4'>
-                <div className='flex items-center gap-2'>
-                  <MdDirectionsCar className='h-4 w-4 text-muted-foreground' />
-                  <Label className='text-sm font-semibold'>
-                    Stock Source <span className='text-red-500'>*</span>
-                  </Label>
-                </div>
-                <div className='grid grid-cols-2 gap-3'>
-                  <button
-                    type='button'
-                    onClick={() => {
-                      setSource('auction')
-                      setSelectedVendor('')
-                    }}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      source === 'auction'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className={`rounded-full p-2 ${source === 'auction' ? 'bg-primary/10' : 'bg-muted'}`}>
-                      <svg className={`h-5 w-5 ${source === 'auction' ? 'text-primary' : 'text-muted-foreground'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="m14.5 12.5-5 5a2.828 2.828 0 1 1-4-4l5-5" />
-                        <path d="m18 9 3-3" />
-                        <path d="m15 6 3-3" />
-                        <path d="M21 3 9 15" />
-                      </svg>
-                    </div>
-                    <span className={`text-sm font-medium ${source === 'auction' ? 'text-primary' : ''}`}>
-                      Auction Stock
-                    </span>
-                    <span className='text-xs text-muted-foreground'>From auctions</span>
-                  </button>
-                  <button
-                    type='button'
-                    onClick={() => setSource('vendor')}
-                    className={`flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all ${
-                      source === 'vendor'
-                        ? 'border-primary bg-primary/5'
-                        : 'border-border hover:border-primary/50'
-                    }`}
-                  >
-                    <div className={`rounded-full p-2 ${source === 'vendor' ? 'bg-primary/10' : 'bg-muted'}`}>
-                      <svg className={`h-5 w-5 ${source === 'vendor' ? 'text-primary' : 'text-muted-foreground'}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z" />
-                        <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" />
-                        <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2" />
-                        <path d="M10 6h4" />
-                        <path d="M10 10h4" />
-                        <path d="M10 14h4" />
-                        <path d="M10 18h4" />
-                      </svg>
-                    </div>
-                    <span className={`text-sm font-medium ${source === 'vendor' ? 'text-primary' : ''}`}>
-                      Zervtek Stock
-                    </span>
-                    <span className='text-xs text-muted-foreground'>From partners</span>
-                  </button>
-                </div>
-
-                {/* Vendor Selection (only when vendor source is selected) */}
-                {source === 'vendor' && (
-                  <div className='space-y-2'>
-                    <Label>
-                      Vendor Partner <span className='text-red-500'>*</span>
-                    </Label>
-                    <Select value={selectedVendor} onValueChange={setSelectedVendor}>
-                      <SelectTrigger>
-                        <SelectValue placeholder='Select vendor partner' />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {vendorPartners.map((vendor) => (
-                          <SelectItem key={vendor.name} value={vendor.name}>
-                            <div className='flex flex-col'>
-                              <span>{vendor.name}</span>
-                              <span className='text-xs text-muted-foreground'>{vendor.contact}</span>
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-
-              <Separator />
-
               {/* Vehicle Information */}
               <div className='space-y-4'>
                 <div className='flex items-center gap-2'>

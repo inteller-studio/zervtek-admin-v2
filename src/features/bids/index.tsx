@@ -14,16 +14,14 @@ import { useDateNavigation } from '@/hooks/use-date-navigation'
 import { bids as initialBids, type Bid } from './data/bids'
 import { useBidsFilters } from './hooks/use-bids-filters'
 import { useBidsActions } from './hooks/use-bids-actions'
-import type { SortOption, ViewMode, BidTab } from './types'
+import type { SortOption, BidTab } from './types'
 
 // Components
 import { BidsStatsCards } from './components/bids-stats-cards'
 import { BidsDateStrip } from './components/bids-date-strip'
 import { BidsSearchBar } from './components/bids-search-bar'
-import { BidsFiltersPanel } from './components/bids-filters-panel'
 import { BidsTabsHeader } from './components/bids-tabs-header'
 import { BidsTableView } from './components/bids-table-view'
-import { BidsCardView } from './components/bids-card-view'
 import { BidsPagination } from './components/bids-pagination'
 import { CreateInvoiceDrawer } from './components/create-invoice-drawer'
 import { BidDetailModal } from './components/bid-detail-modal'
@@ -43,11 +41,9 @@ export function Bids() {
   const [isBidModalOpen, setIsBidModalOpen] = useState(false)
 
   // UI State
-  const [viewMode, setViewMode] = useState<ViewMode>('table')
   const [activeTab, setActiveTab] = useState<BidTab>('pending')
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('ending-soon')
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(20)
 
@@ -213,28 +209,6 @@ export function Bids() {
             onSearchChange={(v) => { setSearchQuery(v); resetPagination() }}
             sortBy={sortBy}
             onSortChange={(v) => { setSortBy(v); resetPagination() }}
-            viewMode={viewMode}
-            onViewModeChange={setViewMode}
-            isFilterOpen={isFilterOpen}
-            onFilterToggle={() => setIsFilterOpen(!isFilterOpen)}
-            hasActiveFilters={hasActiveFilters}
-            onClearFilters={clearFilters}
-          />
-
-          <BidsFiltersPanel
-            isOpen={isFilterOpen}
-            selectedStatuses={selectedStatuses}
-            selectedTypes={selectedTypes}
-            selectedBidderTypes={selectedBidderTypes}
-            selectedAuctionStatuses={selectedAuctionStatuses}
-            amountRange={amountRange}
-            onlyWinning={onlyWinning}
-            onStatusChange={(v) => { setSelectedStatuses(v); resetPagination() }}
-            onTypeChange={(v) => { setSelectedTypes(v); resetPagination() }}
-            onBidderTypeChange={(v) => { setSelectedBidderTypes(v); resetPagination() }}
-            onAuctionStatusChange={(v) => { setSelectedAuctionStatuses(v); resetPagination() }}
-            onAmountRangeChange={(v) => { setAmountRange(v); resetPagination() }}
-            onOnlyWinningChange={(v) => { setOnlyWinning(v); resetPagination() }}
           />
 
           <BidsTabsHeader
@@ -244,6 +218,18 @@ export function Bids() {
           />
         </div>
 
+        <BidsTableView
+          bids={paginatedBids}
+          onViewBid={handleViewBid}
+          onApprove={handleApprove}
+          onDecline={handleDecline}
+          onMarkWon={handleMarkWon}
+          onSoldToOthers={handleSoldToOthers}
+          onMarkUnsold={handleMarkUnsold}
+          onBidCanceled={(bid) => toast.success(`Bid ${bid.bidNumber}: Bid Canceled`)}
+          onAuctionCancelled={(bid) => toast.success(`Bid ${bid.bidNumber}: Auction Cancelled`)}
+        />
+
         <BidsPagination
           currentPage={currentPage}
           totalPages={totalPages}
@@ -252,22 +238,6 @@ export function Bids() {
           onPageChange={setCurrentPage}
           onItemsPerPageChange={(v) => { setItemsPerPage(v); setCurrentPage(1) }}
         />
-
-        {viewMode === 'table' ? (
-          <BidsTableView
-            bids={paginatedBids}
-            onViewBid={handleViewBid}
-            onApprove={handleApprove}
-            onDecline={handleDecline}
-            onMarkWon={handleMarkWon}
-            onSoldToOthers={handleSoldToOthers}
-            onMarkUnsold={handleMarkUnsold}
-            onBidCanceled={(bid) => toast.success(`Bid ${bid.bidNumber}: Bid Canceled`)}
-            onAuctionCancelled={(bid) => toast.success(`Bid ${bid.bidNumber}: Auction Cancelled`)}
-          />
-        ) : (
-          <BidsCardView bids={paginatedBids} onViewBid={handleViewBid} />
-        )}
       </Main>
 
       {/* Dialogs */}

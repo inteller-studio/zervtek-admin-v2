@@ -18,6 +18,7 @@ import {
   MdChevronRight,
   MdCheckCircle,
   MdAttachMoney,
+  MdPhotoLibrary,
 } from 'react-icons/md'
 import { Dialog, DialogContent } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
@@ -40,6 +41,7 @@ import { WorkflowStepper } from './workflow-stepper'
 import { WorkflowSidebar } from '../workflow/workflow-sidebar'
 import { UnifiedDocumentPanel } from './document-panel/unified-document-panel'
 import { OverviewPanel } from './overview/overview-panel'
+import { ModalImageGallery } from './image-gallery'
 
 // Status styles
 const statusStyles: Record<Purchase['status'], string> = {
@@ -98,6 +100,9 @@ export function UnifiedPurchaseModal({
 
   // VIN copy state
   const [vinCopied, setVinCopied] = useState(false)
+
+  // Image gallery state
+  const [showImageGallery, setShowImageGallery] = useState(false)
 
   // Mock current user - in real app, get from auth context
   const currentUser = 'Admin User'
@@ -263,20 +268,33 @@ export function UnifiedPurchaseModal({
               {/* Top Row: Vehicle Info */}
               <div className='px-6 py-4 flex items-start justify-between gap-4'>
                 <div className='flex gap-4 min-w-0'>
-                  {/* Vehicle Image */}
-                  <div className='h-14 w-18 rounded-xl overflow-hidden bg-muted shrink-0'>
+                  {/* Vehicle Image - Clickable thumbnail */}
+                  <button
+                    onClick={() => setShowImageGallery(!showImageGallery)}
+                    className='relative h-14 w-20 rounded-xl overflow-hidden bg-muted shrink-0 group cursor-pointer'
+                  >
                     {auction.vehicleInfo.images[0] && auction.vehicleInfo.images[0] !== '#' ? (
-                      <img
-                        src={auction.vehicleInfo.images[0]}
-                        alt={vehicleTitle}
-                        className='h-full w-full object-cover'
-                      />
+                      <>
+                        <img
+                          src={auction.vehicleInfo.images[0]}
+                          alt={vehicleTitle}
+                          className='h-full w-full object-cover transition-transform group-hover:scale-105'
+                        />
+                        <div className='absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors' />
+                        {/* Image count badge */}
+                        {auction.vehicleInfo.images.filter(img => img && img !== '#').length > 1 && (
+                          <div className='absolute bottom-1 right-1 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-black/60 text-white text-[10px] font-medium backdrop-blur-sm'>
+                            <MdPhotoLibrary className='h-3 w-3' />
+                            {auction.vehicleInfo.images.filter(img => img && img !== '#').length}
+                          </div>
+                        )}
+                      </>
                     ) : (
                       <div className='h-full w-full flex items-center justify-center'>
                         <MdDirectionsCar className='h-6 w-6 text-muted-foreground' />
                       </div>
                     )}
-                  </div>
+                  </button>
 
                   {/* Vehicle Details */}
                   <div className='space-y-1 min-w-0'>
@@ -336,6 +354,26 @@ export function UnifiedPurchaseModal({
                   <MdClose className='h-4 w-4' />
                 </Button>
               </div>
+
+              {/* Expandable Image Gallery */}
+              <AnimatePresence>
+                {showImageGallery && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className='overflow-hidden border-t'
+                  >
+                    <div className='px-6 py-4'>
+                      <ModalImageGallery
+                        images={auction.vehicleInfo.images}
+                        alt={vehicleTitle}
+                      />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Workflow Stepper */}
               <motion.div

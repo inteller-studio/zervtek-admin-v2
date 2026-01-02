@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -52,9 +53,12 @@ export const tasksColumns: ColumnDef<Task>[] = [
       return (
         <div className='flex space-x-2'>
           {label && <Badge variant='outline'>{label.label}</Badge>}
-          <span className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem]'>
+          <Link
+            href={`/tasks/${row.original.id}`}
+            className='max-w-32 truncate font-medium sm:max-w-72 md:max-w-[31rem] hover:text-primary hover:underline underline-offset-4 transition-colors'
+          >
             {row.getValue('title')}
-          </span>
+          </Link>
         </div>
       )
     },

@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
 import { MdSync, MdLogin } from 'react-icons/md'
 import { toast } from 'sonner'
 import { useAuthStore } from '@/stores/auth-store'
@@ -30,6 +31,8 @@ import {
 } from '@/components/ui/select'
 import { MOCK_USERS, getMockUser } from '@/lib/rbac/mock-users'
 import { setCookie } from '@/lib/cookies'
+
+const inputStyles = 'h-14 w-full rounded-xl border-2 border-border/60 bg-transparent px-4 text-base placeholder:text-muted-foreground/50 transition-all duration-200 hover:border-border focus:border-primary focus:outline-none focus:ring-0'
 
 const formSchema = z.object({
   email: z.email({
@@ -114,71 +117,119 @@ export function UserAuthForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-3', className)}
+        className={cn('space-y-6', className)}
         {...props}
       >
-        <FormField
-          control={form.control}
-          name='email'
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder='name@example.com' {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name='password'
-          render={({ field }) => (
-            <FormItem className='relative'>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <PasswordInput placeholder='********' {...field} />
-              </FormControl>
-              <FormMessage />
-              <Link
-                href='/forgot-password'
-                className='text-muted-foreground absolute end-0 -top-0.5 text-sm font-medium hover:opacity-75'
-              >
-                Forgot password?
-              </Link>
-            </FormItem>
-          )}
-        />
-        <Button className='mt-2' disabled={isLoading}>
-          {isLoading ? <MdSync className='animate-spin' /> : <MdLogin />}
-          Sign in
-        </Button>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
+          <FormField
+            control={form.control}
+            name='email'
+            render={({ field }) => (
+              <FormItem className='space-y-2'>
+                <FormLabel className='text-sm font-medium text-foreground/80'>
+                  Email
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder='name@example.com'
+                    className={inputStyles}
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className='text-sm' />
+              </FormItem>
+            )}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15, duration: 0.3 }}
+        >
+          <FormField
+            control={form.control}
+            name='password'
+            render={({ field }) => (
+              <FormItem className='space-y-2'>
+                <div className='flex items-center justify-between'>
+                  <FormLabel className='text-sm font-medium text-foreground/80'>
+                    Password
+                  </FormLabel>
+                  <Link
+                    href='/forgot-password'
+                    className='text-sm text-primary font-medium hover:underline underline-offset-4'
+                  >
+                    Forgot password?
+                  </Link>
+                </div>
+                <FormControl>
+                  <PasswordInput
+                    placeholder='Enter your password'
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className='text-sm' />
+              </FormItem>
+            )}
+          />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.3 }}
+          className='pt-2'
+        >
+          <Button
+            className='w-full h-14 rounded-xl text-base font-medium transition-all duration-200 hover:opacity-90 active:scale-[0.99]'
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <MdSync className='animate-spin h-5 w-5' />
+            ) : (
+              <MdLogin className='h-5 w-5' />
+            )}
+            Sign in
+          </Button>
+        </motion.div>
 
         {/* Quick Login for Development/Testing */}
-        <div className='relative my-2'>
-          <div className='absolute inset-0 flex items-center'>
-            <span className='w-full border-t' />
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.3 }}
+          className='pt-2'
+        >
+          <div className='relative my-4'>
+            <div className='absolute inset-0 flex items-center'>
+              <div className='w-full border-t border-border/50' />
+            </div>
+            <div className='relative flex justify-center'>
+              <span className='bg-background px-4 text-xs text-muted-foreground/70 uppercase tracking-wide font-medium'>
+                Quick Login
+              </span>
+            </div>
           </div>
-          <div className='relative flex justify-center text-xs uppercase'>
-            <span className='bg-background text-muted-foreground px-2'>
-              Quick Login (Demo)
-            </span>
-          </div>
-        </div>
 
-        <Select onValueChange={handleQuickLogin}>
-          <SelectTrigger>
-            <SelectValue placeholder='Select a role to login' />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.entries(MOCK_USERS).map(([key, user]) => (
-              <SelectItem key={key} value={key}>
-                {user.firstName} {user.lastName} ({user.role.join(', ')})
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
+          <Select onValueChange={handleQuickLogin}>
+            <SelectTrigger className='h-14 w-full rounded-xl border-2 border-border/60 bg-transparent px-4 text-base text-muted-foreground transition-all duration-200 hover:border-border focus:border-primary focus:outline-none focus:ring-0'>
+              <SelectValue placeholder='Select a role to login' />
+            </SelectTrigger>
+            <SelectContent className='rounded-xl border border-border/60 shadow-lg'>
+              {Object.entries(MOCK_USERS).map(([key, user]) => (
+                <SelectItem key={key} value={key} className='rounded-lg py-3 px-4 cursor-pointer'>
+                  <span className='font-medium'>{user.firstName} {user.lastName}</span>
+                  <span className='text-muted-foreground ml-2'>({user.role.join(', ')})</span>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </motion.div>
       </form>
     </Form>
   )

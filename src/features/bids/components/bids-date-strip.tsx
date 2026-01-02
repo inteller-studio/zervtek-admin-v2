@@ -62,14 +62,14 @@ export function BidsDateStrip({
                 onDateSelect(tab.date, isTodayDate ? 'Today' : format(tab.date, 'MMM d, yyyy'))
               }
               className={cn(
-                'flex flex-col items-center px-4 py-2 rounded-xl transition-all min-w-[80px]',
+                'flex items-center gap-1.5 px-3 py-2 rounded-xl transition-all',
                 isSelected ? 'bg-primary text-primary-foreground shadow-sm' : 'hover:bg-muted',
                 isTodayDate && !isSelected && 'ring-2 ring-primary/30'
               )}
             >
               <span
                 className={cn(
-                  'text-xs font-medium',
+                  'text-sm font-medium',
                   isSelected
                     ? 'text-primary-foreground'
                     : isTodayDate
@@ -81,7 +81,7 @@ export function BidsDateStrip({
               </span>
               <span
                 className={cn(
-                  'text-lg font-bold',
+                  'text-sm font-bold',
                   isSelected ? 'text-primary-foreground' : 'text-foreground'
                 )}
               >
@@ -89,7 +89,7 @@ export function BidsDateStrip({
               </span>
               <span
                 className={cn(
-                  'text-[10px]',
+                  'text-xs',
                   isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground',
                   count === 0 && 'opacity-50'
                 )}

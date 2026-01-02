@@ -756,12 +756,63 @@ export function BidDetailModal({
                   <LoadingSkeleton />
                 ) : bid ? (
                   <>
-                    {/* Image Gallery */}
-                    <ImageGallery
-                      images={bid.vehicle.images || []}
-                      alt={`${bid.vehicle.year} ${bid.vehicle.make} ${bid.vehicle.model}`}
-                      onOpenLightbox={handleOpenLightbox}
-                    />
+                    {/* Header with Title and Close */}
+                    <div className='flex items-center justify-between px-5 py-4 border-b'>
+                      <div className='flex items-center gap-3 min-w-0'>
+                        <div className='h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0'>
+                          <MdDirectionsCar className='h-5 w-5 text-primary' />
+                        </div>
+                        <div className='min-w-0'>
+                          <h2 id='bid-detail-title' className='font-semibold truncate'>
+                            {bid.vehicle.year} {bid.vehicle.make} {bid.vehicle.model}
+                          </h2>
+                          <p className='text-xs text-muted-foreground'>Bid #{bid.bidNumber}</p>
+                        </div>
+                      </div>
+                      <button
+                        ref={firstFocusableRef}
+                        onClick={onClose}
+                        className='h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors'
+                      >
+                        <MdClose className='h-5 w-5' />
+                      </button>
+                    </div>
+
+                    {/* Compact Thumbnail Row */}
+                    {bid.vehicle.images && bid.vehicle.images.length > 0 && (
+                      <div className='px-5 py-3 border-b bg-muted/20'>
+                        <div className='flex items-center gap-2'>
+                          {bid.vehicle.images.slice(0, 5).map((img, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => handleOpenLightbox(idx)}
+                              className='h-12 w-16 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
+                            >
+                              <img
+                                src={img}
+                                alt={`Photo ${idx + 1}`}
+                                className='h-full w-full object-cover group-hover:scale-105 transition-transform'
+                              />
+                              {idx === 0 && (
+                                <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
+                                  <MdZoomIn className='h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                          {bid.vehicle.images.length > 5 && (
+                            <button
+                              onClick={() => handleOpenLightbox(5)}
+                              className='h-12 w-16 rounded-lg bg-muted shrink-0 flex items-center justify-center hover:bg-muted/80 transition-colors'
+                            >
+                              <span className='text-sm font-medium text-muted-foreground'>
+                                +{bid.vehicle.images.length - 5}
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Amount Section */}
                     <div className="px-5 py-4">

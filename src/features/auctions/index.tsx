@@ -61,6 +61,7 @@ import {
   MdLink,
   MdZoomIn,
   MdFullscreen,
+  MdPhotoLibrary,
   MdCalendarToday,
   MdAccountBalance,
   MdLocalOffer,
@@ -168,6 +169,7 @@ export function Auctions() {
   const [copiedLot, setCopiedLot] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false)
+  const [showThumbnails, setShowThumbnails] = useState(false)
 
   // Get unique makes and models from data
   const uniqueMakes = useMemo(() => {
@@ -639,6 +641,7 @@ export function Auctions() {
                 setCopiedLot(false)
                 setCopiedLink(false)
                 setIsImageDialogOpen(false)
+                setShowThumbnails(false)
               }}
             />
 
@@ -656,131 +659,74 @@ export function Auctions() {
                 'flex flex-col'
               )}
             >
-              {/* Image Gallery */}
-              <div className='relative bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900'>
-                <div
-                  className='relative h-72 md:h-80 cursor-pointer group'
-                  onClick={() => setIsImageDialogOpen(true)}
-                >
-                  {selectedAuction.vehicleInfo.images.length > 0 ? (
-                    <>
-                      <AnimatePresence mode='wait'>
-                        <motion.img
-                          key={selectedImageIndex}
-                          src={selectedAuction.vehicleInfo.images[selectedImageIndex]}
-                          alt={`${selectedAuction.vehicleInfo.year} ${selectedAuction.vehicleInfo.make} ${selectedAuction.vehicleInfo.model}`}
-                          className='h-full w-full object-cover'
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.2 }}
-                        />
-                      </AnimatePresence>
-
-                      {/* Zoom hint overlay */}
-                      <div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center'>
-                        <div className='opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3 backdrop-blur-sm'>
-                          <MdZoomIn className='h-6 w-6 text-white' />
-                        </div>
-                      </div>
-
-                      {/* Navigation arrows */}
-                      {selectedAuction.vehicleInfo.images.length > 1 && (
-                        <>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedImageIndex((prev) =>
-                                prev === 0 ? selectedAuction.vehicleInfo.images.length - 1 : prev - 1
-                              )
-                            }}
-                            className='absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
-                          >
-                            <MdChevronLeft className='h-6 w-6' />
-                          </button>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setSelectedImageIndex((prev) =>
-                                prev === selectedAuction.vehicleInfo.images.length - 1 ? 0 : prev + 1
-                              )
-                            }}
-                            className='absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
-                          >
-                            <MdChevronRight className='h-6 w-6' />
-                          </button>
-                        </>
-                      )}
-
-                      {/* Dots indicator */}
-                      {selectedAuction.vehicleInfo.images.length > 1 && (
-                        <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-2 backdrop-blur-sm'>
-                          {selectedAuction.vehicleInfo.images.map((_, idx) => (
-                            <button
-                              key={idx}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setSelectedImageIndex(idx)
-                              }}
-                              className={cn(
-                                'rounded-full transition-all',
-                                selectedImageIndex === idx
-                                  ? 'w-2.5 h-2.5 bg-white'
-                                  : 'w-2 h-2 bg-white/50 hover:bg-white/75'
-                              )}
-                            />
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Fullscreen hint */}
-                      <div className='absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity'>
-                        <div className='flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm'>
-                          <MdFullscreen className='h-3.5 w-3.5' />
-                          <span>Click to expand</span>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className='flex h-full w-full items-center justify-center'>
-                      <MdDirectionsCar className='h-20 w-20 text-muted-foreground/30' />
-                    </div>
-                  )}
-                </div>
-
-                {/* Thumbnails */}
-                {selectedAuction.vehicleInfo.images.length > 1 && (
-                  <div className='flex gap-2 overflow-x-auto p-2.5 bg-black/10 dark:bg-white/5'>
-                    {selectedAuction.vehicleInfo.images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedImageIndex(idx)}
-                        className={cn(
-                          'flex-shrink-0 h-14 w-20 rounded-md overflow-hidden transition-all',
-                          selectedImageIndex === idx
-                            ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
-                            : 'opacity-50 hover:opacity-100'
-                        )}
-                      >
-                        <img src={img} alt={`Thumbnail ${idx + 1}`} className='h-full w-full object-cover' />
-                      </button>
-                    ))}
+              {/* Header with Title and Close */}
+              <div className='flex items-center justify-between px-5 py-4 border-b'>
+                <div className='flex items-center gap-3 min-w-0'>
+                  <div className='h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0'>
+                    <MdDirectionsCar className='h-5 w-5 text-primary' />
                   </div>
-                )}
-
-                {/* Close button */}
+                  <div className='min-w-0'>
+                    <h2 className='font-semibold truncate'>
+                      {selectedAuction.vehicleInfo.year} {selectedAuction.vehicleInfo.make} {selectedAuction.vehicleInfo.model}
+                    </h2>
+                    <p className='text-xs text-muted-foreground'>Lot #{selectedAuction.lotNumber}</p>
+                  </div>
+                </div>
                 <button
                   onClick={() => {
                     setViewDialogOpen(false)
                     setSelectedImageIndex(0)
                     setCopiedLot(false)
                     setCopiedLink(false)
+                    setShowThumbnails(false)
                   }}
-                  className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40'
+                  className='h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors'
                 >
                   <MdClose className='h-5 w-5' />
                 </button>
               </div>
+
+              {/* Compact Thumbnail Row */}
+              {selectedAuction.vehicleInfo.images.length > 0 && (
+                <div className='px-5 py-3 border-b bg-muted/20'>
+                  <div className='flex items-center gap-2'>
+                    {selectedAuction.vehicleInfo.images.slice(0, 5).map((img, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedImageIndex(idx)
+                          setIsImageDialogOpen(true)
+                        }}
+                        className='h-12 w-16 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
+                      >
+                        <img
+                          src={img}
+                          alt={`Photo ${idx + 1}`}
+                          className='h-full w-full object-cover group-hover:scale-105 transition-transform'
+                        />
+                        {idx === 0 && (
+                          <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
+                            <MdZoomIn className='h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                    {selectedAuction.vehicleInfo.images.length > 5 && (
+                      <button
+                        onClick={() => {
+                          setSelectedImageIndex(5)
+                          setIsImageDialogOpen(true)
+                        }}
+                        className='h-12 w-16 rounded-lg bg-muted shrink-0 flex items-center justify-center hover:bg-muted/80 transition-colors'
+                      >
+                        <span className='text-sm font-medium text-muted-foreground'>
+                          +{selectedAuction.vehicleInfo.images.length - 5}
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Scrollable Content */}
               <div className='flex-1 overflow-y-auto'>
@@ -809,32 +755,32 @@ export function Auctions() {
 
                 {/* Content */}
                 <div className='px-5 pb-5 space-y-4'>
-                  {/* Vehicle Title Card */}
-                  <div className='flex items-center gap-4 rounded-xl bg-muted/30 p-4'>
-                    <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center'>
-                      <MdDirectionsCar className='h-6 w-6 text-primary' />
-                    </div>
-                    <div className='flex-1 min-w-0'>
-                      <div className='flex items-center gap-2'>
-                        <p className='font-semibold truncate'>
-                          {selectedAuction.vehicleInfo.year} {selectedAuction.vehicleInfo.make} {selectedAuction.vehicleInfo.model}
-                        </p>
-                        {selectedAuction.vehicleInfo.score && (
-                          <Badge className={cn(
-                            'text-xs border-0',
-                            ['S', '6', '5', '4.5'].includes(selectedAuction.vehicleInfo.score)
-                              ? 'bg-emerald-500/15 text-emerald-600'
-                              : ['4', '3.5', '3'].includes(selectedAuction.vehicleInfo.score)
-                                ? 'bg-blue-500/15 text-blue-600'
-                                : 'bg-amber-500/15 text-amber-600'
-                          )}>
-                            Grade {selectedAuction.vehicleInfo.score}
-                          </Badge>
-                        )}
-                      </div>
-                      <p className='text-sm text-muted-foreground'>
-                        {selectedAuction.vehicleInfo.mileageDisplay} • {selectedAuction.vehicleInfo.transmission} • {selectedAuction.vehicleInfo.color}
-                      </p>
+                  {/* Quick Info Bar */}
+                  <div className='flex items-center justify-between rounded-xl bg-muted/30 p-3'>
+                    <div className='flex items-center gap-3 flex-wrap'>
+                      {selectedAuction.vehicleInfo.score && (
+                        <Badge className={cn(
+                          'text-xs border-0',
+                          ['S', '6', '5', '4.5'].includes(selectedAuction.vehicleInfo.score)
+                            ? 'bg-emerald-500/15 text-emerald-600'
+                            : ['4', '3.5', '3'].includes(selectedAuction.vehicleInfo.score)
+                              ? 'bg-blue-500/15 text-blue-600'
+                              : 'bg-amber-500/15 text-amber-600'
+                        )}>
+                          Grade {selectedAuction.vehicleInfo.score}
+                        </Badge>
+                      )}
+                      <span className='text-sm text-muted-foreground'>
+                        {selectedAuction.vehicleInfo.mileageDisplay}
+                      </span>
+                      <span className='text-sm text-muted-foreground'>•</span>
+                      <span className='text-sm text-muted-foreground'>
+                        {selectedAuction.vehicleInfo.transmission}
+                      </span>
+                      <span className='text-sm text-muted-foreground'>•</span>
+                      <span className='text-sm text-muted-foreground'>
+                        {selectedAuction.vehicleInfo.color}
+                      </span>
                     </div>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -984,6 +930,7 @@ export function Auctions() {
                     setSelectedImageIndex(0)
                     setCopiedLot(false)
                     setCopiedLink(false)
+                    setShowThumbnails(false)
                   }}
                 >
                   Close
@@ -1425,48 +1372,105 @@ export function Auctions() {
         </DialogContent>
       </Dialog>
 
-      {/* Full-Screen Image Dialog */}
-      <Dialog open={isImageDialogOpen} onOpenChange={setIsImageDialogOpen}>
-        <DialogContent className='max-w-4xl w-[95vw] h-[90vh] p-0 bg-black/95 border-none'>
-          {selectedAuction && selectedAuction.vehicleInfo.images.length > 0 && (
-            <div className='relative w-full h-full flex items-center justify-center'>
-              {/* Main Image */}
-              <img
-                src={selectedAuction.vehicleInfo.images[selectedImageIndex]}
-                alt={`${selectedAuction.vehicleInfo.make} ${selectedAuction.vehicleInfo.model}`}
-                className='max-w-full max-h-full object-contain'
-              />
+      {/* Full-Screen Image Lightbox */}
+      <AnimatePresence>
+        {isImageDialogOpen && selectedAuction && selectedAuction.vehicleInfo.images.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className='fixed inset-0 z-[200] bg-black/95'
+            onClick={() => setIsImageDialogOpen(false)}
+          >
+            {/* Close button */}
+            <button
+              onClick={() => setIsImageDialogOpen(false)}
+              className='absolute top-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-colors hover:bg-white/20'
+            >
+              <MdClose className='h-6 w-6' />
+            </button>
 
-              {/* Navigation Arrows */}
-              {selectedAuction.vehicleInfo.images.length > 1 && (
-                <>
-                  <button
-                    onClick={() => setSelectedImageIndex((prev) =>
-                      prev === 0 ? selectedAuction.vehicleInfo.images.length - 1 : prev - 1
-                    )}
-                    className='absolute left-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white'
-                  >
-                    <MdChevronLeft className='w-6 h-6' />
-                  </button>
-                  <button
-                    onClick={() => setSelectedImageIndex((prev) =>
-                      prev === selectedAuction.vehicleInfo.images.length - 1 ? 0 : prev + 1
-                    )}
-                    className='absolute right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors text-white'
-                  >
-                    <MdChevronRight className='w-6 h-6' />
-                  </button>
-                </>
-              )}
-
-              {/* Image Counter */}
-              <div className='absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1.5 rounded-full text-sm font-medium tabular-nums'>
-                {selectedImageIndex + 1} / {selectedAuction.vehicleInfo.images.length}
-              </div>
+            {/* Image counter */}
+            <div className='absolute top-4 left-4 z-10 rounded-full bg-white/10 px-3 py-1.5 text-sm font-medium text-white backdrop-blur-sm'>
+              {selectedImageIndex + 1} / {selectedAuction.vehicleInfo.images.length}
             </div>
-          )}
-        </DialogContent>
-      </Dialog>
+
+            {/* Main image */}
+            <div
+              className='flex h-full w-full items-center justify-center p-4 md:p-16 pb-28'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <AnimatePresence mode='wait'>
+                <motion.img
+                  key={selectedImageIndex}
+                  src={selectedAuction.vehicleInfo.images[selectedImageIndex]}
+                  alt={`${selectedAuction.vehicleInfo.make} ${selectedAuction.vehicleInfo.model}`}
+                  className='max-h-full max-w-full object-contain rounded-lg'
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                />
+              </AnimatePresence>
+            </div>
+
+            {/* Navigation arrows */}
+            {selectedAuction.vehicleInfo.images.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImageIndex((prev) =>
+                      prev === 0 ? selectedAuction.vehicleInfo.images.length - 1 : prev - 1
+                    )
+                  }}
+                  className='absolute left-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20'
+                >
+                  <MdChevronLeft className='h-8 w-8' />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setSelectedImageIndex((prev) =>
+                      prev === selectedAuction.vehicleInfo.images.length - 1 ? 0 : prev + 1
+                    )
+                  }}
+                  className='absolute right-4 top-1/2 -translate-y-1/2 flex h-12 w-12 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur-sm transition-all hover:bg-white/20'
+                >
+                  <MdChevronRight className='h-8 w-8' />
+                </button>
+              </>
+            )}
+
+            {/* Thumbnail strip */}
+            {selectedAuction.vehicleInfo.images.length > 1 && (
+              <div className='absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 overflow-x-auto max-w-[90vw] p-2 rounded-xl bg-black/50 backdrop-blur-sm'>
+                {selectedAuction.vehicleInfo.images.map((img, idx) => (
+                  <button
+                    key={idx}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedImageIndex(idx)
+                    }}
+                    className={cn(
+                      'flex-shrink-0 h-16 w-24 rounded-lg overflow-hidden transition-all',
+                      selectedImageIndex === idx
+                        ? 'ring-2 ring-white ring-offset-2 ring-offset-black'
+                        : 'opacity-50 hover:opacity-100'
+                    )}
+                  >
+                    <img
+                      src={img}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className='h-full w-full object-cover'
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   )
 }

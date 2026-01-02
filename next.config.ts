@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
         hostname: 'p3.aleado.com',
         pathname: '/pic/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
     ],
   },
 };

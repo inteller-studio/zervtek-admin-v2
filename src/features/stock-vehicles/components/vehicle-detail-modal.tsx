@@ -250,126 +250,68 @@ export function VehicleDetailModal({
                   <LoadingSkeleton />
                 ) : vehicle ? (
                   <>
-                    {/* Image Gallery */}
-                    <div className='relative bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900'>
-                      <div
-                        className='relative h-72 md:h-80 cursor-pointer group'
-                        onClick={() => setLightboxOpen(true)}
-                      >
-                        {vehicle.images && vehicle.images.length > 0 ? (
-                          <>
-                            <AnimatePresence mode='wait'>
-                              <motion.img
-                                key={currentImageIndex}
-                                src={vehicle.images[currentImageIndex]}
-                                alt={`${vehicle.year} ${vehicle.make} ${vehicle.model}`}
-                                className='h-full w-full object-cover'
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                              />
-                            </AnimatePresence>
-
-                            {/* Zoom hint overlay */}
-                            <div className='absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center'>
-                              <div className='opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 rounded-full p-3 backdrop-blur-sm'>
-                                <MdZoomIn className='h-6 w-6 text-white' />
-                              </div>
-                            </div>
-
-                            {/* Navigation arrows */}
-                            {vehicle.images.length > 1 && (
-                              <>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    goToPrev()
-                                  }}
-                                  className='absolute left-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
-                                >
-                                  <MdChevronLeft className='h-6 w-6' />
-                                </button>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    goToNext()
-                                  }}
-                                  className='absolute right-3 top-1/2 -translate-y-1/2 flex h-10 w-10 items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm transition-all hover:bg-black/60 hover:scale-110 opacity-0 group-hover:opacity-100'
-                                >
-                                  <MdChevronRight className='h-6 w-6' />
-                                </button>
-                              </>
-                            )}
-
-                            {/* Dots indicator */}
-                            {vehicle.images.length > 1 && (
-                              <div className='absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 rounded-full bg-black/50 px-3 py-2 backdrop-blur-sm'>
-                                {vehicle.images.map((_, idx) => (
-                                  <button
-                                    key={idx}
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setCurrentImageIndex(idx)
-                                    }}
-                                    className={cn(
-                                      'rounded-full transition-all',
-                                      currentImageIndex === idx
-                                        ? 'w-2.5 h-2.5 bg-white'
-                                        : 'w-2 h-2 bg-white/50 hover:bg-white/75'
-                                    )}
-                                  />
-                                ))}
-                              </div>
-                            )}
-
-                            {/* Fullscreen hint */}
-                            <div className='absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity'>
-                              <div className='flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1.5 text-xs text-white backdrop-blur-sm'>
-                                <MdFullscreen className='h-3.5 w-3.5' />
-                                <span>Click to expand</span>
-                              </div>
-                            </div>
-                          </>
-                        ) : (
-                          <div className='flex h-full w-full items-center justify-center'>
-                            <MdDirectionsCar className='h-20 w-20 text-muted-foreground/30' />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Thumbnails */}
-                      {vehicle.images && vehicle.images.length > 1 && (
-                        <div className='flex gap-2 overflow-x-auto p-2.5 bg-black/10 dark:bg-white/5'>
-                          {vehicle.images.map((img, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => setCurrentImageIndex(idx)}
-                              className={cn(
-                                'flex-shrink-0 h-14 w-20 rounded-md overflow-hidden transition-all',
-                                currentImageIndex === idx
-                                  ? 'ring-2 ring-primary ring-offset-1 ring-offset-background'
-                                  : 'opacity-50 hover:opacity-100'
-                              )}
-                            >
-                              <img
-                                src={img}
-                                alt={`Thumbnail ${idx + 1}`}
-                                className='h-full w-full object-cover'
-                              />
-                            </button>
-                          ))}
+                    {/* Header with Title and Close */}
+                    <div className='flex items-center justify-between px-5 py-4 border-b'>
+                      <div className='flex items-center gap-3 min-w-0'>
+                        <div className='h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0'>
+                          <MdDirectionsCar className='h-5 w-5 text-primary' />
                         </div>
-                      )}
-
-                      {/* Close button */}
+                        <div className='min-w-0'>
+                          <h2 id='vehicle-detail-title' className='font-semibold truncate'>
+                            {vehicle.year} {vehicle.make} {vehicle.model}
+                          </h2>
+                          <p className='text-xs text-muted-foreground'>Stock #{vehicle.stockNumber}</p>
+                        </div>
+                      </div>
                       <button
                         onClick={onClose}
-                        className='absolute right-4 top-4 z-20 flex h-8 w-8 items-center justify-center rounded-lg bg-black/20 text-white backdrop-blur-sm transition-colors hover:bg-black/40'
+                        className='h-8 w-8 rounded-lg flex items-center justify-center hover:bg-muted transition-colors'
                       >
                         <MdClose className='h-5 w-5' />
                       </button>
                     </div>
+
+                    {/* Compact Thumbnail Row */}
+                    {vehicle.images && vehicle.images.length > 0 && (
+                      <div className='px-5 py-3 border-b bg-muted/20'>
+                        <div className='flex items-center gap-2'>
+                          {vehicle.images.slice(0, 5).map((img, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                setCurrentImageIndex(idx)
+                                setLightboxOpen(true)
+                              }}
+                              className='h-12 w-16 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
+                            >
+                              <img
+                                src={img}
+                                alt={`Photo ${idx + 1}`}
+                                className='h-full w-full object-cover group-hover:scale-105 transition-transform'
+                              />
+                              {idx === 0 && (
+                                <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
+                                  <MdZoomIn className='h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                                </div>
+                              )}
+                            </button>
+                          ))}
+                          {vehicle.images.length > 5 && (
+                            <button
+                              onClick={() => {
+                                setCurrentImageIndex(5)
+                                setLightboxOpen(true)
+                              }}
+                              className='h-12 w-16 rounded-lg bg-muted shrink-0 flex items-center justify-center hover:bg-muted/80 transition-colors'
+                            >
+                              <span className='text-sm font-medium text-muted-foreground'>
+                                +{vehicle.images.length - 5}
+                              </span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
 
                     {/* Price Section */}
                     <div className='px-5 py-4'>
@@ -395,26 +337,25 @@ export function VehicleDetailModal({
 
                     {/* Content */}
                     <div className='px-5 pb-5 space-y-4'>
-                      {/* Vehicle Title Card */}
-                      <div className='flex items-center gap-4 rounded-xl bg-muted/30 p-4'>
-                        <div className='h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center'>
-                          <MdDirectionsCar className='h-6 w-6 text-primary' />
-                        </div>
-                        <div className='flex-1 min-w-0'>
-                          <div className='flex items-center gap-2'>
-                            <p className='font-semibold truncate'>
-                              {vehicle.year} {vehicle.make} {vehicle.model}
-                            </p>
-                            {vehicle.grade && (
-                              <Badge className='text-xs border-0 bg-blue-500/15 text-blue-600'>
-                                {vehicle.grade}
-                              </Badge>
-                            )}
-                          </div>
-                          <p className='text-sm text-muted-foreground'>
-                            {vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`} •{' '}
-                            {vehicle.transmission} • {vehicle.exteriorColor}
-                          </p>
+                      {/* Quick Info Bar */}
+                      <div className='flex items-center justify-between rounded-xl bg-muted/30 p-3'>
+                        <div className='flex items-center gap-3 flex-wrap'>
+                          {vehicle.grade && (
+                            <Badge className='text-xs border-0 bg-blue-500/15 text-blue-600'>
+                              {vehicle.grade}
+                            </Badge>
+                          )}
+                          <span className='text-sm text-muted-foreground'>
+                            {vehicle.mileageDisplay || `${vehicle.mileage.toLocaleString()} km`}
+                          </span>
+                          <span className='text-sm text-muted-foreground'>•</span>
+                          <span className='text-sm text-muted-foreground'>
+                            {vehicle.transmission}
+                          </span>
+                          <span className='text-sm text-muted-foreground'>•</span>
+                          <span className='text-sm text-muted-foreground'>
+                            {vehicle.exteriorColor}
+                          </span>
                         </div>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -534,28 +475,6 @@ export function VehicleDetailModal({
                         </div>
                       </div>
 
-                      {/* Grades Row */}
-                      {(vehicle.exteriorGrade || vehicle.interiorGrade) && (
-                        <div className='rounded-xl bg-muted/30 p-4'>
-                          <h3 className='text-xs font-medium text-muted-foreground uppercase tracking-wide mb-3'>
-                            Condition Grades
-                          </h3>
-                          <div className='grid grid-cols-2 gap-4'>
-                            {vehicle.exteriorGrade && (
-                              <div className='text-center p-3 rounded-lg bg-background/50'>
-                                <p className='text-xs text-muted-foreground mb-1'>Exterior</p>
-                                <p className='text-lg font-bold'>{vehicle.exteriorGrade}</p>
-                              </div>
-                            )}
-                            {vehicle.interiorGrade && (
-                              <div className='text-center p-3 rounded-lg bg-background/50'>
-                                <p className='text-xs text-muted-foreground mb-1'>Interior</p>
-                                <p className='text-lg font-bold'>{vehicle.interiorGrade}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
                     </div>
                   </>
                 ) : null}
