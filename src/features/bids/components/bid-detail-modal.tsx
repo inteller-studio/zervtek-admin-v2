@@ -815,18 +815,8 @@ export function BidDetailModal({
                         {/* Right Side Details */}
                         <div className='flex-1 flex flex-col justify-between min-w-0'>
                           <div className='space-y-1.5'>
-                            {bid.vehicle.grade && (
-                              <p className='text-sm font-semibold'>Grade {bid.vehicle.grade}</p>
-                            )}
-                            {bid.vehicle.mileage && (
-                              <p className='text-sm text-muted-foreground'>{bid.vehicle.mileage.toLocaleString()} km</p>
-                            )}
-                            {bid.vehicle.transmission && (
-                              <p className='text-sm text-muted-foreground'>{bid.vehicle.transmission.toUpperCase()}</p>
-                            )}
-                            {bid.vehicle.color && (
-                              <p className='text-sm text-muted-foreground'>{bid.vehicle.color.toUpperCase()}</p>
-                            )}
+                            <p className='text-sm font-semibold'>{bid.vehicle.year} {bid.vehicle.make}</p>
+                            <p className='text-sm text-muted-foreground'>{bid.vehicle.model}</p>
                           </div>
 
                           {/* Copy Link */}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { startOfDay } from 'date-fns'
 import { toast } from 'sonner'
 
@@ -34,6 +35,7 @@ import {
 } from './components/dialogs'
 
 export function Bids() {
+  const router = useRouter()
   const [bids] = useState(initialBids)
 
   // Bid detail modal state
@@ -321,6 +323,10 @@ export function Bids() {
         onCreateInvoice={(bid) => {
           openCreateInvoice(bid)
           closeBidModal()
+        }}
+        onViewCustomer={(bid) => {
+          closeBidModal()
+          router.push(`/customers/${bid.bidder.id}`)
         }}
       />
     </>

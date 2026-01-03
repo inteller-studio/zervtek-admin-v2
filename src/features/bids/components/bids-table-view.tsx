@@ -114,13 +114,10 @@ export function BidsTableView({
                     <p className='text-xs text-muted-foreground'>
                       {bid.bidder.type} • {bid.bidder.location}
                     </p>
-                    {bid.type === 'assisted' && (
-                      <div className='mt-1 flex items-center gap-1'>
-                        <Badge variant='outline' className='text-xs'>
-                          Assisted
-                        </Badge>
-                        <span className='text-xs text-muted-foreground'>by {bid.assistedBy}</span>
-                      </div>
+                    {bid.bidder.depositAmount > 0 && (
+                      <p className='mt-1 text-xs text-muted-foreground'>
+                        Deposit: ¥{bid.bidder.depositAmount.toLocaleString()}
+                      </p>
                     )}
                   </div>
                 </TableCell>
@@ -133,11 +130,18 @@ export function BidsTableView({
                   </Badge>
                 </TableCell>
                 <TableCell>
-                  <div className='flex items-center gap-1'>
-                    {getTypeIcon(bid.type)}
-                    <span className='text-sm capitalize'>
-                      {bid.type === 'assisted' ? 'Assisted' : 'Manual'}
-                    </span>
+                  <div>
+                    <div className='flex items-center gap-1'>
+                      {getTypeIcon(bid.type)}
+                      <span className='text-sm capitalize'>
+                        {bid.type === 'assisted' ? 'Assisted' : 'Manual'}
+                      </span>
+                    </div>
+                    {bid.type === 'assisted' && bid.assistedBy && (
+                      <p className='mt-0.5 text-xs text-muted-foreground'>
+                        by {bid.assistedBy}
+                      </p>
+                    )}
                   </div>
                 </TableCell>
                 <TableCell>

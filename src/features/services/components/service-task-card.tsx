@@ -1,7 +1,6 @@
 'use client'
 
-import { formatDistanceToNow } from 'date-fns'
-import { MdAccessTime, MdFactCheck, MdTranslate } from 'react-icons/md'
+import { MdFactCheck, MdTranslate } from 'react-icons/md'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
@@ -30,7 +29,6 @@ export function ServiceTaskCard({
 }: ServiceTaskCardProps) {
   const isCompleted = request.status === 'completed'
   const isTranslation = request.type === 'translation'
-  const waitTime = formatDistanceToNow(new Date(request.createdAt), { addSuffix: false })
 
   return (
     <motion.div
@@ -53,23 +51,6 @@ export function ServiceTaskCard({
               alt={vehicleInfo.name}
               className='h-full w-full object-cover transition-transform group-hover:scale-105'
             />
-            {/* Type Badge */}
-            <div className='absolute right-2 top-2'>
-              <Badge
-                variant='secondary'
-                className={cn(
-                  'flex items-center gap-1 text-white',
-                  isTranslation ? 'bg-blue-500/90' : 'bg-amber-500/90'
-                )}
-              >
-                {isTranslation ? (
-                  <MdTranslate className='h-3 w-3' />
-                ) : (
-                  <MdFactCheck className='h-3 w-3' />
-                )}
-                {isTranslation ? 'Translation' : 'Inspection'}
-              </Badge>
-            </div>
           </div>
 
           {/* Content Section */}
@@ -107,15 +88,24 @@ export function ServiceTaskCard({
                     {request.status.replace('_', ' ')}
                   </Badge>
                 </div>
-                {!isCompleted && (
-                  <div className='text-right'>
-                    <p className='text-xs text-muted-foreground'>Waiting</p>
-                    <p className='flex items-center gap-1 text-sm font-medium'>
-                      <MdAccessTime className='h-3.5 w-3.5' />
-                      {waitTime}
-                    </p>
+                <div className='text-right'>
+                  <p className='text-xs text-muted-foreground'>Type</p>
+                  <div
+                    className={cn(
+                      'mt-0.5 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition-colors',
+                      isTranslation
+                        ? 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+                        : 'bg-amber-500/10 text-amber-600 dark:bg-amber-500/20 dark:text-amber-400'
+                    )}
+                  >
+                    {isTranslation ? (
+                      <MdTranslate className='h-3.5 w-3.5' />
+                    ) : (
+                      <MdFactCheck className='h-3.5 w-3.5' />
+                    )}
+                    {isTranslation ? 'Translation' : 'Inspection'}
                   </div>
-                )}
+                </div>
               </div>
             </div>
           </div>

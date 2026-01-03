@@ -72,28 +72,28 @@ export function MediaUploadSection({
   const videos = media.filter((m) => m.type === 'video')
 
   return (
-    <div className='space-y-4'>
+    <div className='space-y-5'>
       {/* Upload Zone */}
       {!disabled && (
         <div
           {...getRootProps()}
           className={cn(
-            'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-colors',
+            'border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all',
             isDragActive
-              ? 'border-primary bg-primary/5'
-              : 'border-muted-foreground/25 hover:border-primary/50'
+              ? 'border-primary bg-primary/5 scale-[1.02]'
+              : 'border-muted-foreground/25 hover:border-primary/50 hover:bg-primary/[0.02]'
           )}
         >
           <input {...getInputProps()} />
-          <div className='flex flex-col items-center gap-2'>
-            <div className='flex h-12 w-12 items-center justify-center rounded-full bg-muted'>
-              <MdUpload className='h-6 w-6 text-muted-foreground' />
+          <div className='flex flex-col items-center gap-3'>
+            <div className='flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/5'>
+              <MdUpload className='h-7 w-7 text-primary/60' />
             </div>
             <div>
               <p className='font-medium'>
                 {isDragActive ? 'Drop files here' : 'Drag & drop files here'}
               </p>
-              <p className='text-sm text-muted-foreground'>
+              <p className='text-sm text-muted-foreground mt-1'>
                 or click to browse • Images & Videos
               </p>
             </div>
@@ -103,49 +103,52 @@ export function MediaUploadSection({
 
       {/* Media Grid */}
       {media.length > 0 && (
-        <div className='space-y-3'>
+        <div className='space-y-4'>
           {/* Images */}
           {images.length > 0 && (
             <div>
-              <div className='flex items-center gap-2 mb-2'>
-                <MdImage className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Images ({images.length})</span>
+              <div className='flex items-center gap-2 mb-3'>
+                <div className='h-6 w-6 rounded-lg bg-blue-500/10 flex items-center justify-center'>
+                  <MdImage className='h-3.5 w-3.5 text-blue-600 dark:text-blue-400' />
+                </div>
+                <span className='text-sm font-medium'>Images</span>
+                <span className='text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full'>{images.length}</span>
               </div>
-              <div className='grid grid-cols-4 gap-2'>
+              <div className='grid grid-cols-4 gap-2.5'>
                 {images.map((item) => (
                   <div
                     key={item.id}
-                    className='group relative aspect-square rounded-lg overflow-hidden border bg-muted'
+                    className='group relative aspect-square rounded-xl overflow-hidden ring-1 ring-border/50 bg-muted shadow-sm'
                   >
                     <img
                       src={item.url}
                       alt='Inspection'
-                      className='w-full h-full object-cover'
+                      className='w-full h-full object-cover transition-transform group-hover:scale-105'
                     />
                     {/* Overlay */}
-                    <div className='absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100'>
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-2 gap-1.5'>
                       <Button
                         size='icon'
                         variant='secondary'
-                        className='h-7 w-7'
+                        className='h-8 w-8 rounded-full backdrop-blur-sm'
                         onClick={() => setPreviewMedia(item)}
                       >
-                        <MdFullscreen className='h-3.5 w-3.5' />
+                        <MdFullscreen className='h-4 w-4' />
                       </Button>
                       {!disabled && (
                         <Button
                           size='icon'
                           variant='destructive'
-                          className='h-7 w-7'
+                          className='h-8 w-8 rounded-full'
                           onClick={() => handleDelete(item.id)}
                         >
-                          <MdDelete className='h-3.5 w-3.5' />
+                          <MdDelete className='h-4 w-4' />
                         </Button>
                       )}
                     </div>
                     {/* Note indicator */}
                     {item.note && (
-                      <div className='absolute bottom-0 left-0 right-0 bg-black/60 px-1.5 py-0.5'>
+                      <div className='absolute bottom-0 left-0 right-0 bg-black/70 backdrop-blur-sm px-2 py-1'>
                         <p className='text-[10px] text-white truncate'>{item.note}</p>
                       </div>
                     )}
@@ -154,7 +157,7 @@ export function MediaUploadSection({
                 {!disabled && (
                   <div
                     {...getRootProps()}
-                    className='aspect-square rounded-lg border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 transition-colors'
+                    className='aspect-square rounded-xl border-2 border-dashed border-muted-foreground/25 flex items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all'
                   >
                     <MdAdd className='h-6 w-6 text-muted-foreground' />
                   </div>
@@ -166,15 +169,18 @@ export function MediaUploadSection({
           {/* Videos */}
           {videos.length > 0 && (
             <div>
-              <div className='flex items-center gap-2 mb-2'>
-                <MdVideocam className='h-4 w-4 text-muted-foreground' />
-                <span className='text-sm font-medium'>Videos ({videos.length})</span>
+              <div className='flex items-center gap-2 mb-3'>
+                <div className='h-6 w-6 rounded-lg bg-rose-500/10 flex items-center justify-center'>
+                  <MdVideocam className='h-3.5 w-3.5 text-rose-600 dark:text-rose-400' />
+                </div>
+                <span className='text-sm font-medium'>Videos</span>
+                <span className='text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full'>{videos.length}</span>
               </div>
-              <div className='grid grid-cols-3 gap-2'>
+              <div className='grid grid-cols-2 gap-2.5'>
                 {videos.map((item) => (
                   <div
                     key={item.id}
-                    className='group relative aspect-video rounded-lg overflow-hidden border bg-muted'
+                    className='group relative aspect-video rounded-xl overflow-hidden ring-1 ring-border/50 bg-muted shadow-sm'
                   >
                     <video
                       src={item.url}
@@ -182,28 +188,28 @@ export function MediaUploadSection({
                     />
                     {/* Play overlay */}
                     <div className='absolute inset-0 flex items-center justify-center'>
-                      <div className='h-10 w-10 rounded-full bg-black/60 flex items-center justify-center'>
-                        <MdPlayArrow className='h-5 w-5 text-white fill-white' />
+                      <div className='h-12 w-12 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center ring-2 ring-white/20'>
+                        <MdPlayArrow className='h-6 w-6 text-white fill-white' />
                       </div>
                     </div>
                     {/* Hover overlay */}
-                    <div className='absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100'>
+                    <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-3 gap-1.5'>
                       <Button
                         size='icon'
                         variant='secondary'
-                        className='h-7 w-7'
+                        className='h-8 w-8 rounded-full backdrop-blur-sm'
                         onClick={() => setPreviewMedia(item)}
                       >
-                        <MdFullscreen className='h-3.5 w-3.5' />
+                        <MdFullscreen className='h-4 w-4' />
                       </Button>
                       {!disabled && (
                         <Button
                           size='icon'
                           variant='destructive'
-                          className='h-7 w-7'
+                          className='h-8 w-8 rounded-full'
                           onClick={() => handleDelete(item.id)}
                         >
-                          <MdDelete className='h-3.5 w-3.5' />
+                          <MdDelete className='h-4 w-4' />
                         </Button>
                       )}
                     </div>
@@ -217,57 +223,64 @@ export function MediaUploadSection({
 
       {/* Empty State */}
       {media.length === 0 && disabled && (
-        <div className='flex flex-col items-center justify-center py-8 text-center border rounded-lg bg-muted/20'>
-          <MdImage className='h-8 w-8 text-muted-foreground mb-2' />
-          <p className='text-sm text-muted-foreground'>No media uploaded yet</p>
+        <div className='flex flex-col items-center justify-center py-12 text-center rounded-2xl bg-secondary/30 ring-1 ring-border/50'>
+          <div className='h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center mb-4'>
+            <MdImage className='h-7 w-7 text-muted-foreground' />
+          </div>
+          <p className='text-sm font-medium text-muted-foreground'>No media uploaded yet</p>
         </div>
       )}
 
-      {/* Preview Dialog */}
+      {/* Fullscreen Preview Dialog */}
       <Dialog open={!!previewMedia} onOpenChange={() => setPreviewMedia(null)}>
-        <DialogContent className='max-w-4xl p-0 overflow-hidden'>
+        <DialogContent className='max-w-[95vw] max-h-[95vh] p-0 overflow-hidden rounded-3xl border-0 bg-black/95' showCloseButton={false}>
           {previewMedia && (
-            <div className='relative'>
+            <div className='relative w-full h-full flex items-center justify-center'>
               {previewMedia.type === 'image' ? (
                 <img
                   src={previewMedia.url}
                   alt='Preview'
-                  className='w-full h-auto max-h-[80vh] object-contain bg-black'
+                  className='max-w-full max-h-[85vh] object-contain'
                 />
               ) : (
                 <video
                   src={previewMedia.url}
                   controls
                   autoPlay
-                  className='w-full h-auto max-h-[80vh] bg-black'
+                  className='max-w-full max-h-[85vh]'
                 />
               )}
-              {/* Info bar */}
-              <div className='absolute bottom-0 left-0 right-0 bg-black/80 p-3 flex items-center justify-between'>
-                <div className='flex items-center gap-3'>
-                  <Badge variant='secondary' className='capitalize'>
+              {/* Close button */}
+              <div className='absolute top-4 right-4'>
+                <Button
+                  variant='secondary'
+                  size='icon'
+                  className='h-10 w-10 rounded-full backdrop-blur-sm bg-white/10 hover:bg-white/20 text-white hover:text-white'
+                  onClick={() => setPreviewMedia(null)}
+                >
+                  <MdClose className='h-5 w-5' />
+                </Button>
+              </div>
+              {/* Info footer */}
+              <div className='absolute bottom-4 left-1/2 -translate-x-1/2'>
+                <div className='inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm'>
+                  <Badge variant='secondary' className='capitalize rounded-full bg-white/20 text-white border-0'>
                     {previewMedia.type}
                   </Badge>
                   <span className='text-sm text-white/80'>
-                    Uploaded by {previewMedia.uploadedBy}
+                    {previewMedia.uploadedBy}
                   </span>
-                  <span className='text-sm text-white/60'>
-                    {format(new Date(previewMedia.uploadedAt), 'MMM dd, yyyy HH:mm')}
+                  <span className='text-sm text-white/60 tabular-nums'>
+                    {format(new Date(previewMedia.uploadedAt), 'MMM dd, HH:mm')}
                   </span>
                 </div>
-                <Button
-                  size='sm'
-                  variant='ghost'
-                  className='text-white hover:text-white hover:bg-white/20'
-                  onClick={() => setPreviewMedia(null)}
-                >
-                  <MdClose className='h-4 w-4' />
-                </Button>
               </div>
-              {/* Note */}
+              {/* Note header */}
               {previewMedia.note && (
-                <div className='absolute top-0 left-0 right-0 bg-black/80 p-3'>
-                  <p className='text-sm text-white'>{previewMedia.note}</p>
+                <div className='absolute top-4 left-4 right-16'>
+                  <span className='inline-block px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-sm text-sm text-white max-w-full'>
+                    {previewMedia.note}
+                  </span>
                 </div>
               )}
             </div>

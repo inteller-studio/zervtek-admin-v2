@@ -54,39 +54,43 @@ export function InspectionNotes({
       {/* Notes List */}
       <ScrollArea className='flex-1'>
         {notes.length > 0 ? (
-          <div className='space-y-3 p-1'>
-            {notes.map((note) => (
+          <div className='space-y-3'>
+            {notes.map((note, index) => (
               <div
                 key={note.id}
-                className='rounded-lg border bg-muted/30 p-3'
+                className='rounded-2xl bg-secondary/40 ring-1 ring-border/50 p-4'
               >
-                <p className='text-sm'>{note.note}</p>
-                <div className='flex items-center gap-2 mt-2 text-xs text-muted-foreground'>
-                  <MdPerson className='h-3 w-3' />
-                  <span>{note.addedBy}</span>
-                  <span>•</span>
-                  <span>{format(new Date(note.addedAt), 'MMM dd, yyyy HH:mm')}</span>
+                <p className='text-sm leading-relaxed'>{note.note}</p>
+                <div className='flex items-center gap-2 mt-3 text-xs text-muted-foreground'>
+                  <div className='h-5 w-5 rounded-full bg-secondary flex items-center justify-center'>
+                    <span className='text-[10px] font-medium'>{note.addedBy.charAt(0)}</span>
+                  </div>
+                  <span className='font-medium'>{note.addedBy}</span>
+                  <span className='text-muted-foreground/50'>•</span>
+                  <span className='tabular-nums'>{format(new Date(note.addedAt), 'MMM dd, HH:mm')}</span>
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className='flex flex-col items-center justify-center py-8 text-center'>
-            <MdMessage className='h-8 w-8 text-muted-foreground mb-2' />
-            <p className='text-sm text-muted-foreground'>No notes yet</p>
+          <div className='flex flex-col items-center justify-center py-12 text-center rounded-2xl bg-secondary/30 ring-1 ring-border/50'>
+            <div className='h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center mb-4'>
+              <MdMessage className='h-7 w-7 text-muted-foreground' />
+            </div>
+            <p className='text-sm font-medium text-muted-foreground'>No notes yet</p>
           </div>
         )}
       </ScrollArea>
 
       {/* Add Note Input */}
       {!disabled && (
-        <div className='border-t pt-3 mt-3'>
-          <div className='flex gap-2'>
+        <div className='border-t border-border/50 pt-4 mt-4'>
+          <div className='relative rounded-2xl ring-1 ring-border focus-within:ring-2 focus-within:ring-primary transition-shadow'>
             <Textarea
               placeholder='Add an inspection note...'
               value={newNote}
               onChange={(e) => setNewNote(e.target.value)}
-              className='min-h-[60px] text-sm resize-none'
+              className='min-h-[80px] text-sm resize-none border-0 rounded-2xl focus-visible:ring-0 focus-visible:ring-offset-0'
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
@@ -95,13 +99,13 @@ export function InspectionNotes({
               }}
             />
           </div>
-          <div className='flex justify-end mt-2'>
+          <div className='flex justify-end mt-3'>
             <Button
-              size='sm'
               onClick={handleAddNote}
               disabled={!newNote.trim() || isAdding}
+              className='rounded-full px-5 shadow-sm'
             >
-              <MdSend className='h-4 w-4 mr-1.5' />
+              <MdSend className='h-4 w-4 mr-2' />
               Add Note
             </Button>
           </div>
