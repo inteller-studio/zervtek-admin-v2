@@ -3,13 +3,13 @@
 import { format, isToday, startOfDay, subDays } from 'date-fns'
 import { MdCalendarToday, MdChevronLeft, MdChevronRight } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
-import { Calendar as CalendarPicker } from '@/components/ui/calendar'
+import { Calendar } from '@/components/ui/calendar'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import { cn } from '@/lib/utils'
 import type { VisibleDate } from '@/hooks/use-date-navigation'
 
-interface ServicesDateStripProps {
-  selectedDate: Date
+interface PurchasesDateStripProps {
+  selectedDate: Date | undefined
   dateRangeStart: Date | undefined
   dateRangeLabel: string
   visibleDates: VisibleDate[]
@@ -18,10 +18,10 @@ interface ServicesDateStripProps {
   getDateCount: (date: Date) => number
   onDateSelect: (date: Date, label: string) => void
   onNavigate: (days: number) => void
-  onDateRangeSelect: (start: Date | undefined, end: Date, label: string) => void
+  onDateRangeSelect: (start: Date | undefined, end: Date | undefined, label: string) => void
 }
 
-export function ServicesDateStrip({
+export function PurchasesDateStrip({
   selectedDate,
   dateRangeStart,
   dateRangeLabel,
@@ -32,7 +32,7 @@ export function ServicesDateStrip({
   onDateSelect,
   onNavigate,
   onDateRangeSelect,
-}: ServicesDateStripProps) {
+}: PurchasesDateStripProps) {
   return (
     <div className='flex items-center gap-2'>
       {/* Left Arrow */}
@@ -49,7 +49,10 @@ export function ServicesDateStrip({
       <div className='flex items-center gap-1.5'>
         {visibleDates.map((tab) => {
           const count = getDateCount(tab.date)
-          const isSelected = tab.date.getTime() === selectedDate.getTime() && !dateRangeStart
+          const isSelected =
+            selectedDate &&
+            startOfDay(tab.date).getTime() === startOfDay(selectedDate).getTime() &&
+            !dateRangeStart
           const isTodayDate = isToday(tab.date)
 
           return (
@@ -109,11 +112,11 @@ export function ServicesDateStrip({
       </Button>
 
       {/* Today Button - only shows when not viewing today */}
-      {!isToday(selectedDate) && !dateRangeStart && (
+      {selectedDate && !isToday(selectedDate) && !dateRangeStart && (
         <Button
           variant='outline'
           size='sm'
-          onClick={() => onDateSelect(startOfDay(new Date()), 'Today')}
+          onClick={() => onDateSelect(new Date(), 'Today')}
           className='ml-2'
         >
           Today
@@ -135,11 +138,7 @@ export function ServicesDateStrip({
                 variant={dateRangeLabel === 'Last 3 Days' ? 'default' : 'outline'}
                 size='sm'
                 onClick={() => {
-                  onDateRangeSelect(
-                    startOfDay(subDays(new Date(), 2)),
-                    startOfDay(new Date()),
-                    'Last 3 Days'
-                  )
+                  onDateRangeSelect(subDays(new Date(), 2), new Date(), 'Last 3 Days')
                   onCalendarOpenChange(false)
                 }}
               >
@@ -149,11 +148,7 @@ export function ServicesDateStrip({
                 variant={dateRangeLabel === 'Last 7 Days' ? 'default' : 'outline'}
                 size='sm'
                 onClick={() => {
-                  onDateRangeSelect(
-                    startOfDay(subDays(new Date(), 6)),
-                    startOfDay(new Date()),
-                    'Last 7 Days'
-                  )
+                  onDateRangeSelect(subDays(new Date(), 6), new Date(), 'Last 7 Days')
                   onCalendarOpenChange(false)
                 }}
               >
@@ -163,11 +158,7 @@ export function ServicesDateStrip({
                 variant={dateRangeLabel === '1 Month' ? 'default' : 'outline'}
                 size='sm'
                 onClick={() => {
-                  onDateRangeSelect(
-                    startOfDay(subDays(new Date(), 29)),
-                    startOfDay(new Date()),
-                    '1 Month'
-                  )
+                  onDateRangeSelect(subDays(new Date(), 29), new Date(), '1 Month')
                   onCalendarOpenChange(false)
                 }}
               >
@@ -177,24 +168,30 @@ export function ServicesDateStrip({
                 variant={dateRangeLabel === '3 Months' ? 'default' : 'outline'}
                 size='sm'
                 onClick={() => {
-                  onDateRangeSelect(
-                    startOfDay(subDays(new Date(), 89)),
-                    startOfDay(new Date()),
-                    '3 Months'
-                  )
+                  onDateRangeSelect(subDays(new Date(), 89), new Date(), '3 Months')
                   onCalendarOpenChange(false)
                 }}
               >
                 3 Months
               </Button>
+              <Button
+                variant={dateRangeLabel === 'All dates' ? 'default' : 'outline'}
+                size='sm'
+                onClick={() => {
+                  onDateRangeSelect(undefined, undefined, 'All dates')
+                  onCalendarOpenChange(false)
+                }}
+              >
+                All dates
+              </Button>
             </div>
           </div>
-          <CalendarPicker
+          <Calendar
             mode='single'
             selected={selectedDate}
             onSelect={(date) => {
               if (date) {
-                onDateSelect(startOfDay(date), format(date, 'MMM d, yyyy'))
+                onDateSelect(date, format(date, 'MMM d, yyyy'))
                 onCalendarOpenChange(false)
               }
             }}

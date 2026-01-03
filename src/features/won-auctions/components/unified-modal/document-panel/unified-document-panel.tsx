@@ -11,7 +11,6 @@ import {
   MdDelete,
   MdVisibility,
   MdExpandMore,
-  MdExpandLess,
   MdKeyboardDoubleArrowRight,
   MdKeyboardDoubleArrowLeft,
   MdReceipt,
@@ -22,6 +21,7 @@ import {
   MdBadge,
   MdConfirmationNumber,
   MdMoreHoriz,
+  MdClose,
 } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -125,6 +125,9 @@ const DOCUMENT_TYPE_CONFIG: Record<
   },
 }
 
+// All document types including "other"
+const ALL_DOCUMENT_TYPES = [...DOCUMENT_TYPES, { key: 'other', label: 'Other Documents', required: false }]
+
 export function UnifiedDocumentPanel({
   auction,
   workflow,
@@ -133,7 +136,6 @@ export function UnifiedDocumentPanel({
   onDocumentUpload,
   onDocumentDelete,
 }: UnifiedDocumentPanelProps) {
-  const [uploadOpen, setUploadOpen] = useState(true)
   const [highlightedGroup, setHighlightedGroup] = useState<string | null>(null)
   const groupRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -150,22 +152,6 @@ export function UnifiedDocumentPanel({
   }, [auction.documents])
 
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => new Set(documentTypes))
-
-  // Handle clicking on a required document to scroll to and highlight its group
-  const handleDocumentTypeClick = useCallback((docTypeKey: string) => {
-    // Expand the group
-    setExpandedGroups(prev => new Set([...prev, docTypeKey]))
-
-    // Highlight temporarily
-    setHighlightedGroup(docTypeKey)
-    setTimeout(() => setHighlightedGroup(null), 2000)
-
-    // Scroll to the group
-    const groupElement = groupRefs.current[docTypeKey]
-    if (groupElement) {
-      groupElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
-    }
-  }, [])
 
   // Combine auction documents with workflow invoice attachments
   const workflowInvoices: Document[] = (workflow.stages.afterPurchase?.invoiceAttachments || []).map(inv => ({
@@ -205,30 +191,6 @@ export function UnifiedDocumentPanel({
     {}
   )
 
-  // Define the order for document types (required docs first, then others)
-  const DOCUMENT_TYPE_ORDER = [
-    'invoice',
-    'export_certificate',
-    'bill_of_lading',
-    'insurance',
-    'inspection',
-    'deregistration',
-    'number_plates',
-    'other',
-  ]
-
-  // Get sorted document type entries
-  const sortedDocumentEntries = useMemo(() => {
-    const entries = Object.entries(documentsByType)
-    return entries.sort(([typeA], [typeB]) => {
-      const indexA = DOCUMENT_TYPE_ORDER.indexOf(typeA)
-      const indexB = DOCUMENT_TYPE_ORDER.indexOf(typeB)
-      // If type not in order list, put it at the end
-      const orderA = indexA === -1 ? DOCUMENT_TYPE_ORDER.length : indexA
-      const orderB = indexB === -1 ? DOCUMENT_TYPE_ORDER.length : indexB
-      return orderA - orderB
-    })
-  }, [documentsByType])
 
   // Check which documents are present
   const hasDocument = (type: string) => {
@@ -363,242 +325,125 @@ export function UnifiedDocumentPanel({
       </div>
 
       <ScrollArea className='flex-1'>
-        <div className='p-4 space-y-4'>
-          {/* Document Checklist */}
-          <div className='rounded-lg border bg-background p-3'>
-            <h4 className='text-sm font-medium mb-3'>Required Documents</h4>
-            <div className='space-y-2'>
-              {DOCUMENT_TYPES.map((docType) => {
-                const isPresent = hasDocument(docType.key)
+        <div className='p-4'>
+          {/* Single Unified Documents Box */}
+          <div className='rounded-lg border bg-background overflow-hidden'>
+            {/* Upload Area at Top - Only show when in upload mode or type selection */}
+            {showTypeSelection ? (
+              <div className='p-4 border-b bg-muted/30'>
+                <div className='flex items-center justify-between mb-3'>
+                  <p className='text-sm font-medium'>Select document type</p>
+                  <Button variant='ghost' size='icon' className='h-7 w-7' onClick={handleCancelUpload}>
+                    <MdClose className='h-4 w-4' />
+                  </Button>
+                </div>
+                <div className='p-3 rounded-lg bg-background border mb-3'>
+                  <p className='text-xs text-muted-foreground mb-1'>Files to upload ({pendingFiles.length})</p>
+                  <div className='space-y-0.5'>
+                    {pendingFiles.slice(0, 3).map(f => (
+                      <p key={f.id} className='text-sm truncate'>{f.name}</p>
+                    ))}
+                    {pendingFiles.length > 3 && (
+                      <p className='text-xs text-muted-foreground'>+{pendingFiles.length - 3} more</p>
+                    )}
+                  </div>
+                </div>
+                <div className='grid grid-cols-2 gap-2 mb-3'>
+                  {ALL_DOCUMENT_TYPES.map((docType) => {
+                    const config = DOCUMENT_TYPE_CONFIG[docType.key] || DOCUMENT_TYPE_CONFIG.other
+                    const Icon = config.icon
+                    const isSelected = selectedDocType === docType.key
+
+                    return (
+                      <button
+                        key={docType.key}
+                        onClick={() => setSelectedDocType(docType.key)}
+                        className={cn(
+                          'flex items-center gap-2 p-2 rounded-lg border transition-all text-left',
+                          isSelected
+                            ? 'border-primary bg-primary/10 ring-1 ring-primary'
+                            : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                        )}
+                      >
+                        <div className={cn('h-6 w-6 rounded flex items-center justify-center', config.bgColor)}>
+                          <Icon className={cn('h-3 w-3', config.color)} />
+                        </div>
+                        <span className='text-xs font-medium truncate'>{docType.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+                <Button size='sm' className='w-full' onClick={handleConfirmUpload}>
+                  <MdUpload className='h-4 w-4 mr-1.5' />
+                  Upload
+                </Button>
+              </div>
+            ) : (
+              <div className='p-3 border-b'>
+                <WorkflowFileUpload
+                  onFilesSelected={handleFilesSelected}
+                  accept='.pdf,.doc,.docx,.png,.jpg,.jpeg'
+                  maxFiles={10}
+                  maxSize={10 * 1024 * 1024}
+                  label='Drop files to upload'
+                  description='PDF, DOC, PNG, JPG'
+                  showPreview={false}
+                />
+              </div>
+            )}
+
+            {/* Document Types List */}
+            <div className='divide-y'>
+              {ALL_DOCUMENT_TYPES.map((docType) => {
                 const docs = documentsByType[docType.key] || []
+                const isPresent = docs.length > 0
                 const config = DOCUMENT_TYPE_CONFIG[docType.key] || DOCUMENT_TYPE_CONFIG.other
                 const Icon = config.icon
+                const isHighlighted = highlightedGroup === docType.key
+                const isExpanded = expandedGroups.has(docType.key)
+                const isRequired = docType.key !== 'other'
 
                 return (
-                  <button
+                  <div
                     key={docType.key}
-                    onClick={() => isPresent && handleDocumentTypeClick(docType.key)}
-                    disabled={!isPresent}
+                    ref={(el) => { groupRefs.current[docType.key] = el }}
                     className={cn(
-                      'w-full flex items-center gap-2 py-2 px-2.5 rounded-lg transition-all text-left',
-                      isPresent
-                        ? 'bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 cursor-pointer'
-                        : 'cursor-default opacity-60'
+                      'transition-all duration-300',
+                      isHighlighted && 'bg-primary/5 ring-2 ring-primary ring-inset'
                     )}
                   >
                     {isPresent ? (
-                      <div className='h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center shrink-0'>
-                        <MdCheck className='h-3 w-3 text-white' />
-                      </div>
-                    ) : (
-                      <MdRadioButtonUnchecked className='h-5 w-5 text-muted-foreground/40 shrink-0' />
-                    )}
-                    <span
-                      className={cn(
-                        'text-sm flex-1',
-                        isPresent
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : 'text-muted-foreground'
-                      )}
-                    >
-                      {docType.label}
-                    </span>
-                    {isPresent && docs.length > 0 && (
-                      <Badge variant='secondary' className={cn('text-xs', config.bgColor, config.color)}>
-                        {docs.length}
-                      </Badge>
-                    )}
-                    {isPresent && (
-                      <MdExpandMore className='h-4 w-4 text-muted-foreground' />
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-
-          {/* Upload Section */}
-          <Collapsible open={uploadOpen} onOpenChange={setUploadOpen}>
-            <div className='rounded-lg border bg-background'>
-              <CollapsibleTrigger asChild>
-                <button className='flex items-center justify-between w-full p-3 text-left'>
-                  <div className='flex items-center gap-2'>
-                    <MdUpload className='h-4 w-4 text-muted-foreground' />
-                    <span className='text-sm font-medium'>Upload Documents</span>
-                  </div>
-                  {uploadOpen ? (
-                    <MdExpandLess className='h-4 w-4 text-muted-foreground' />
-                  ) : (
-                    <MdExpandMore className='h-4 w-4 text-muted-foreground' />
-                  )}
-                </button>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <div className='px-3 pb-3'>
-                  {showTypeSelection ? (
-                    /* Document Type Selection */
-                    <div className='space-y-4'>
-                      <div className='p-3 rounded-lg bg-muted/50 border'>
-                        <p className='text-sm font-medium mb-1'>Selected Files ({pendingFiles.length})</p>
-                        <div className='space-y-1'>
-                          {pendingFiles.map(f => (
-                            <p key={f.id} className='text-xs text-muted-foreground truncate'>
-                              {f.name} ({formatFileSize(f.size)})
-                            </p>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <p className='text-sm font-medium mb-2'>What type of document is this?</p>
-                        <div className='space-y-1.5'>
-                          {DOCUMENT_TYPES.map((docType) => {
-                            const isPresent = hasDocument(docType.key)
-                            const config = DOCUMENT_TYPE_CONFIG[docType.key] || DOCUMENT_TYPE_CONFIG.other
-                            const Icon = config.icon
-                            const isSelected = selectedDocType === docType.key
-
-                            return (
-                              <button
-                                key={docType.key}
-                                onClick={() => setSelectedDocType(docType.key)}
-                                className={cn(
-                                  'w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left',
-                                  isSelected
-                                    ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                                    : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                                )}
-                              >
-                                <div className={cn('h-7 w-7 rounded-md flex items-center justify-center', config.bgColor)}>
-                                  <Icon className={cn('h-3.5 w-3.5', config.color)} />
-                                </div>
-                                <span className='text-sm font-medium flex-1'>{docType.label}</span>
-                                {isPresent ? (
-                                  <Badge variant='secondary' className='text-[10px] bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400'>
-                                    Uploaded
-                                  </Badge>
-                                ) : (
-                                  <Badge variant='outline' className='text-[10px] text-amber-600 border-amber-300'>
-                                    Required
-                                  </Badge>
-                                )}
-                              </button>
-                            )
-                          })}
-                          {/* Other option */}
-                          <button
-                            onClick={() => setSelectedDocType('other')}
-                            className={cn(
-                              'w-full flex items-center gap-3 p-2.5 rounded-lg border transition-all text-left',
-                              selectedDocType === 'other'
-                                ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                                : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                            )}
-                          >
-                            <div className='h-7 w-7 rounded-md flex items-center justify-center bg-gray-100 dark:bg-gray-900/30'>
-                              <MdMoreHoriz className='h-3.5 w-3.5 text-gray-600 dark:text-gray-400' />
-                            </div>
-                            <span className='text-sm font-medium flex-1'>Other Document</span>
-                            <Badge variant='outline' className='text-[10px]'>
-                              Optional
-                            </Badge>
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className='flex gap-2'>
-                        <Button variant='outline' size='sm' className='flex-1' onClick={handleCancelUpload}>
-                          Cancel
-                        </Button>
-                        <Button size='sm' className='flex-1' onClick={handleConfirmUpload}>
-                          <MdUpload className='h-4 w-4 mr-1.5' />
-                          Upload as {DOCUMENT_TYPE_CONFIG[selectedDocType]?.label || 'Other'}
-                        </Button>
-                      </div>
-                    </div>
-                  ) : (
-                    <WorkflowFileUpload
-                      onFilesSelected={handleFilesSelected}
-                      accept='.pdf,.doc,.docx,.png,.jpg,.jpeg'
-                      maxFiles={10}
-                      maxSize={10 * 1024 * 1024}
-                      label='Drop files here'
-                      description='PDF, DOC, PNG, JPG up to 10MB'
-                      showPreview={false}
-                    />
-                  )}
-                </div>
-              </CollapsibleContent>
-            </div>
-          </Collapsible>
-
-          {/* Uploaded Documents - Grouped by Type */}
-          <div className='space-y-3'>
-            <div className='flex items-center justify-between'>
-              <h4 className='text-sm font-medium flex items-center gap-2'>
-                <MdDescription className='h-4 w-4 text-muted-foreground' />
-                Uploaded Documents ({allDocuments.length})
-              </h4>
-            </div>
-
-            {allDocuments.length === 0 ? (
-              <div className='rounded-lg border bg-background p-6 text-center'>
-                <MdDescription className='h-10 w-10 text-muted-foreground/30 mx-auto mb-2' />
-                <p className='text-sm text-muted-foreground'>No documents uploaded yet</p>
-              </div>
-            ) : (
-              <div className='space-y-2'>
-                {sortedDocumentEntries.map(([type, docs]) => {
-                  const config = DOCUMENT_TYPE_CONFIG[type] || DOCUMENT_TYPE_CONFIG.other
-                  const Icon = config.icon
-                  const isHighlighted = highlightedGroup === type
-                  const isExpanded = expandedGroups.has(type)
-
-                  return (
-                    <Collapsible
-                      key={type}
-                      open={isExpanded}
-                      onOpenChange={(open) => {
-                        setExpandedGroups(prev => {
-                          const next = new Set(prev)
-                          if (open) {
-                            next.add(type)
-                          } else {
-                            next.delete(type)
-                          }
-                          return next
-                        })
-                      }}
-                      defaultOpen
-                    >
-                      <div
-                        ref={(el) => { groupRefs.current[type] = el }}
-                        className={cn(
-                          'rounded-lg border bg-background overflow-hidden transition-all duration-300',
-                          isHighlighted && 'ring-2 ring-primary ring-offset-2 shadow-lg'
-                        )}
+                      <Collapsible
+                        open={isExpanded}
+                        onOpenChange={(open) => {
+                          setExpandedGroups(prev => {
+                            const next = new Set(prev)
+                            if (open) {
+                              next.add(docType.key)
+                            } else {
+                              next.delete(docType.key)
+                            }
+                            return next
+                          })
+                        }}
                       >
                         <CollapsibleTrigger asChild>
-                          <button className='flex items-center justify-between w-full p-3 text-left hover:bg-muted/50 transition-colors'>
-                            <div className='flex items-center gap-3'>
-                              <div className={cn('h-8 w-8 rounded-lg flex items-center justify-center', config.bgColor)}>
-                                <Icon className={cn('h-4 w-4', config.color)} />
-                              </div>
-                              <div>
-                                <span className='text-sm font-medium'>{config.label}</span>
-                                <p className='text-xs text-muted-foreground'>{docs.length} file{docs.length !== 1 ? 's' : ''}</p>
-                              </div>
+                          <button className='flex items-center gap-3 w-full p-3 text-left hover:bg-muted/50 transition-colors'>
+                            <div className={cn('h-8 w-8 rounded-lg flex items-center justify-center', config.bgColor)}>
+                              <Icon className={cn('h-4 w-4', config.color)} />
                             </div>
-                            <div className='flex items-center gap-2'>
-                              <Badge variant='secondary' className={cn('text-xs', config.bgColor, config.color)}>
-                                {docs.length}
-                              </Badge>
-                              <MdExpandMore className='h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180' />
+                            <div className='flex-1 min-w-0'>
+                              <p className='text-sm font-medium'>{config.label}</p>
+                              <p className='text-xs text-muted-foreground'>{docs.length} file{docs.length !== 1 ? 's' : ''}</p>
                             </div>
+                            <div className='h-5 w-5 rounded-full bg-emerald-500 flex items-center justify-center'>
+                              <MdCheck className='h-3 w-3 text-white' />
+                            </div>
+                            <MdExpandMore className={cn('h-4 w-4 text-muted-foreground transition-transform', isExpanded && 'rotate-180')} />
                           </button>
                         </CollapsibleTrigger>
                         <CollapsibleContent>
-                          <div className='px-3 pb-3 space-y-1.5'>
+                          <div className='px-3 pb-3 space-y-1'>
                             {docs.map((doc) => {
                               const isWorkflowInvoice = workflowInvoices.some(inv => inv.id === doc.id)
                               const costInvoice = costInvoiceAttachments.find(c => c.id === doc.id)
@@ -614,42 +459,28 @@ export function UnifiedDocumentPanel({
                                   <MdDescription className={cn('h-4 w-4 shrink-0', config.color)} />
                                   <div className='flex-1 min-w-0'>
                                     <div className='flex items-center gap-2'>
-                                      <p className='text-sm font-medium truncate'>{doc.name}</p>
+                                      <p className='text-sm truncate'>{doc.name}</p>
                                       {isWorkflowInvoice && (
-                                        <Badge variant='secondary' className='text-[10px] px-1.5 py-0'>
-                                          Workflow
-                                        </Badge>
+                                        <Badge variant='secondary' className='text-[10px] px-1.5 py-0'>Workflow</Badge>
                                       )}
                                       {isCostInvoice && costTypeLabel && (
-                                        <Badge variant='outline' className='text-[10px] px-1.5 py-0'>
-                                          {costTypeLabel}
-                                        </Badge>
+                                        <Badge variant='outline' className='text-[10px] px-1.5 py-0'>{costTypeLabel}</Badge>
                                       )}
                                     </div>
                                     <p className='text-xs text-muted-foreground'>
-                                      {formatFileSize(doc.size)} • {format(new Date(doc.uploadedAt), 'MMM d, yyyy')}
+                                      {formatFileSize(doc.size)} • {format(new Date(doc.uploadedAt), 'MMM d')}
                                     </p>
                                   </div>
-                                  <div className='flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
-                                    <Button
-                                      variant='ghost'
-                                      size='icon'
-                                      className='h-7 w-7'
-                                      onClick={() => window.open(doc.url, '_blank')}
-                                    >
-                                      <MdVisibility className='h-3.5 w-3.5' />
+                                  <div className='flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity'>
+                                    <Button variant='ghost' size='icon' className='h-6 w-6' onClick={() => window.open(doc.url, '_blank')}>
+                                      <MdVisibility className='h-3 w-3' />
                                     </Button>
-                                    <Button variant='ghost' size='icon' className='h-7 w-7'>
-                                      <MdDownload className='h-3.5 w-3.5' />
+                                    <Button variant='ghost' size='icon' className='h-6 w-6'>
+                                      <MdDownload className='h-3 w-3' />
                                     </Button>
                                     {onDocumentDelete && !isWorkflowDoc && (
-                                      <Button
-                                        variant='ghost'
-                                        size='icon'
-                                        className='h-7 w-7 text-destructive hover:text-destructive'
-                                        onClick={() => onDocumentDelete(doc.id)}
-                                      >
-                                        <MdDelete className='h-3.5 w-3.5' />
+                                      <Button variant='ghost' size='icon' className='h-6 w-6 text-destructive hover:text-destructive' onClick={() => onDocumentDelete(doc.id)}>
+                                        <MdDelete className='h-3 w-3' />
                                       </Button>
                                     )}
                                   </div>
@@ -658,12 +489,25 @@ export function UnifiedDocumentPanel({
                             })}
                           </div>
                         </CollapsibleContent>
+                      </Collapsible>
+                    ) : (
+                      <div className='flex items-center gap-3 p-3 opacity-60'>
+                        <div className={cn('h-8 w-8 rounded-lg flex items-center justify-center', config.bgColor)}>
+                          <Icon className={cn('h-4 w-4', config.color)} />
+                        </div>
+                        <div className='flex-1 min-w-0'>
+                          <p className='text-sm font-medium text-muted-foreground'>{config.label}</p>
+                          <p className='text-xs text-muted-foreground'>
+                            {isRequired ? 'Required' : 'Optional'}
+                          </p>
+                        </div>
+                        <MdRadioButtonUnchecked className='h-5 w-5 text-muted-foreground/40' />
                       </div>
-                    </Collapsible>
-                  )
-                })}
-              </div>
-            )}
+                    )}
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
       </ScrollArea>

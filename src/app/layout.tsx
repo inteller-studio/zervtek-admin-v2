@@ -23,8 +23,8 @@ const jetbrainsMono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Zervtek Admin',
-  description: 'Zervtek Admin Dashboard',
+  title: 'Zervtek Dashboard',
+  description: 'Zervtek Dashboard',
 }
 
 export default function RootLayout({

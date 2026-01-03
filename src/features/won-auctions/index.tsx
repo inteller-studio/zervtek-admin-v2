@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { startOfDay } from 'date-fns'
 import { MdGridView, MdViewList, MdRefresh } from 'react-icons/md'
 import { toast } from 'sonner'
 
@@ -12,6 +13,7 @@ import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import { Button } from '@/components/ui/button'
 import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
+import { useDateNavigation } from '@/hooks/use-date-navigation'
 
 import {
   purchases as initialWonAuctions,
@@ -26,6 +28,7 @@ import { WonAuctionsProvider, useWonAuctions } from './components/won-auctions-p
 import { WonAuctionsDialogs } from './components/won-auctions-dialogs'
 import { WonAuctionsFilters } from './components/won-auctions-filters'
 import { WonAuctionsPagination } from './components/won-auctions-pagination'
+import { PurchasesDateStrip } from './components/purchases-date-strip'
 import { VehicleCard } from './components/vehicle-card'
 import { WonAuctionsTableView } from './components/won-auctions-table-view'
 import { useWonAuctionsFilters } from './hooks/use-won-auctions-filters'
@@ -39,10 +42,57 @@ function WonAuctionsContent() {
 
   const { setOpen, setCurrentRow, setInitialMode } = useWonAuctions()
 
-  // Filter auctions by active tab (status)
+  // Date Navigation
+  const {
+    selectedDate,
+    dateRangeStart,
+    dateRangeLabel,
+    visibleDates,
+    isCalendarOpen,
+    setIsCalendarOpen,
+    navigateDate,
+    selectDate,
+    selectDateRange,
+  } = useDateNavigation()
+
+  // Get date count for date strip
+  const getDateCount = (date: Date) => {
+    return auctions.filter((a) => {
+      const purchaseDate = startOfDay(new Date(a.createdAt))
+      return purchaseDate.getTime() === startOfDay(date).getTime()
+    }).length
+  }
+
+  // Handle date selection
+  const handleDateSelect = (date: Date, label: string) => {
+    selectDate(date, label)
+  }
+
+  // Handle date range selection
+  const handleDateRangeSelect = (start: Date | undefined, end: Date | undefined, label: string) => {
+    selectDateRange(start, end, label)
+  }
+
+  // Filter auctions by date and active tab (status)
   const tabFilteredAuctions = useMemo(() => {
-    return auctions.filter((a) => a.status === activeTab)
-  }, [auctions, activeTab])
+    let result = auctions.filter((a) => a.status === activeTab)
+
+    // Apply date filter if not "All dates"
+    if (dateRangeLabel !== 'All dates' && selectedDate) {
+      result = result.filter((a) => {
+        const purchaseDate = startOfDay(new Date(a.createdAt))
+        if (dateRangeStart) {
+          // Date range filter
+          return purchaseDate >= startOfDay(dateRangeStart) && purchaseDate <= startOfDay(selectedDate)
+        } else {
+          // Single date filter
+          return purchaseDate.getTime() === startOfDay(selectedDate).getTime()
+        }
+      })
+    }
+
+    return result
+  }, [auctions, activeTab, selectedDate, dateRangeStart, dateRangeLabel])
 
   const {
     filters,
@@ -284,6 +334,20 @@ function WonAuctionsContent() {
               Refresh
             </Button>
         </div>
+
+        {/* Date Strip */}
+        <PurchasesDateStrip
+          selectedDate={selectedDate}
+          dateRangeStart={dateRangeStart}
+          dateRangeLabel={dateRangeLabel}
+          visibleDates={visibleDates}
+          isCalendarOpen={isCalendarOpen}
+          onCalendarOpenChange={setIsCalendarOpen}
+          getDateCount={getDateCount}
+          onDateSelect={handleDateSelect}
+          onNavigate={navigateDate}
+          onDateRangeSelect={handleDateRangeSelect}
+        />
 
         {/* Filters */}
         <WonAuctionsFilters

@@ -101,7 +101,7 @@ export const sidebarNavGroups: NavGroup[] = [
       },
       {
         title: 'Tasks',
-        url: '/services',
+        url: '/tasks',
         icon: MdFactCheck,
         badge: (pendingTranslationsCount + pendingInspectionsCount) > 0 ? String(pendingTranslationsCount + pendingInspectionsCount) : undefined,
       },

@@ -26,6 +26,8 @@ import {
   MdClose,
   MdZoomIn,
   MdFullscreen,
+  MdPhotoLibrary,
+  MdLink,
 } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -626,6 +628,7 @@ export function BidDetailModal({
   const [isDeclining, setIsDeclining] = useState(false)
   const [lightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [copiedLink, setCopiedLink] = useState(false)
 
   // Reset state when bid changes
   useEffect(() => {
@@ -633,6 +636,7 @@ export function BidDetailModal({
       setIsApproving(false)
       setIsDeclining(false)
       setLightboxOpen(false)
+      setCopiedLink(false)
     }
   }, [bid?.id])
 
@@ -778,41 +782,81 @@ export function BidDetailModal({
                       </button>
                     </div>
 
-                    {/* Compact Thumbnail Row */}
-                    {bid.vehicle.images && bid.vehicle.images.length > 0 && (
-                      <div className='px-5 py-3 border-b bg-muted/20'>
-                        <div className='flex items-center gap-2'>
-                          {bid.vehicle.images.slice(0, 5).map((img, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => handleOpenLightbox(idx)}
-                              className='h-12 w-16 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
-                            >
-                              <img
-                                src={img}
-                                alt={`Photo ${idx + 1}`}
-                                className='h-full w-full object-cover group-hover:scale-105 transition-transform'
-                              />
-                              {idx === 0 && (
-                                <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
-                                  <MdZoomIn className='h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
-                                </div>
-                              )}
-                            </button>
-                          ))}
-                          {bid.vehicle.images.length > 5 && (
-                            <button
-                              onClick={() => handleOpenLightbox(5)}
-                              className='h-12 w-16 rounded-lg bg-muted shrink-0 flex items-center justify-center hover:bg-muted/80 transition-colors'
-                            >
-                              <span className='text-sm font-medium text-muted-foreground'>
-                                +{bid.vehicle.images.length - 5}
-                              </span>
-                            </button>
-                          )}
+                    {/* Image and Details Row */}
+                    <div className='px-5 py-4 border-b bg-muted/20'>
+                      <div className='flex gap-4'>
+                        {/* Bigger Image */}
+                        {bid.vehicle.images && bid.vehicle.images.length > 0 ? (
+                          <button
+                            onClick={() => handleOpenLightbox(0)}
+                            className='h-36 w-52 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
+                          >
+                            <img
+                              src={bid.vehicle.images[0]}
+                              alt={`${bid.vehicle.make} ${bid.vehicle.model}`}
+                              className='h-full w-full object-cover group-hover:scale-105 transition-transform'
+                            />
+                            <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
+                              <MdZoomIn className='h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                            </div>
+                            {bid.vehicle.images.length > 1 && (
+                              <div className='absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-xs text-white'>
+                                <MdPhotoLibrary className='h-3 w-3' />
+                                {bid.vehicle.images.length}
+                              </div>
+                            )}
+                          </button>
+                        ) : (
+                          <div className='h-36 w-52 rounded-lg bg-muted shrink-0 flex items-center justify-center'>
+                            <MdDirectionsCar className='h-10 w-10 text-muted-foreground/30' />
+                          </div>
+                        )}
+
+                        {/* Right Side Details */}
+                        <div className='flex-1 flex flex-col justify-between min-w-0'>
+                          <div className='space-y-1.5'>
+                            {bid.vehicle.grade && (
+                              <p className='text-sm font-semibold'>Grade {bid.vehicle.grade}</p>
+                            )}
+                            {bid.vehicle.mileage && (
+                              <p className='text-sm text-muted-foreground'>{bid.vehicle.mileage.toLocaleString()} km</p>
+                            )}
+                            {bid.vehicle.transmission && (
+                              <p className='text-sm text-muted-foreground'>{bid.vehicle.transmission.toUpperCase()}</p>
+                            )}
+                            {bid.vehicle.color && (
+                              <p className='text-sm text-muted-foreground'>{bid.vehicle.color.toUpperCase()}</p>
+                            )}
+                          </div>
+
+                          {/* Copy Link */}
+                          <Button
+                            variant='outline'
+                            size='sm'
+                            className='w-fit mt-2'
+                            onClick={() => {
+                              const url = `${window.location.origin}/bids/${bid.id}`
+                              navigator.clipboard.writeText(url)
+                              setCopiedLink(true)
+                              setTimeout(() => setCopiedLink(false), 2000)
+                              toast.success('Link copied to clipboard')
+                            }}
+                          >
+                            {copiedLink ? (
+                              <>
+                                <MdCheck className='mr-1.5 h-4 w-4 text-emerald-500' />
+                                Copied!
+                              </>
+                            ) : (
+                              <>
+                                <MdContentCopy className='mr-1.5 h-4 w-4' />
+                                Copy Link
+                              </>
+                            )}
+                          </Button>
                         </div>
                       </div>
-                    )}
+                    </div>
 
                     {/* Amount Section */}
                     <div className="px-5 py-4">
@@ -823,9 +867,24 @@ export function BidDetailModal({
                             ¥{bid.amount.toLocaleString()}
                           </p>
                         </div>
-                        <Badge className={cn('text-sm px-3 py-1.5 font-medium border-0', statusStyles[bid.status])}>
+                        <span
+                          className='text-sm px-3 py-1.5 font-semibold rounded-md'
+                          style={{
+                            backgroundColor:
+                              bid.status === 'pending_approval' ? '#f59e0b' :
+                              bid.status === 'active' ? '#3b82f6' :
+                              bid.status === 'winning' ? '#10b981' :
+                              bid.status === 'outbid' ? '#f97316' :
+                              bid.status === 'won' ? '#10b981' :
+                              bid.status === 'lost' ? '#64748b' :
+                              bid.status === 'retracted' ? '#ef4444' :
+                              bid.status === 'expired' ? '#64748b' :
+                              bid.status === 'declined' ? '#f43f5e' : '#64748b',
+                            color: '#ffffff'
+                          }}
+                        >
                           {statusLabels[bid.status]}
-                        </Badge>
+                        </span>
                       </div>
                     </div>
 

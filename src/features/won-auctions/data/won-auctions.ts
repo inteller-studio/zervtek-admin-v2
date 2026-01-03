@@ -437,6 +437,22 @@ const realVehicles = stockVehiclesFromSQL.slice(0, 80)
 // Auction house names
 const auctionHouses = ['USS Tokyo', 'HAA Kobe', 'TAA Osaka', 'JU Nagoya', 'USS Yokohama', 'CAA Gifu', 'NAA Nagoya', 'LAA Kansai']
 
+// Distribute statuses more evenly for better demo
+const statusDistribution: Purchase['status'][] = [
+  // 15 payment_pending
+  ...Array(15).fill('payment_pending'),
+  // 12 processing
+  ...Array(12).fill('processing'),
+  // 12 documents_pending
+  ...Array(12).fill('documents_pending'),
+  // 15 shipping
+  ...Array(15).fill('shipping'),
+  // 13 delivered
+  ...Array(13).fill('delivered'),
+  // 13 completed
+  ...Array(13).fill('completed'),
+]
+
 export const purchases: Purchase[] = realVehicles.map((vehicle, index) => {
   const firstName = faker.person.firstName()
   const lastName = faker.person.lastName()
@@ -446,7 +462,8 @@ export const purchases: Purchase[] = realVehicles.map((vehicle, index) => {
   const totalAmount = winningBid + shippingCost + insuranceFee
   const paymentStatus = faker.helpers.arrayElement(['pending', 'partial', 'completed'] as const)
   const paidAmount = paymentStatus === 'completed' ? totalAmount : paymentStatus === 'partial' ? Math.floor(totalAmount * 0.5) : 0
-  const status = faker.helpers.arrayElement(['payment_pending', 'processing', 'documents_pending', 'shipping', 'delivered', 'completed'] as const)
+  // Use distributed status for better demo
+  const status = statusDistribution[index % statusDistribution.length]
 
   // Determine if this is an auction or stock purchase (70% auction, 30% stock)
   const source: 'auction' | 'stock' = faker.datatype.boolean({ probability: 0.7 }) ? 'auction' : 'stock'
@@ -519,9 +536,10 @@ export const purchases: Purchase[] = realVehicles.map((vehicle, index) => {
     estimatedShippingCost: shippingCost,
     notes: faker.helpers.maybe(() => faker.lorem.sentence()),
     timeline,
-    auctionEndDate: faker.date.past(),
-    createdAt: faker.date.past(),
-    updatedAt: faker.date.recent(),
+    auctionEndDate: faker.date.recent({ days: 7 }),
+    // Spread createdAt across the last 7 days for date strip demo
+    createdAt: new Date(Date.now() - (index % 7) * 24 * 60 * 60 * 1000),
+    updatedAt: faker.date.recent({ days: 2 }),
     ourCosts: generateOurCosts(winningBid),
   }
 })

@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { format, startOfDay } from 'date-fns'
-import { MdCalendarToday, MdTranslate, MdFactCheck, MdCheckCircle, MdAccessTime } from 'react-icons/md'
-import { toast } from 'sonner'
+import { MdCalendarToday } from 'react-icons/md'
 
 import { Header } from '@/components/layout/header'
 import { Main } from '@/components/layout/main'
@@ -12,19 +12,17 @@ import { Search } from '@/components/search'
 import { useDateNavigation } from '@/hooks/use-date-navigation'
 import { StatsCard } from '@/features/dashboard/components/stats-card'
 
-import { requests as allRequests, type ServiceRequest, type InspectionMedia, type InspectionNote } from '../requests/data/requests'
+import { requests as allRequests, type ServiceRequest } from '../requests/data/requests'
 import { auctions, type Auction } from '../auctions/data/auctions'
 
 import type { ServiceTypeFilter } from './types'
-import { ITEMS_PER_PAGE, CURRENT_USER_ID, CURRENT_USER_NAME, CURRENT_USER_ROLE } from './types'
+import { ITEMS_PER_PAGE } from './types'
 
 // Components
 import { ServicesDateStrip } from './components/services-date-strip'
 import { ServicesFilterTabs } from './components/services-filter-tabs'
 import { ServiceTasksGrid } from './components/service-tasks-grid'
 import { ServicesPagination } from './components/services-pagination'
-import { TranslationModal } from './components/translation-modal'
-import { InspectionModal } from './components/inspection-modal'
 
 // Create auction lookup map
 const auctionMap = new Map(auctions.map((a) => [a.id, a]))
@@ -40,16 +38,12 @@ const initialRequests = allRequests.filter(
   (r) => (r.type === 'translation' && r.title.includes('Auction Sheet')) || r.type === 'inspection'
 )
 
-const canAssignOthers = ['superadmin', 'admin', 'manager'].includes(CURRENT_USER_ROLE)
-
 export function Services() {
-  const [requests, setRequests] = useState<ServiceRequest[]>(initialRequests)
-  const [selectedRequest, setSelectedRequest] = useState<ServiceRequest | null>(null)
+  const router = useRouter()
+  const [requests] = useState<ServiceRequest[]>(initialRequests)
   const [searchQuery, setSearchQuery] = useState('')
   const [typeFilter, setTypeFilter] = useState<ServiceTypeFilter>('all')
-  const [isModalOpen, setIsModalOpen] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
-  const [assignDrawerOpen, setAssignDrawerOpen] = useState(false)
 
   // Date Navigation
   const {
@@ -63,9 +57,6 @@ export function Services() {
     selectDate,
     selectDateRange,
   } = useDateNavigation()
-
-  // Get auction for selected request
-  const selectedAuction = selectedRequest ? getAuctionForRequest(selectedRequest) : undefined
 
   // Get count for a specific date
   const getDateCount = (date: Date) => {
@@ -173,116 +164,9 @@ export function Services() {
     return { name: 'Unknown Vehicle', lotNo: 'N/A', auctionHouse: 'N/A', time: 'N/A', grade: 'N/A', image: '/placeholder-car.jpg' }
   }
 
-  // Card click handler
+  // Card click handler - navigate to detail page
   const handleCardClick = (request: ServiceRequest) => {
-    setSelectedRequest(request)
-    setIsModalOpen(true)
-  }
-
-  // Translation handlers
-  const handleSendTranslation = async (replyText: string) => {
-    if (!selectedRequest) return
-    await new Promise((resolve) => setTimeout(resolve, 800))
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id
-        ? { ...r, status: 'completed' as const, updatedAt: new Date(), completedAt: new Date() }
-        : r
-    )
-    setRequests(updated)
-    setIsModalOpen(false)
-    setSelectedRequest(null)
-    toast.success('Translation sent successfully!')
-  }
-
-  // Inspection handlers
-  const handleAssignToMe = (request: ServiceRequest) => {
-    const updated = requests.map((r) =>
-      r.id === request.id
-        ? { ...r, assignedTo: CURRENT_USER_ID, assignedToName: CURRENT_USER_NAME, status: 'assigned' as const }
-        : r
-    )
-    setRequests(updated)
-    setSelectedRequest({
-      ...request,
-      assignedTo: CURRENT_USER_ID,
-      assignedToName: CURRENT_USER_NAME,
-      status: 'assigned',
-    })
-    toast.success('Assigned to you')
-  }
-
-  const handleAssignStaff = (staffId: string, staffName: string) => {
-    if (!selectedRequest) return
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id
-        ? { ...r, assignedTo: staffId, assignedToName: staffName, status: 'assigned' as const }
-        : r
-    )
-    setRequests(updated)
-    setSelectedRequest({
-      ...selectedRequest,
-      assignedTo: staffId,
-      assignedToName: staffName,
-      status: 'assigned',
-    })
-  }
-
-  const handleStartInspection = () => {
-    if (!selectedRequest) return
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id ? { ...r, status: 'in_progress' as const, updatedAt: new Date() } : r
-    )
-    setRequests(updated)
-    setSelectedRequest({ ...selectedRequest, status: 'in_progress', updatedAt: new Date() })
-    toast.success('Inspection started')
-  }
-
-  const handleCompleteInspection = () => {
-    if (!selectedRequest) return
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id
-        ? { ...r, status: 'completed' as const, updatedAt: new Date(), completedAt: new Date() }
-        : r
-    )
-    setRequests(updated)
-    setSelectedRequest({
-      ...selectedRequest,
-      status: 'completed',
-      updatedAt: new Date(),
-      completedAt: new Date(),
-    })
-    setIsModalOpen(false)
-    toast.success('Inspection completed and sent to customer')
-  }
-
-  const handleAddMedia = (newMedia: InspectionMedia[]) => {
-    if (!selectedRequest) return
-    const updatedMedia = [...(selectedRequest.inspectionMedia || []), ...newMedia]
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id ? { ...r, inspectionMedia: updatedMedia } : r
-    )
-    setRequests(updated)
-    setSelectedRequest({ ...selectedRequest, inspectionMedia: updatedMedia })
-  }
-
-  const handleDeleteMedia = (mediaId: string) => {
-    if (!selectedRequest) return
-    const updatedMedia = (selectedRequest.inspectionMedia || []).filter((m) => m.id !== mediaId)
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id ? { ...r, inspectionMedia: updatedMedia } : r
-    )
-    setRequests(updated)
-    setSelectedRequest({ ...selectedRequest, inspectionMedia: updatedMedia })
-  }
-
-  const handleAddNote = (note: InspectionNote) => {
-    if (!selectedRequest) return
-    const updatedNotes = [...(selectedRequest.inspectionNotes || []), note]
-    const updated = requests.map((r) =>
-      r.id === selectedRequest.id ? { ...r, inspectionNotes: updatedNotes } : r
-    )
-    setRequests(updated)
-    setSelectedRequest({ ...selectedRequest, inspectionNotes: updatedNotes })
+    router.push(`/tasks/${request.id}`)
   }
 
   // Calculate stats
@@ -323,8 +207,8 @@ export function Services() {
               <MdCalendarToday className='h-5 w-5 text-primary' />
             </div>
             <div>
-              <h1 className='text-2xl font-bold tracking-tight'>Service Tasks</h1>
-              <p className='text-muted-foreground text-sm'>Translations & Inspections by day</p>
+              <h1 className='text-2xl font-bold tracking-tight'>Tasks</h1>
+              <p className='text-muted-foreground text-sm'>Translations & Inspections</p>
             </div>
           </div>
         </div>
@@ -367,6 +251,8 @@ export function Services() {
           onTypeFilterChange={setTypeFilter}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
+          translationCount={stats.pendingTranslations}
+          inspectionCount={stats.pendingInspections}
         />
 
         <ServiceTasksGrid
@@ -384,36 +270,6 @@ export function Services() {
           onPageChange={setCurrentPage}
         />
       </Main>
-
-      {/* Translation Modal */}
-      {selectedRequest?.type === 'translation' && (
-        <TranslationModal
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          request={selectedRequest}
-          auction={selectedAuction}
-          onSendTranslation={handleSendTranslation}
-        />
-      )}
-
-      {/* Inspection Modal */}
-      {selectedRequest?.type === 'inspection' && (
-        <InspectionModal
-          open={isModalOpen}
-          onOpenChange={setIsModalOpen}
-          request={selectedRequest}
-          canAssignOthers={canAssignOthers}
-          assignDrawerOpen={assignDrawerOpen}
-          onAssignDrawerOpenChange={setAssignDrawerOpen}
-          onAssignToMe={handleAssignToMe}
-          onAssignStaff={handleAssignStaff}
-          onStartInspection={handleStartInspection}
-          onCompleteInspection={handleCompleteInspection}
-          onAddMedia={handleAddMedia}
-          onDeleteMedia={handleDeleteMedia}
-          onAddNote={handleAddNote}
-        />
-      )}
     </>
   )
 }

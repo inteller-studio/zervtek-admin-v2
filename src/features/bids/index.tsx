@@ -203,19 +203,20 @@ export function Bids() {
           onDateRangeSelect={handleDateRangeSelect}
         />
 
-        <div className='space-y-4'>
-          <BidsSearchBar
-            searchQuery={searchQuery}
-            onSearchChange={(v) => { setSearchQuery(v); resetPagination() }}
-            sortBy={sortBy}
-            onSortChange={(v) => { setSortBy(v); resetPagination() }}
-          />
-
+        <div className='flex flex-wrap items-center gap-3'>
           <BidsTabsHeader
             activeTab={activeTab}
             onTabChange={(v) => { setActiveTab(v); resetPagination() }}
             pendingCount={stats.pending}
           />
+          <div className='ml-auto flex items-center gap-3'>
+            <BidsSearchBar
+              searchQuery={searchQuery}
+              onSearchChange={(v) => { setSearchQuery(v); resetPagination() }}
+              sortBy={sortBy}
+              onSortChange={(v) => { setSortBy(v); resetPagination() }}
+            />
+          </div>
         </div>
 
         <BidsTableView

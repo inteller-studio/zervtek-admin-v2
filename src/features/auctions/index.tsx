@@ -686,47 +686,82 @@ export function Auctions() {
                 </button>
               </div>
 
-              {/* Compact Thumbnail Row */}
-              {selectedAuction.vehicleInfo.images.length > 0 && (
-                <div className='px-5 py-3 border-b bg-muted/20'>
-                  <div className='flex items-center gap-2'>
-                    {selectedAuction.vehicleInfo.images.slice(0, 5).map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => {
-                          setSelectedImageIndex(idx)
-                          setIsImageDialogOpen(true)
-                        }}
-                        className='h-12 w-16 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
-                      >
-                        <img
-                          src={img}
-                          alt={`Photo ${idx + 1}`}
-                          className='h-full w-full object-cover group-hover:scale-105 transition-transform'
-                        />
-                        {idx === 0 && (
-                          <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
-                            <MdZoomIn className='h-4 w-4 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
-                          </div>
-                        )}
-                      </button>
-                    ))}
-                    {selectedAuction.vehicleInfo.images.length > 5 && (
-                      <button
-                        onClick={() => {
-                          setSelectedImageIndex(5)
-                          setIsImageDialogOpen(true)
-                        }}
-                        className='h-12 w-16 rounded-lg bg-muted shrink-0 flex items-center justify-center hover:bg-muted/80 transition-colors'
-                      >
-                        <span className='text-sm font-medium text-muted-foreground'>
-                          +{selectedAuction.vehicleInfo.images.length - 5}
-                        </span>
-                      </button>
-                    )}
+              {/* Image and Details Row */}
+              <div className='px-5 py-4 border-b bg-muted/20'>
+                <div className='flex gap-4'>
+                  {/* Bigger Image */}
+                  {selectedAuction.vehicleInfo.images.length > 0 ? (
+                    <button
+                      onClick={() => {
+                        setSelectedImageIndex(0)
+                        setIsImageDialogOpen(true)
+                      }}
+                      className='h-36 w-52 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
+                    >
+                      <img
+                        src={selectedAuction.vehicleInfo.images[0]}
+                        alt={`${selectedAuction.vehicleInfo.make} ${selectedAuction.vehicleInfo.model}`}
+                        className='h-full w-full object-cover group-hover:scale-105 transition-transform'
+                      />
+                      <div className='absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/20 transition-colors'>
+                        <MdZoomIn className='h-5 w-5 text-white opacity-0 group-hover:opacity-100 transition-opacity' />
+                      </div>
+                      {selectedAuction.vehicleInfo.images.length > 1 && (
+                        <div className='absolute bottom-2 right-2 flex items-center gap-1 rounded-md bg-black/60 px-2 py-1 text-xs text-white'>
+                          <MdPhotoLibrary className='h-3 w-3' />
+                          {selectedAuction.vehicleInfo.images.length}
+                        </div>
+                      )}
+                    </button>
+                  ) : (
+                    <div className='h-36 w-52 rounded-lg bg-muted shrink-0 flex items-center justify-center'>
+                      <span className='text-sm text-muted-foreground'>No image</span>
+                    </div>
+                  )}
+
+                  {/* Right Side Details */}
+                  <div className='flex-1 flex flex-col justify-between min-w-0'>
+                    <div className='space-y-1.5'>
+                      {selectedAuction.vehicleInfo.score && (
+                        <p className='text-sm font-semibold'>Grade {selectedAuction.vehicleInfo.score}</p>
+                      )}
+                      <p className='text-sm text-muted-foreground'>{selectedAuction.vehicleInfo.mileageDisplay}</p>
+                      {selectedAuction.vehicleInfo.transmission && (
+                        <p className='text-sm text-muted-foreground'>{selectedAuction.vehicleInfo.transmission.toUpperCase()}</p>
+                      )}
+                      {selectedAuction.vehicleInfo.color && (
+                        <p className='text-sm text-muted-foreground'>{selectedAuction.vehicleInfo.color.toUpperCase()}</p>
+                      )}
+                    </div>
+
+                    {/* Copy Link */}
+                    <Button
+                      variant='outline'
+                      size='sm'
+                      className='w-fit mt-2'
+                      onClick={() => {
+                        const url = `https://customer-portal-v3.vercel.app/dashboard/auction/${selectedAuction.id}`
+                        navigator.clipboard.writeText(url)
+                        setCopiedLink(true)
+                        setTimeout(() => setCopiedLink(false), 2000)
+                        toast.success('Link copied to clipboard')
+                      }}
+                    >
+                      {copiedLink ? (
+                        <>
+                          <MdCheck className='mr-1.5 h-4 w-4 text-emerald-500' />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <MdContentCopy className='mr-1.5 h-4 w-4' />
+                          Copy Link
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Scrollable Content */}
               <div className='flex-1 overflow-y-auto'>
@@ -739,74 +774,26 @@ export function Auctions() {
                         ¥{selectedAuction.startingBid.toLocaleString()}
                       </p>
                     </div>
-                    <Badge className={cn(
-                      'text-sm px-3 py-1.5 font-medium border-0',
-                      selectedAuction.status === 'draft' && 'bg-amber-500/15 text-amber-600',
-                      selectedAuction.status === 'active' && 'bg-emerald-500/15 text-emerald-600',
-                      selectedAuction.status === 'scheduled' && 'bg-blue-500/15 text-blue-600',
-                      selectedAuction.status === 'ended' && 'bg-slate-500/15 text-slate-600',
-                      selectedAuction.status === 'sold' && 'bg-purple-500/15 text-purple-600',
-                      selectedAuction.status === 'cancelled' && 'bg-red-500/15 text-red-600'
-                    )}>
+                    <span
+                      className='text-sm px-3 py-1.5 font-semibold rounded-md'
+                      style={{
+                        backgroundColor:
+                          selectedAuction.status === 'draft' ? '#f59e0b' :
+                          selectedAuction.status === 'active' ? '#10b981' :
+                          selectedAuction.status === 'scheduled' ? '#3b82f6' :
+                          selectedAuction.status === 'ended' ? '#64748b' :
+                          selectedAuction.status === 'sold' ? '#a855f7' :
+                          selectedAuction.status === 'cancelled' ? '#ef4444' : '#64748b',
+                        color: '#ffffff'
+                      }}
+                    >
                       {selectedAuction.status.charAt(0).toUpperCase() + selectedAuction.status.slice(1)}
-                    </Badge>
+                    </span>
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className='px-5 pb-5 space-y-4'>
-                  {/* Quick Info Bar */}
-                  <div className='flex items-center justify-between rounded-xl bg-muted/30 p-3'>
-                    <div className='flex items-center gap-3 flex-wrap'>
-                      {selectedAuction.vehicleInfo.score && (
-                        <Badge className={cn(
-                          'text-xs border-0',
-                          ['S', '6', '5', '4.5'].includes(selectedAuction.vehicleInfo.score)
-                            ? 'bg-emerald-500/15 text-emerald-600'
-                            : ['4', '3.5', '3'].includes(selectedAuction.vehicleInfo.score)
-                              ? 'bg-blue-500/15 text-blue-600'
-                              : 'bg-amber-500/15 text-amber-600'
-                        )}>
-                          Grade {selectedAuction.vehicleInfo.score}
-                        </Badge>
-                      )}
-                      <span className='text-sm text-muted-foreground'>
-                        {selectedAuction.vehicleInfo.mileageDisplay}
-                      </span>
-                      <span className='text-sm text-muted-foreground'>•</span>
-                      <span className='text-sm text-muted-foreground'>
-                        {selectedAuction.vehicleInfo.transmission}
-                      </span>
-                      <span className='text-sm text-muted-foreground'>•</span>
-                      <span className='text-sm text-muted-foreground'>
-                        {selectedAuction.vehicleInfo.color}
-                      </span>
-                    </div>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button
-                          onClick={() => {
-                            const url = `https://customer-portal-v3.vercel.app/dashboard/auction/${selectedAuction.id}`
-                            navigator.clipboard.writeText(url)
-                            setCopiedLink(true)
-                            setTimeout(() => setCopiedLink(false), 2000)
-                            toast.success('Link copied to clipboard')
-                          }}
-                          className='p-2 rounded-lg hover:bg-muted transition-colors'
-                        >
-                          {copiedLink ? (
-                            <MdCheck className='w-4 h-4 text-emerald-500' />
-                          ) : (
-                            <MdLink className='w-4 h-4 text-muted-foreground' />
-                          )}
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side='bottom'>
-                        <p className='text-xs'>{copiedLink ? 'Copied!' : 'Copy link'}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </div>
-
                   {/* Info Sections - Two Column Grid */}
                   <div className='grid gap-4 grid-cols-2'>
                     {/* Auction Details */}

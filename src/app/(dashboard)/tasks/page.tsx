@@ -1,10 +1,5 @@
-import { Suspense } from 'react'
-import { Tasks } from '@/features/tasks'
+import { Services } from '@/features/services'
 
-export default function TasksPage() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <Tasks />
-    </Suspense>
-  )
+export default function ServicesPage() {
+  return <Services />
 }

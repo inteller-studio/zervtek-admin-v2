@@ -15,6 +15,7 @@ import {
   MdPerson,
   MdVerifiedUser,
   MdClose,
+  MdContentCopy,
 } from 'react-icons/md'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -169,32 +170,67 @@ export function AssistBuyerDrawer({
 
           {/* Vehicle Preview Card */}
           <div className='p-4'>
-            <div className='flex gap-3 rounded-lg border bg-background p-3'>
-              {auction.vehicleInfo.images.length > 0 ? (
-                <img
-                  src={auction.vehicleInfo.images[1] || auction.vehicleInfo.images[0]}
-                  alt={`${auction.vehicleInfo.year} ${auction.vehicleInfo.make} ${auction.vehicleInfo.model}`}
-                  className='h-16 w-24 rounded-md object-cover'
-                />
-              ) : (
-                <div className='flex h-16 w-24 items-center justify-center rounded-md bg-muted'>
-                  <span className='text-xs text-muted-foreground'>No image</span>
-                </div>
-              )}
-              <div className='flex-1'>
-                <p className='font-semibold'>
+            <div className='rounded-lg border bg-background p-3'>
+              {/* Title and Copy Link */}
+              <div className='flex items-center justify-between mb-3'>
+                <p className='font-semibold truncate'>
                   {auction.vehicleInfo.year} {auction.vehicleInfo.make} {auction.vehicleInfo.model}
                 </p>
-                <p className='text-sm text-muted-foreground'>
-                  {auction.lotNumber} • {auction.vehicleInfo.mileageDisplay}
-                </p>
-                <div className='mt-1 flex items-center gap-2'>
-                  <Badge variant='secondary' className='text-xs'>
-                    Current: {formatPrice(auction.currentBid)}
-                  </Badge>
-                  <Badge variant='outline' className='text-xs'>
-                    {auction.totalBids} bids
-                  </Badge>
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-7 px-2 text-xs text-muted-foreground hover:text-foreground'
+                  onClick={() => {
+                    const url = `${window.location.origin}/auctions/${auction.id}`
+                    navigator.clipboard.writeText(url)
+                    toast.success('Link copied to clipboard')
+                  }}
+                >
+                  <MdContentCopy className='mr-1 h-3.5 w-3.5' />
+                  Copy Link
+                </Button>
+              </div>
+
+              {/* Image and Details Row */}
+              <div className='flex gap-4'>
+                {auction.vehicleInfo.images.length > 0 ? (
+                  <img
+                    src={auction.vehicleInfo.images[1] || auction.vehicleInfo.images[0]}
+                    alt={`${auction.vehicleInfo.year} ${auction.vehicleInfo.make} ${auction.vehicleInfo.model}`}
+                    className='h-32 w-48 rounded-lg object-cover'
+                  />
+                ) : (
+                  <div className='flex h-32 w-48 items-center justify-center rounded-lg bg-muted'>
+                    <span className='text-xs text-muted-foreground'>No image</span>
+                  </div>
+                )}
+
+                {/* Right Side Details */}
+                <div className='flex-1 flex flex-col justify-between min-w-0'>
+                  <div className='space-y-1.5'>
+                    {auction.vehicleInfo.grade && (
+                      <p className='text-sm font-medium'>Grade {auction.vehicleInfo.grade}</p>
+                    )}
+                    <p className='text-sm text-muted-foreground'>{auction.vehicleInfo.mileageDisplay}</p>
+                    {auction.vehicleInfo.transmission && (
+                      <p className='text-sm text-muted-foreground'>{auction.vehicleInfo.transmission.toUpperCase()}</p>
+                    )}
+                    {auction.vehicleInfo.color && (
+                      <p className='text-sm text-muted-foreground'>{auction.vehicleInfo.color.toUpperCase()}</p>
+                    )}
+                  </div>
+
+                  <div className='flex items-center gap-2 mt-2'>
+                    <Badge
+                      variant={auction.status === 'active' ? 'default' : 'secondary'}
+                      className='text-xs'
+                    >
+                      {auction.status.charAt(0).toUpperCase() + auction.status.slice(1)}
+                    </Badge>
+                    <Badge variant='outline' className='text-xs'>
+                      {formatPrice(auction.currentBid)}
+                    </Badge>
+                  </div>
                 </div>
               </div>
             </div>

@@ -1,13 +1,12 @@
 'use client'
 
 import { formatDistanceToNow } from 'date-fns'
-import { MdCheckCircle, MdFactCheck, MdAccessTime, MdTranslate } from 'react-icons/md'
+import { MdAccessTime, MdFactCheck, MdTranslate } from 'react-icons/md'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import type { ServiceRequest } from '../../requests/data/requests'
-import { getTimeBadgeStyle } from '../types'
 
 interface ServiceTaskCardProps {
   request: ServiceRequest
@@ -30,98 +29,95 @@ export function ServiceTaskCard({
   onClick,
 }: ServiceTaskCardProps) {
   const isCompleted = request.status === 'completed'
-  const isPending = request.status === 'pending'
   const isTranslation = request.type === 'translation'
-
-  const getWaitTime = (createdAt: Date) => {
-    return formatDistanceToNow(new Date(createdAt), { addSuffix: false })
-  }
+  const waitTime = formatDistanceToNow(new Date(request.createdAt), { addSuffix: false })
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ delay: index * 0.03, duration: 0.25 }}
     >
       <Card
         className={cn(
-          'relative cursor-pointer rounded-xl border-border/50 bg-card shadow-sm transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 overflow-hidden',
+          'group cursor-pointer overflow-hidden transition-all hover:shadow-md !py-0 !gap-0',
           isCompleted && 'opacity-60'
         )}
         onClick={onClick}
       >
-        {/* Thumbnail */}
-        <div className='relative h-32 bg-muted'>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={vehicleInfo.image}
-            alt={vehicleInfo.name}
-            className='h-full w-full object-cover'
-          />
-          {/* Type badge overlay */}
-          <div className='absolute top-2 right-2 flex items-center gap-1.5'>
-            {isPending && (
-              <span className='size-2 rounded-full bg-blue-500 ring-2 ring-background' />
-            )}
-            <span
-              className={cn(
-                'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium backdrop-blur-sm',
-                isTranslation ? 'bg-blue-500/90 text-white' : 'bg-amber-500/90 text-white'
-              )}
-            >
-              {isTranslation ? (
-                <MdTranslate className='h-3 w-3' />
-              ) : (
-                <MdFactCheck className='h-3 w-3' />
-              )}
-              {isTranslation ? 'Translation' : 'Inspection'}
-            </span>
-          </div>
-        </div>
-
-        <CardContent className='p-4'>
-          <h3
-            className={cn(
-              'text-sm line-clamp-1',
-              isCompleted ? 'font-normal text-muted-foreground' : 'font-medium text-foreground'
-            )}
-          >
-            {vehicleInfo.name}
-          </h3>
-
-          <div className='mt-1 flex items-center gap-1.5 text-xs text-muted-foreground'>
-            <span className='font-mono'>{vehicleInfo.lotNo}</span>
-            <span className='text-muted-foreground/40'>•</span>
-            <span className='truncate'>{vehicleInfo.auctionHouse}</span>
-          </div>
-
-          <div className='mt-3 flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
-              <div className='size-6 rounded-full bg-primary/10 flex items-center justify-center'>
-                <span className='text-[10px] font-medium text-primary'>
-                  {request.customerName.charAt(0).toUpperCase()}
-                </span>
-              </div>
-              <span className='text-xs text-muted-foreground truncate max-w-[70px]'>
-                {request.customerName.split(' ')[0]}
-              </span>
-            </div>
-            {isCompleted ? (
-              <Badge variant='emerald' className='text-[10px]'>
-                <MdCheckCircle className='h-3 w-3 mr-1' />
-                Done
-              </Badge>
-            ) : (
-              <span
+        <CardContent className='p-0'>
+          {/* Image Section */}
+          <div className='relative h-44 w-full overflow-hidden bg-muted'>
+            <img
+              src={vehicleInfo.image}
+              alt={vehicleInfo.name}
+              className='h-full w-full object-cover transition-transform group-hover:scale-105'
+            />
+            {/* Type Badge */}
+            <div className='absolute right-2 top-2'>
+              <Badge
+                variant='secondary'
                 className={cn(
-                  'flex items-center gap-1 text-xs',
-                  getTimeBadgeStyle(request.createdAt)
+                  'flex items-center gap-1 text-white',
+                  isTranslation ? 'bg-blue-500/90' : 'bg-amber-500/90'
                 )}
               >
-                <MdAccessTime className='h-3 w-3' />
-                {getWaitTime(request.createdAt)}
-              </span>
-            )}
+                {isTranslation ? (
+                  <MdTranslate className='h-3 w-3' />
+                ) : (
+                  <MdFactCheck className='h-3 w-3' />
+                )}
+                {isTranslation ? 'Translation' : 'Inspection'}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Content Section */}
+          <div className='p-4'>
+            {/* Title */}
+            <div>
+              <h3 className='truncate text-sm font-semibold'>
+                {vehicleInfo.name}
+              </h3>
+              <p className='truncate text-xs text-muted-foreground'>
+                {vehicleInfo.grade !== 'N/A' ? `Grade ${vehicleInfo.grade}` : request.customerName}
+              </p>
+            </div>
+
+            {/* Info Row */}
+            <div className='mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground'>
+              <span className='font-mono'>{vehicleInfo.lotNo}</span>
+              <span className='text-muted-foreground/50'>•</span>
+              <span>{vehicleInfo.auctionHouse}</span>
+            </div>
+
+            {/* Bottom Section */}
+            <div className='mt-3 border-t pt-3'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <p className='text-xs text-muted-foreground'>Status</p>
+                  <Badge
+                    variant={
+                      isCompleted ? 'emerald' :
+                      request.status === 'in_progress' ? 'blue' :
+                      request.status === 'assigned' ? 'violet' : 'amber'
+                    }
+                    className='mt-0.5 capitalize'
+                  >
+                    {request.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+                {!isCompleted && (
+                  <div className='text-right'>
+                    <p className='text-xs text-muted-foreground'>Waiting</p>
+                    <p className='flex items-center gap-1 text-sm font-medium'>
+                      <MdAccessTime className='h-3.5 w-3.5' />
+                      {waitTime}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>

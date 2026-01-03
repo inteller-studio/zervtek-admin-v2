@@ -30,7 +30,7 @@ export function BidsSearchBar({
       <div className='relative flex-1 min-w-[200px] max-w-md'>
         <MdSearch className='absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground' />
         <Input
-          placeholder='Search bids, vehicles, bidders...'
+          placeholder='Search'
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           className='pl-9'
