@@ -1,7 +1,5 @@
-'use client'
-
-import { SignupsPage } from '@/features/leads/components/signups-page'
+import { redirect } from 'next/navigation'
 
 export default function LeadsSignupsPage() {
-  return <SignupsPage />
+  redirect('/leads')
 }

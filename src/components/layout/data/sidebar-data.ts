@@ -20,6 +20,7 @@ import {
   MdHelpOutline,
   MdPersonAdd,
   MdInbox,
+  MdAccountBalance,
 } from 'react-icons/md'
 import { type NavGroup, type User, type Team } from '../types'
 import { ROLES } from '@/lib/rbac/types'
@@ -114,6 +115,7 @@ export const sidebarNavGroups: NavGroup[] = [
       { title: 'Purchases', url: '/purchases', icon: MdShoppingCart },
       { title: 'Invoices', url: '/invoices', icon: MdDescription },
       { title: 'Payments', url: '/payments', icon: MdCreditCard },
+      { title: 'Accounting', url: '/accounting', icon: MdAccountBalance },
     ],
   },
   {

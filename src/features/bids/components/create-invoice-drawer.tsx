@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -57,19 +58,16 @@ export function CreateInvoiceDrawer({
 }: CreateInvoiceDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [invoiceType, setInvoiceType] = useState<'full' | 'deposit' | 'balance'>('full')
-  const [shippingCost, setShippingCost] = useState('')
-  const [additionalFees, setAdditionalFees] = useState('')
-  const [discount, setDiscount] = useState('')
+  const [shippingCost, setShippingCost] = useState<number>(0)
+  const [additionalFees, setAdditionalFees] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
   const [notes, setNotes] = useState('')
 
   // Calculate totals
   const bidAmount = bid?.amount || 0
   const serviceFee = bid?.serviceFee || 0
-  const shippingAmount = Number(shippingCost) || 0
-  const additionalAmount = Number(additionalFees) || 0
-  const discountAmount = Number(discount) || 0
-  const subtotal = bidAmount + serviceFee + shippingAmount + additionalAmount
-  const total = subtotal - discountAmount
+  const subtotal = bidAmount + serviceFee + shippingCost + additionalFees
+  const total = subtotal - discount
 
   const handleCreateInvoice = async () => {
     setIsSubmitting(true)
@@ -86,9 +84,9 @@ export function CreateInvoiceDrawer({
 
   const resetForm = () => {
     setInvoiceType('full')
-    setShippingCost('')
-    setAdditionalFees('')
-    setDiscount('')
+    setShippingCost(0)
+    setAdditionalFees(0)
+    setDiscount(0)
     setNotes('')
   }
 
@@ -209,29 +207,26 @@ export function CreateInvoiceDrawer({
                   <div className='space-y-3'>
                     <div className='space-y-1'>
                       <Label className='text-sm'>Shipping Cost</Label>
-                      <Input
-                        type='number'
+                      <NumericInput
                         placeholder='0'
                         value={shippingCost}
-                        onChange={(e) => setShippingCost(e.target.value)}
+                        onChange={setShippingCost}
                       />
                     </div>
                     <div className='space-y-1'>
                       <Label className='text-sm'>Additional Fees</Label>
-                      <Input
-                        type='number'
+                      <NumericInput
                         placeholder='0'
                         value={additionalFees}
-                        onChange={(e) => setAdditionalFees(e.target.value)}
+                        onChange={setAdditionalFees}
                       />
                     </div>
                     <div className='space-y-1'>
                       <Label className='text-sm'>Discount</Label>
-                      <Input
-                        type='number'
+                      <NumericInput
                         placeholder='0'
                         value={discount}
-                        onChange={(e) => setDiscount(e.target.value)}
+                        onChange={setDiscount}
                       />
                     </div>
                   </div>
@@ -244,10 +239,10 @@ export function CreateInvoiceDrawer({
                       <span>Subtotal</span>
                       <span>{formatPrice(subtotal)}</span>
                     </div>
-                    {discountAmount > 0 && (
+                    {discount > 0 && (
                       <div className='flex items-center justify-between text-sm text-green-600'>
                         <span>Discount</span>
-                        <span>-{formatPrice(discountAmount)}</span>
+                        <span>-{formatPrice(discount)}</span>
                       </div>
                     )}
                     <div className='flex items-center justify-between text-lg font-bold'>

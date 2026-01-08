@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { Leads } from '@/features/leads'
 
 export default function LeadsPage() {
-  redirect('/leads/inquiries')
+  return <Leads />
 }

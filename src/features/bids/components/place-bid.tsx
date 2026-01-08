@@ -9,6 +9,7 @@ import { Search } from '@/components/search'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Badge } from '@/components/ui/badge'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
@@ -232,8 +233,8 @@ export function PlaceBid() {
   const [customerBids, setCustomerBids] = useState<CustomerBid[]>([])
   const [selectedBid, setSelectedBid] = useState<CustomerBid | null>(null)
   const [isPlaceBidModalOpen, setIsPlaceBidModalOpen] = useState(false)
-  const [bidAmount, setBidAmount] = useState('')
-  const [maxBidAmount, setMaxBidAmount] = useState('')
+  const [bidAmount, setBidAmount] = useState<number>(0)
+  const [maxBidAmount, setMaxBidAmount] = useState<number>(0)
   const [bidNotes, setBidNotes] = useState('')
 
   const handleCustomerSearch = () => {
@@ -283,23 +284,22 @@ export function PlaceBid() {
   const handleOpenPlaceBid = (bid: CustomerBid) => {
     setSelectedBid(bid)
     const suggestedBid = bid.highestBid + 500
-    setBidAmount(suggestedBid.toString())
+    setBidAmount(suggestedBid)
     setIsPlaceBidModalOpen(true)
   }
 
   const handlePlaceBid = () => {
     if (!selectedBid || !bidAmount) return
 
-    const amount = parseFloat(bidAmount)
-    if (amount <= selectedBid.highestBid) {
+    if (bidAmount <= selectedBid.highestBid) {
       toast.error('Bid must be higher than current highest bid')
       return
     }
 
-    toast.success(`Bid of ¥${amount.toLocaleString()} placed successfully`)
+    toast.success(`Bid of ¥${bidAmount.toLocaleString()} placed successfully`)
 
-    setBidAmount('')
-    setMaxBidAmount('')
+    setBidAmount(0)
+    setMaxBidAmount(0)
     setBidNotes('')
     setIsPlaceBidModalOpen(false)
   }
@@ -553,13 +553,11 @@ export function PlaceBid() {
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="bidAmount">Bid Amount (¥)</Label>
-                      <Input
+                      <NumericInput
                         id="bidAmount"
-                        type="number"
                         placeholder="Enter bid amount"
                         value={bidAmount}
-                        onChange={(e) => setBidAmount(e.target.value)}
-                        min={selectedBid.highestBid + 100}
+                        onChange={setBidAmount}
                       />
                       <p className="text-xs text-muted-foreground">
                         Minimum bid: ¥{(selectedBid.highestBid + 100).toLocaleString()}
@@ -568,12 +566,11 @@ export function PlaceBid() {
 
                     <div className="space-y-2">
                       <Label htmlFor="maxBidAmount">Max Bid Amount (Optional)</Label>
-                      <Input
+                      <NumericInput
                         id="maxBidAmount"
-                        type="number"
                         placeholder="Set maximum for auto-bidding"
                         value={maxBidAmount}
-                        onChange={(e) => setMaxBidAmount(e.target.value)}
+                        onChange={setMaxBidAmount}
                       />
                       <p className="text-xs text-muted-foreground">
                         System will automatically bid up to this amount
@@ -607,7 +604,7 @@ export function PlaceBid() {
                 </Button>
                 <Button
                   onClick={handlePlaceBid}
-                  disabled={!bidAmount || parseFloat(bidAmount) <= (selectedBid?.highestBid || 0)}
+                  disabled={!bidAmount || bidAmount <= (selectedBid?.highestBid || 0)}
                 >
                   Place Bid
                 </Button>

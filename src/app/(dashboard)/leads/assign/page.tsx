@@ -1,7 +1,5 @@
-'use client'
-
-import { AssignPage } from '@/features/leads/components/assign-page'
+import { redirect } from 'next/navigation'
 
 export default function LeadsAssignPage() {
-  return <AssignPage />
+  redirect('/leads')
 }

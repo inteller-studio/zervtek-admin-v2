@@ -11,8 +11,28 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
-import { Collapsible, CollapsibleContent } from '@/components/ui/collapsible'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
+import { Switch } from '@/components/ui/switch'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -42,7 +62,12 @@ import {
   MdRefresh,
   MdSearch,
   MdSettings,
+  MdTune,
+  MdClose,
+  MdExpandMore,
+  MdHelp,
 } from 'react-icons/md'
+import { cn } from '@/lib/utils'
 import { vehicles as initialVehicles, vendorVehicles as initialVendorVehicles, vendorPartners, type Vehicle, type VehicleSource } from './data/vehicles'
 
 
@@ -79,9 +104,21 @@ export function StockVehicles() {
   const [itemsPerPage, setItemsPerPage] = useState(20)
 
   // Advanced filter states
+  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false)
+  const [make, setMake] = useState('')
+  const [model, setModel] = useState('')
   const [selectedMakes, setSelectedMakes] = useState<string[]>([])
   const [selectedTransmissions, setSelectedTransmissions] = useState<string[]>([])
   const [selectedColors, setSelectedColors] = useState<string[]>([])
+  const [yearFrom, setYearFrom] = useState('')
+  const [yearTo, setYearTo] = useState('')
+  const [priceFrom, setPriceFrom] = useState<number>(0)
+  const [priceTo, setPriceTo] = useState<number>(0)
+  const [mileageFrom, setMileageFrom] = useState<number>(0)
+  const [mileageTo, setMileageTo] = useState<number>(0)
+  const [showMoreFilters, setShowMoreFilters] = useState(false)
+
+  // Keep old range states for compatibility
   const [yearRange, setYearRange] = useState([2020, 2025])
   const [priceRange, setPriceRange] = useState([0, 10000000])
   const [mileageRange, setMileageRange] = useState([0, 200000])
@@ -90,6 +127,21 @@ export function StockVehicles() {
   const uniqueMakes = [...new Set(vehicles.map((v) => v.make))].sort()
   const uniqueColors = [...new Set(vehicles.map((v) => v.exteriorColor))].filter(c => c && c !== 'Unknown').sort()
   const uniqueTransmissions = [...new Set(vehicles.map((v) => v.transmission))].filter(Boolean).sort()
+
+  // Available models based on selected make
+  const availableModels = useMemo(() => {
+    if (!make) return []
+    const models = new Set(
+      vehicles
+        .filter(v => v.make === make)
+        .map(v => v.model)
+    )
+    return Array.from(models).filter(Boolean).sort()
+  }, [make, vehicles])
+
+  // Year options
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 30 }, (_, i) => currentYear - i)
 
   // Filter logic
   const filteredVehicles = useMemo(() => {
@@ -102,25 +154,42 @@ export function StockVehicles() {
 
       const matchesTab = activeTab === 'all' || vehicle.status === activeTab
 
+      // Make & Model filters (from advanced modal)
+      const matchesMakeDropdown = !make || vehicle.make === make
+      const matchesModelDropdown = !model || vehicle.model === model
+
       // Advanced filters
       const matchesMake = selectedMakes.length === 0 || selectedMakes.includes(vehicle.make)
       const matchesTransmission =
         selectedTransmissions.length === 0 || selectedTransmissions.includes(vehicle.transmission)
       const matchesColor = selectedColors.length === 0 || selectedColors.includes(vehicle.exteriorColor)
-      const matchesYear = vehicle.year >= yearRange[0] && vehicle.year <= yearRange[1]
-      const matchesPrice = vehicle.price >= priceRange[0] && vehicle.price <= priceRange[1]
-      const matchesMileage =
-        vehicle.mileage >= mileageRange[0] && vehicle.mileage <= mileageRange[1]
+
+      // Year filter (from advanced modal inputs)
+      const matchesYearFrom = !yearFrom || vehicle.year >= parseInt(yearFrom)
+      const matchesYearTo = !yearTo || vehicle.year <= parseInt(yearTo)
+
+      // Price filter (from advanced modal inputs)
+      const matchesPriceFrom = !priceFrom || vehicle.price >= priceFrom
+      const matchesPriceTo = !priceTo || vehicle.price <= priceTo
+
+      // Mileage filter (from advanced modal inputs)
+      const matchesMileageFrom = !mileageFrom || vehicle.mileage >= mileageFrom
+      const matchesMileageTo = !mileageTo || vehicle.mileage <= mileageTo
 
       return (
         matchesSearch &&
         matchesTab &&
+        matchesMakeDropdown &&
+        matchesModelDropdown &&
         matchesMake &&
         matchesTransmission &&
         matchesColor &&
-        matchesYear &&
-        matchesPrice &&
-        matchesMileage
+        matchesYearFrom &&
+        matchesYearTo &&
+        matchesPriceFrom &&
+        matchesPriceTo &&
+        matchesMileageFrom &&
+        matchesMileageTo
       )
     })
 
@@ -149,12 +218,17 @@ export function StockVehicles() {
     vehicles,
     searchQuery,
     activeTab,
+    make,
+    model,
     selectedMakes,
     selectedTransmissions,
     selectedColors,
-    yearRange,
-    priceRange,
-    mileageRange,
+    yearFrom,
+    yearTo,
+    priceFrom,
+    priceTo,
+    mileageFrom,
+    mileageTo,
     sortBy,
   ])
 
@@ -171,12 +245,17 @@ export function StockVehicles() {
 
   const clearFilters = () => {
     setSearchQuery('')
+    setMake('')
+    setModel('')
     setSelectedMakes([])
     setSelectedTransmissions([])
     setSelectedColors([])
-    setYearRange([2020, 2025])
-    setPriceRange([0, 10000000])
-    setMileageRange([0, 200000])
+    setYearFrom('')
+    setYearTo('')
+    setPriceFrom(0)
+    setPriceTo(0)
+    setMileageFrom(0)
+    setMileageTo(0)
     setActiveTab('all')
     setSortBy('newest')
     resetPagination()
@@ -195,16 +274,22 @@ export function StockVehicles() {
     }
   }
 
-  const hasActiveFilters =
-    selectedMakes.length > 0 ||
-    selectedTransmissions.length > 0 ||
-    selectedColors.length > 0 ||
-    yearRange[0] !== 2020 ||
-    yearRange[1] !== 2025 ||
-    priceRange[0] !== 0 ||
-    priceRange[1] !== 10000000 ||
-    mileageRange[0] !== 0 ||
-    mileageRange[1] !== 200000
+  // Calculate active filter count
+  const activeFilterCount = [
+    make,
+    model,
+    selectedMakes.length > 0,
+    selectedTransmissions.length > 0,
+    selectedColors.length > 0,
+    yearFrom,
+    yearTo,
+    priceFrom,
+    priceTo,
+    mileageFrom,
+    mileageTo,
+  ].filter(Boolean).length
+
+  const hasActiveFilters = activeFilterCount > 0
 
   // Main source tabs configuration
   const mainTabs: TabItem[] = useMemo(() => [
@@ -324,164 +409,26 @@ export function StockVehicles() {
                 </Button>
               </div>
               <Button
-                variant={isFilterOpen ? 'default' : 'outline'}
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className='relative'
+                variant={activeFilterCount > 0 ? 'default' : 'outline'}
+                onClick={() => setIsAdvancedOpen(true)}
+                className='gap-2'
               >
-                <MdFilterList className='mr-2 h-4 w-4' />
-                Filters
-                {hasActiveFilters && (
-                  <span className='absolute -right-1 -top-1 h-3 w-3 rounded-full bg-primary' />
+                <MdTune className='h-4 w-4' />
+                Advanced
+                {activeFilterCount > 0 && (
+                  <Badge variant='secondary' className='ml-1 h-5 w-5 rounded-full p-0 text-xs'>
+                    {activeFilterCount}
+                  </Badge>
                 )}
               </Button>
               {hasActiveFilters && (
                 <Button variant='ghost' size='sm' onClick={clearFilters}>
-                  <MdRefresh className='mr-2 h-4 w-4' />
+                  <MdClose className='mr-2 h-4 w-4' />
                   Clear
                 </Button>
               )}
             </div>
           </div>
-
-          {/* Advanced Filters Panel */}
-          <Collapsible open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <CollapsibleContent>
-              <Card>
-                <CardContent className='pt-6'>
-                  <div className='grid gap-6 md:grid-cols-3 lg:grid-cols-4'>
-                    {/* Make Filter */}
-                    <div className='space-y-3'>
-                      <Label>Vehicle Make</Label>
-                      <div className='max-h-48 space-y-2 overflow-y-auto'>
-                        {uniqueMakes.map((make) => (
-                          <div key={make} className='flex items-center space-x-2'>
-                            <Checkbox
-                              checked={selectedMakes.includes(make)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedMakes([...selectedMakes, make])
-                                } else {
-                                  setSelectedMakes(selectedMakes.filter((m) => m !== make))
-                                }
-                                resetPagination()
-                              }}
-                            />
-                            <Label className='cursor-pointer text-sm font-normal'>{make}</Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Transmission Filter */}
-                    <div className='space-y-3'>
-                      <Label>Transmission</Label>
-                      <div className='space-y-2'>
-                        {uniqueTransmissions.map((transmission) => (
-                          <div key={transmission} className='flex items-center space-x-2'>
-                            <Checkbox
-                              checked={selectedTransmissions.includes(transmission)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedTransmissions([...selectedTransmissions, transmission])
-                                } else {
-                                  setSelectedTransmissions(
-                                    selectedTransmissions.filter((t) => t !== transmission)
-                                  )
-                                }
-                                resetPagination()
-                              }}
-                            />
-                            <Label className='cursor-pointer text-sm font-normal capitalize'>
-                              {transmission === 'cvt' ? 'CVT' : transmission}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Color Filter */}
-                    <div className='space-y-3'>
-                      <Label>Exterior Color</Label>
-                      <div className='max-h-48 space-y-2 overflow-y-auto'>
-                        {uniqueColors.map((color) => (
-                          <div key={color} className='flex items-center space-x-2'>
-                            <Checkbox
-                              checked={selectedColors.includes(color)}
-                              onCheckedChange={(checked) => {
-                                if (checked) {
-                                  setSelectedColors([...selectedColors, color])
-                                } else {
-                                  setSelectedColors(selectedColors.filter((c) => c !== color))
-                                }
-                                resetPagination()
-                              }}
-                            />
-                            <Label className='cursor-pointer text-sm font-normal'>
-                              {color}
-                            </Label>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Year Range */}
-                    <div className='space-y-3'>
-                      <Label>
-                        Year: {yearRange[0]} - {yearRange[1]}
-                      </Label>
-                      <Slider
-                        value={yearRange}
-                        onValueChange={(value) => {
-                          setYearRange(value)
-                          resetPagination()
-                        }}
-                        min={2015}
-                        max={2025}
-                        step={1}
-                        className='w-full'
-                      />
-                    </div>
-
-                    {/* Price Range */}
-                    <div className='space-y-3'>
-                      <Label>
-                        Price: ¥{priceRange[0].toLocaleString()} - ¥{priceRange[1].toLocaleString()}
-                      </Label>
-                      <Slider
-                        value={priceRange}
-                        onValueChange={(value) => {
-                          setPriceRange(value)
-                          resetPagination()
-                        }}
-                        min={0}
-                        max={10000000}
-                        step={100000}
-                        className='w-full'
-                      />
-                    </div>
-
-                    {/* Mileage Range */}
-                    <div className='space-y-3'>
-                      <Label>
-                        Mileage: {mileageRange[0].toLocaleString()} - {mileageRange[1].toLocaleString()} km
-                      </Label>
-                      <Slider
-                        value={mileageRange}
-                        onValueChange={(value) => {
-                          setMileageRange(value)
-                          resetPagination()
-                        }}
-                        min={0}
-                        max={200000}
-                        step={5000}
-                        className='w-full'
-                      />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </CollapsibleContent>
-          </Collapsible>
 
           {/* Status Tabs */}
           <AnimatedTabs
@@ -493,33 +440,6 @@ export function StockVehicles() {
             }}
             variant='compact'
           />
-        </div>
-
-        {/* Results count and items per page */}
-        <div className='flex items-center justify-between'>
-          <p className='text-sm text-muted-foreground'>
-            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredVehicles.length)} of {filteredVehicles.length} vehicles
-          </p>
-          <div className='flex items-center gap-2'>
-            <Label className='text-sm'>Items per page:</Label>
-            <Select
-              value={itemsPerPage.toString()}
-              onValueChange={(value) => {
-                setItemsPerPage(Number(value))
-                setCurrentPage(1)
-              }}
-            >
-              <SelectTrigger className='w-20'>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='20'>20</SelectItem>
-                <SelectItem value='40'>40</SelectItem>
-                <SelectItem value='60'>60</SelectItem>
-                <SelectItem value='100'>100</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
         </div>
 
         {/* Vehicle Grid / List View */}
@@ -681,6 +601,35 @@ export function StockVehicles() {
             </CardContent>
           </Card>
         )}
+
+        {/* Results count and items per page */}
+        <div className='flex items-center justify-between pt-4'>
+          <p className='text-sm text-muted-foreground'>
+            Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, filteredVehicles.length)} of {filteredVehicles.length} vehicles
+            <span className='mx-2'>•</span>
+            <span className='text-green-600 font-medium'>{filteredVehicles.filter(v => v.status === 'available').length} in stock</span>
+          </p>
+          <div className='flex items-center gap-2'>
+            <Label className='text-sm'>Items per page:</Label>
+            <Select
+              value={itemsPerPage.toString()}
+              onValueChange={(value) => {
+                setItemsPerPage(Number(value))
+                setCurrentPage(1)
+              }}
+            >
+              <SelectTrigger className='w-20'>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value='20'>20</SelectItem>
+                <SelectItem value='40'>40</SelectItem>
+                <SelectItem value='60'>60</SelectItem>
+                <SelectItem value='100'>100</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -865,6 +814,256 @@ export function StockVehicles() {
           closeVehicleModal()
         }}
       />
+
+      {/* Advanced Search Dialog */}
+      <Dialog open={isAdvancedOpen} onOpenChange={setIsAdvancedOpen}>
+        <DialogContent className='sm:max-w-3xl w-[90vw] max-h-[85vh] overflow-hidden !flex !flex-col !gap-0 p-0'>
+          <DialogHeader className='flex-shrink-0 p-6 pb-4 border-b'>
+            <div className='flex items-center justify-between'>
+              <DialogTitle className='text-lg'>Advanced Search</DialogTitle>
+              {activeFilterCount > 0 && (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  onClick={clearFilters}
+                  className='text-muted-foreground hover:text-foreground h-8'
+                >
+                  Clear all
+                </Button>
+              )}
+            </div>
+            <DialogDescription>
+              Refine your search with additional filters
+            </DialogDescription>
+          </DialogHeader>
+
+          {/* Scrollable Content */}
+          <div className='flex-1 overflow-y-auto px-6 py-4 space-y-6'>
+
+            {/* Make & Model */}
+            <div className='space-y-3'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Make & Model</h3>
+              <div className='grid grid-cols-2 gap-4'>
+                {/* Make Filter */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Make</Label>
+                  <Select value={make} onValueChange={(value) => {
+                    setMake(value === 'any' ? '' : value)
+                    setModel('')
+                  }}>
+                    <SelectTrigger className='h-9 w-full'>
+                      <MdDirectionsCar className='mr-2 h-4 w-4 text-muted-foreground' />
+                      <SelectValue placeholder='Any Make' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='any'>Any Make</SelectItem>
+                      {uniqueMakes.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Model Filter */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Model</Label>
+                  <Select
+                    value={model}
+                    onValueChange={(value) => {
+                      setModel(value === 'any' ? '' : value)
+                    }}
+                    disabled={!make}
+                  >
+                    <SelectTrigger className={cn('h-9 w-full', !make && 'opacity-50')}>
+                      <MdSettings className='mr-2 h-4 w-4 text-muted-foreground' />
+                      <SelectValue placeholder={make ? 'Any Model' : 'Select make first'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='any'>Any Model</SelectItem>
+                      {availableModels.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Year */}
+            <div className='space-y-3'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Year</h3>
+              <div className='grid grid-cols-2 gap-4'>
+                <Select value={yearFrom} onValueChange={(v) => setYearFrom(v === 'any' ? '' : v)}>
+                  <SelectTrigger className='h-9 w-full'>
+                    <SelectValue placeholder='From' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='any'>Any</SelectItem>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={yearTo} onValueChange={(v) => setYearTo(v === 'any' ? '' : v)}>
+                  <SelectTrigger className='h-9 w-full'>
+                    <SelectValue placeholder='To' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='any'>Any</SelectItem>
+                    {years.map(year => (
+                      <SelectItem key={year} value={year.toString()}>{year}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Price & Mileage */}
+            <div className='space-y-3'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Price & Mileage</h3>
+              <div className='grid grid-cols-2 gap-4'>
+                {/* Price Range */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Price (¥)</Label>
+                  <div className='flex gap-2'>
+                    <NumericInput
+                      value={priceFrom}
+                      onChange={setPriceFrom}
+                      placeholder='Min'
+                      className='h-9 rounded-lg'
+                    />
+                    <NumericInput
+                      value={priceTo}
+                      onChange={setPriceTo}
+                      placeholder='Max'
+                      className='h-9 rounded-lg'
+                    />
+                  </div>
+                </div>
+
+                {/* Mileage Range */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Mileage (km)</Label>
+                  <div className='flex gap-2'>
+                    <NumericInput
+                      value={mileageFrom}
+                      onChange={setMileageFrom}
+                      placeholder='Min'
+                      className='h-9 rounded-lg'
+                    />
+                    <NumericInput
+                      value={mileageTo}
+                      onChange={setMileageTo}
+                      placeholder='Max'
+                      className='h-9 rounded-lg'
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Transmission - Pill Toggles */}
+            <div className='space-y-3'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Transmission</h3>
+              <div className='flex flex-wrap gap-2'>
+                {uniqueTransmissions.map((trans) => (
+                  <button
+                    key={trans}
+                    type='button'
+                    onClick={() => {
+                      if (selectedTransmissions.includes(trans)) {
+                        setSelectedTransmissions(selectedTransmissions.filter(t => t !== trans))
+                      } else {
+                        setSelectedTransmissions([...selectedTransmissions, trans])
+                      }
+                    }}
+                    className={cn(
+                      'px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-150 border',
+                      selectedTransmissions.includes(trans)
+                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                        : 'bg-background hover:bg-muted border-border hover:border-muted-foreground/30'
+                    )}
+                  >
+                    {trans === 'cvt' ? 'CVT' : trans}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* More Filters - Collapsible */}
+            <Collapsible open={showMoreFilters} onOpenChange={setShowMoreFilters}>
+              <CollapsibleTrigger asChild>
+                <button
+                  type='button'
+                  className='flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors duration-150'
+                >
+                  <MdExpandMore className={cn('w-4 h-4 transition-transform duration-150', showMoreFilters && 'rotate-180')} />
+                  {showMoreFilters ? 'Show less' : 'Show more filters'}
+                </button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className='space-y-6 pt-6'>
+
+                {/* Color Filter */}
+                <div className='space-y-3'>
+                  <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Exterior Color</h3>
+                  <div className='grid grid-cols-3 md:grid-cols-4 gap-2'>
+                    {uniqueColors.map((color) => (
+                      <label
+                        key={color}
+                        className={cn(
+                          'flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-all duration-150 border',
+                          selectedColors.includes(color)
+                            ? 'bg-muted border-primary/50'
+                            : 'hover:bg-muted/50 border-border hover:border-muted-foreground/30'
+                        )}
+                      >
+                        <Checkbox
+                          checked={selectedColors.includes(color)}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setSelectedColors([...selectedColors, color])
+                            } else {
+                              setSelectedColors(selectedColors.filter(c => c !== color))
+                            }
+                          }}
+                        />
+                        <span className='text-sm'>{color}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+              </CollapsibleContent>
+            </Collapsible>
+
+          </div>
+
+          {/* Footer */}
+          <DialogFooter className='flex-shrink-0 border-t p-6 pt-4 bg-muted/30'>
+            <div className='flex w-full items-center justify-between'>
+              <div className='flex items-center gap-2'>
+                <span className='text-sm font-medium'>
+                  {filteredVehicles.length}
+                </span>
+                <span className='text-sm text-muted-foreground'>
+                  {filteredVehicles.length === 1 ? 'vehicle found' : 'vehicles found'}
+                </span>
+              </div>
+              <div className='flex gap-2'>
+                <Button variant='outline' onClick={() => setIsAdvancedOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => {
+                  resetPagination()
+                  setIsAdvancedOpen(false)
+                }}>
+                  Apply Filters
+                </Button>
+              </div>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

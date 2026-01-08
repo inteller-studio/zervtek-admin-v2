@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import type { Bid } from '../../data/bids'
 
@@ -65,12 +65,11 @@ export function UnsoldDialog({
           )}
           <div className='space-y-2'>
             <Label htmlFor='unsoldPrice'>Unsold Price (¥)</Label>
-            <Input
+            <NumericInput
               id='unsoldPrice'
-              type='number'
               placeholder='Enter final price'
-              value={unsoldPrice}
-              onChange={(e) => onUnsoldPriceChange(e.target.value)}
+              value={unsoldPrice ? parseInt(unsoldPrice) : 0}
+              onChange={(v) => onUnsoldPriceChange(v.toString())}
             />
             <p className='text-xs text-muted-foreground'>
               The price at which the vehicle remained unsold (reserve not met)
@@ -78,12 +77,11 @@ export function UnsoldDialog({
           </div>
           <div className='space-y-2'>
             <Label htmlFor='negoStartPrice'>Starting Negotiating Price (¥)</Label>
-            <Input
+            <NumericInput
               id='negoStartPrice'
-              type='number'
               placeholder='Enter starting nego price'
-              value={negoStartPrice}
-              onChange={(e) => onNegoStartPriceChange(e.target.value)}
+              value={negoStartPrice ? parseInt(negoStartPrice) : 0}
+              onChange={(v) => onNegoStartPriceChange(v.toString())}
             />
             <p className='text-xs text-muted-foreground'>
               The price at which post-auction negotiation can begin

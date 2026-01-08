@@ -63,6 +63,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import {
   Select,
@@ -1044,11 +1045,10 @@ export function Requests() {
                       </div>
                       <div>
                         <label className='text-sm font-medium'>Year</label>
-                        <Input
-                          type='number'
+                        <NumericInput
                           placeholder='2024'
-                          value={newRequest.vehicleYear}
-                          onChange={(e) => setNewRequest({ ...newRequest, vehicleYear: e.target.value })}
+                          value={newRequest.vehicleYear ? parseInt(newRequest.vehicleYear) : 0}
+                          onChange={(v) => setNewRequest({ ...newRequest, vehicleYear: v.toString() })}
                         />
                       </div>
                       <div>

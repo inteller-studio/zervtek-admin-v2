@@ -1,11 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, FormEvent } from 'react'
 import { format } from 'date-fns'
-import { MdCreditCard, MdAdd, MdDelete, MdReceipt } from 'react-icons/md'
+import { MdCreditCard, MdAdd, MdDelete, MdReceipt, MdSync } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -48,6 +49,7 @@ export function PaymentProcessingStage({
 }: PaymentProcessingStageProps) {
   const stage = workflow.stages.paymentProcessing
   const [dialogOpen, setDialogOpen] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [newPayment, setNewPayment] = useState<Partial<WorkflowPayment>>({
     method: 'bank_transfer',
     amount: 0,
@@ -55,14 +57,17 @@ export function PaymentProcessingStage({
     notes: '',
   })
 
-  const handleAddPayment = () => {
-    if (!newPayment.amount || !newPayment.referenceNumber) return
+  const handleAddPayment = (e?: FormEvent) => {
+    e?.preventDefault()
+    if (!newPayment.amount || isSubmitting) return
+
+    setIsSubmitting(true)
 
     const payment: WorkflowPayment = {
       id: crypto.randomUUID(),
       amount: newPayment.amount,
       method: newPayment.method as WorkflowPayment['method'],
-      referenceNumber: newPayment.referenceNumber,
+      referenceNumber: newPayment.referenceNumber || '',
       receivedAt: new Date(),
       recordedBy: currentUser,
       notes: newPayment.notes,
@@ -86,6 +91,7 @@ export function PaymentProcessingStage({
       referenceNumber: '',
       notes: '',
     })
+    setIsSubmitting(false)
   }
 
   const handleRemovePayment = (paymentId: string) => {
@@ -172,15 +178,15 @@ export function PaymentProcessingStage({
                   Add a new payment received from the customer.
                 </DialogDescription>
               </DialogHeader>
-              <div className='space-y-4 py-4'>
+              <form onSubmit={handleAddPayment} className='space-y-4 py-4'>
                 <div className='space-y-2'>
                   <Label>Amount (¥)</Label>
-                  <Input
-                    type='number'
+                  <NumericInput
+                    autoFocus
                     placeholder='0'
-                    value={newPayment.amount || ''}
-                    onChange={(e) =>
-                      setNewPayment({ ...newPayment, amount: Number(e.target.value) })
+                    value={newPayment.amount || 0}
+                    onChange={(value) =>
+                      setNewPayment({ ...newPayment, amount: value })
                     }
                   />
                 </div>
@@ -208,7 +214,7 @@ export function PaymentProcessingStage({
                   </Select>
                 </div>
                 <div className='space-y-2'>
-                  <Label>Reference Number</Label>
+                  <Label>Reference Number (Optional)</Label>
                   <Input
                     placeholder='Transaction ID, check number, etc.'
                     value={newPayment.referenceNumber || ''}
@@ -225,20 +231,39 @@ export function PaymentProcessingStage({
                     onChange={(e) =>
                       setNewPayment({ ...newPayment, notes: e.target.value })
                     }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault()
+                        if (newPayment.amount && !isSubmitting) {
+                          handleAddPayment()
+                        }
+                      }
+                    }}
                   />
+                  <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
                 </div>
-              </div>
-              <DialogFooter>
-                <Button variant='outline' onClick={() => setDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleAddPayment}
-                  disabled={!newPayment.amount || !newPayment.referenceNumber}
-                >
-                  Add Payment
-                </Button>
-              </DialogFooter>
+                <DialogFooter>
+                  <Button type='button' variant='outline' onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
+                    Cancel
+                  </Button>
+                  <Button
+                    type='submit'
+                    disabled={!newPayment.amount || isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <MdSync className='mr-2 h-4 w-4 animate-spin' />
+                        Adding...
+                      </>
+                    ) : (
+                      <>
+                        Add Payment
+                        <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
+                      </>
+                    )}
+                  </Button>
+                </DialogFooter>
+              </form>
             </DialogContent>
           </Dialog>
         </div>
@@ -265,7 +290,7 @@ export function PaymentProcessingStage({
                     </Badge>
                   </div>
                   <p className='text-xs text-muted-foreground'>
-                    Ref: {payment.referenceNumber} •{' '}
+                    {payment.referenceNumber && <>Ref: {payment.referenceNumber} • </>}
                     {format(new Date(payment.receivedAt), 'MMM d, yyyy')}
                   </p>
                   {payment.notes && (

@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { MdAttachMoney } from 'react-icons/md'
+import { MdAttachMoney, MdSync } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Textarea } from '@/components/ui/textarea'
 import {
   Select,
@@ -64,6 +65,7 @@ export function RecordPaymentDialog({
   auction,
   onSubmit,
 }: RecordPaymentDialogProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const form = useForm<PaymentForm>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
@@ -94,7 +96,7 @@ export function RecordPaymentDialog({
   const outstandingBalance = auction.totalAmount - auction.paidAmount
   const paymentProgress = (auction.paidAmount / auction.totalAmount) * 100
 
-  const handleSubmit = (data: PaymentForm) => {
+  const handleSubmit = async (data: PaymentForm) => {
     if (data.amount > outstandingBalance) {
       form.setError('amount', {
         message: `Amount cannot exceed outstanding balance of ¥${outstandingBalance.toLocaleString()}`,
@@ -102,20 +104,26 @@ export function RecordPaymentDialog({
       return
     }
 
-    onSubmit(auction.id, {
-      amount: data.amount,
-      method: data.method,
-      date: data.date,
-      referenceNumber: data.referenceNumber,
-      notes: data.notes,
-    })
+    setIsSubmitting(true)
 
-    toast.success('Payment recorded successfully', {
-      description: `¥${data.amount.toLocaleString()} payment recorded for ${auction.auctionId}`,
-    })
+    try {
+      onSubmit(auction.id, {
+        amount: data.amount,
+        method: data.method,
+        date: data.date,
+        referenceNumber: data.referenceNumber,
+        notes: data.notes,
+      })
 
-    form.reset()
-    onOpenChange(false)
+      toast.success('Payment recorded successfully', {
+        description: `¥${data.amount.toLocaleString()} payment recorded for ${auction.auctionId}`,
+      })
+
+      form.reset()
+      onOpenChange(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -185,14 +193,11 @@ export function RecordPaymentDialog({
                   <FormItem>
                     <FormLabel>Payment Amount (¥)</FormLabel>
                     <FormControl>
-                      <Input
-                        type='number'
-                        step='1'
-                        min='1'
-                        max={outstandingBalance}
+                      <NumericInput
+                        autoFocus
                         placeholder={`Max: ${outstandingBalance.toLocaleString()}`}
-                        {...field}
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                        value={field.value}
+                        onChange={field.onChange}
                       />
                     </FormControl>
                     <FormMessage />
@@ -277,12 +282,21 @@ export function RecordPaymentDialog({
             />
 
             <DialogFooter>
-              <Button type='button' variant='outline' onClick={() => onOpenChange(false)}>
+              <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
                 Cancel
               </Button>
-              <Button type='submit' disabled={outstandingBalance <= 0}>
-                <MdAttachMoney className='mr-2 h-4 w-4' />
-                Record Payment
+              <Button type='submit' disabled={outstandingBalance <= 0 || isSubmitting}>
+                {isSubmitting ? (
+                  <>
+                    <MdSync className='mr-2 h-4 w-4 animate-spin' />
+                    Recording...
+                  </>
+                ) : (
+                  <>
+                    <MdAttachMoney className='mr-2 h-4 w-4' />
+                    Record Payment
+                  </>
+                )}
               </Button>
             </DialogFooter>
           </form>

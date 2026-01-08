@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { MdDirectionsBoat } from 'react-icons/md'
+import { useState, FormEvent } from 'react'
+import { MdDirectionsBoat, MdSync } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -40,9 +40,13 @@ export function ShippingUpdateDialog({
   const [carrier, setCarrier] = useState('')
   const [shippingStatus, setShippingStatus] = useState<ShipmentTracking['status']>('preparing')
   const [shippingLocation, setShippingLocation] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = () => {
-    if (!auction || !trackingNumber || !carrier) return
+  const handleSubmit = async (e?: FormEvent) => {
+    e?.preventDefault()
+    if (!auction || !trackingNumber || !carrier || isSubmitting) return
+
+    setIsSubmitting(true)
 
     const newShipment: ShipmentTracking = {
       carrier,
@@ -60,18 +64,22 @@ export function ShippingUpdateDialog({
       ],
     }
 
-    onSubmit(auction.id, newShipment)
+    try {
+      onSubmit(auction.id, newShipment)
 
-    toast.success('Shipping information updated', {
-      description: `Tracking: ${trackingNumber}`,
-    })
+      toast.success('Shipping information updated', {
+        description: `Tracking: ${trackingNumber}`,
+      })
 
-    // Reset form
-    setTrackingNumber('')
-    setCarrier('')
-    setShippingStatus('preparing')
-    setShippingLocation('')
-    onOpenChange(false)
+      // Reset form
+      setTrackingNumber('')
+      setCarrier('')
+      setShippingStatus('preparing')
+      setShippingLocation('')
+      onOpenChange(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (!auction) return null
@@ -87,10 +95,11 @@ export function ShippingUpdateDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className='space-y-4'>
+        <form onSubmit={handleSubmit} className='space-y-4'>
           <div className='space-y-2'>
             <Label>Shipping Carrier</Label>
             <Input
+              autoFocus
               placeholder='e.g., Maersk Line, MSC, CMA CGM'
               value={carrier}
               onChange={(e) => setCarrier(e.target.value)}
@@ -132,17 +141,26 @@ export function ShippingUpdateDialog({
               onChange={(e) => setShippingLocation(e.target.value)}
             />
           </div>
-        </div>
 
-        <DialogFooter>
-          <Button variant='outline' onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleSubmit} disabled={!trackingNumber || !carrier}>
-            <MdDirectionsBoat className='mr-2 h-4 w-4' />
-            Update Shipping
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type='button' variant='outline' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type='submit' disabled={!trackingNumber || !carrier || isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <MdSync className='mr-2 h-4 w-4 animate-spin' />
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <MdDirectionsBoat className='mr-2 h-4 w-4' />
+                  Update Shipping
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

@@ -1,12 +1,14 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MdArrowBack, MdDirectionsCar, MdContentCopy, MdCheck, MdPerson, MdCalendarToday, MdLocationOn, MdChevronLeft, MdChevronRight } from 'react-icons/md'
+import { MdArrowBack, MdDirectionsCar, MdContentCopy, MdCheck, MdPerson, MdCalendarToday, MdLocationOn, MdChevronLeft, MdChevronRight, MdNotes, MdSave } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { type Purchase } from '../../data/won-auctions'
 
@@ -74,6 +76,8 @@ interface PurchasePageHeaderProps {
   vinCopied: boolean
   onBack: () => void
   onCopyVin: () => void
+  notes?: string
+  onNotesUpdate?: (notes: string) => void
 }
 
 export function PurchasePageHeader({
@@ -82,8 +86,24 @@ export function PurchasePageHeader({
   vinCopied,
   onBack,
   onCopyVin,
+  notes = '',
+  onNotesUpdate,
 }: PurchasePageHeaderProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const [localNotes, setLocalNotes] = useState(notes)
+  const [notesOpen, setNotesOpen] = useState(false)
+
+  // Sync local notes when prop changes
+  useEffect(() => {
+    setLocalNotes(notes)
+  }, [notes])
+
+  const handleSaveNotes = () => {
+    if (onNotesUpdate && localNotes !== notes) {
+      onNotesUpdate(localNotes)
+      setNotesOpen(false)
+    }
+  }
   const images = auction.vehicleInfo.images.filter(img => img && img !== '#')
   const hasMultipleImages = images.length > 1
   const isActiveStatus = activeStatuses.includes(auction.status)
@@ -244,7 +264,7 @@ export function PurchasePageHeader({
                 </motion.button>
               </div>
 
-              {/* Badges Row - Status, Auction ID, Destination */}
+              {/* Badges Row - Status, Auction ID, Destination, Notes */}
               <motion.div
                 className='flex items-center gap-2 flex-wrap'
                 initial={{ opacity: 0, y: 5 }}
@@ -286,6 +306,42 @@ export function PurchasePageHeader({
                     <MdLocationOn className='h-3 w-3' />
                     {auction.destinationPort.split(',')[0]}
                   </Badge>
+                )}
+
+                {/* Notes Sheet */}
+                {onNotesUpdate && (
+                  <Sheet open={notesOpen} onOpenChange={setNotesOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant='ghost' size='sm' className='h-7 gap-1.5 px-2 text-muted-foreground hover:text-foreground'>
+                        <MdNotes className='h-4 w-4' />
+                        <span className='text-xs'>Notes</span>
+                        {notes && <span className='h-1.5 w-1.5 rounded-full bg-primary' />}
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side='right' className='w-[400px] sm:w-[450px]'>
+                      <SheetHeader>
+                        <SheetTitle className='flex items-center gap-2'>
+                          <MdNotes className='h-5 w-5' />
+                          Internal Notes
+                        </SheetTitle>
+                      </SheetHeader>
+                      <div className='mt-6 space-y-4'>
+                        <Textarea
+                          placeholder='Add notes about this purchase...'
+                          value={localNotes}
+                          onChange={(e) => setLocalNotes(e.target.value)}
+                          className='min-h-[200px] text-sm'
+                        />
+                        <div className='flex justify-between items-center'>
+                          <p className='text-xs text-muted-foreground'>Visible to staff only</p>
+                          <Button onClick={handleSaveNotes} disabled={localNotes === notes}>
+                            <MdSave className='h-4 w-4 mr-2' />
+                            Save Notes
+                          </Button>
+                        </div>
+                      </div>
+                    </SheetContent>
+                  </Sheet>
                 )}
               </motion.div>
 

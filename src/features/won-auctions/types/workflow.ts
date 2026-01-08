@@ -182,12 +182,36 @@ export interface UnregisteredVehicleTasks {
   exportCertificateCreated: WorkflowTask
 }
 
+/** Accessories sub-items */
+export interface AccessoriesSubItems {
+  remotes: boolean
+  shiftKnobs: boolean
+  floorMats: boolean
+  originalRemote: boolean
+  antenna: boolean
+  jackSet: boolean
+  toolKit: boolean
+}
+
+/** Accessories checklist for vehicles */
+export interface AccessoriesChecklist {
+  spareKeys: boolean
+  maintenanceRecords: boolean
+  manuals: boolean
+  catalogues: boolean
+  accessories: boolean
+  accessoriesSubItems?: AccessoriesSubItems
+  others: boolean
+  othersText?: string
+}
+
 export interface DocumentsReceivedStage {
   status: WorkflowStageStatus
   isRegistered: boolean | null // null = not yet determined
   checklist: DocumentChecklist
   registeredTasks?: RegisteredVehicleTasks
   unregisteredTasks?: UnregisteredVehicleTasks
+  accessories?: AccessoriesChecklist
 }
 
 // ============================================
@@ -212,6 +236,8 @@ export interface BookingStage {
   status: WorkflowStageStatus
   bookingRequested: WorkflowTask
   shippingMethod: ShippingMethod | null
+  shippingAgentId: string | null
+  shippingAgentName?: string
   bookingDetails: BookingDetails
   bookingStatus: BookingStatus
   sentSIAndEC: WorkflowTask // SI = Shipping Instructions, EC = Export Certificate
@@ -271,6 +297,9 @@ export interface WorkflowStages {
 export interface PurchaseWorkflow {
   currentStage: number // 1-8
   stages: WorkflowStages
+  finalized: boolean
+  finalizedAt?: Date
+  finalizedBy?: string
   createdAt: Date
   updatedAt: Date
 }

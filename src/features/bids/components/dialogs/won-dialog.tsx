@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import type { Bid } from '../../data/bids'
 import type { BidActionType } from '../../types'
@@ -70,12 +70,11 @@ export function WonDialog({
           )}
           <div className='space-y-2'>
             <Label htmlFor='wonPrice'>Winning Price (¥)</Label>
-            <Input
+            <NumericInput
               id='wonPrice'
-              type='number'
               placeholder='Enter the winning price'
-              value={wonPrice}
-              onChange={(e) => onWonPriceChange(e.target.value)}
+              value={wonPrice ? parseInt(wonPrice) : 0}
+              onChange={(v) => onWonPriceChange(v.toString())}
             />
             <p className='text-xs text-muted-foreground'>
               {wonType === 'contract_nego'

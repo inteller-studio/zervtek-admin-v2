@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { format } from 'date-fns'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MdCheck, MdPerson, MdAccessTime, MdChat, MdAttachFile, MdClose, MdDescription, MdImage } from 'react-icons/md'
+import { MdCheck, MdPerson, MdAccessTime, MdChat, MdAttachFile, MdClose, MdDescription, MdImage, MdEdit } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -37,6 +37,7 @@ interface WorkflowCheckboxProps {
   disabled?: boolean
   completion?: TaskCompletion
   onCheckedChange: (checked: boolean, notes?: string, attachments?: WorkflowAttachment[]) => void
+  onEdit?: (completion: TaskCompletion) => void
   showNoteOnComplete?: boolean
   showDocumentUpload?: boolean
   currentUser?: string
@@ -51,6 +52,7 @@ export function WorkflowCheckbox({
   disabled = false,
   completion,
   onCheckedChange,
+  onEdit,
   showNoteOnComplete = false,
   showDocumentUpload = false,
   currentUser = 'System',
@@ -159,145 +161,178 @@ export function WorkflowCheckbox({
       {/* Confirmation Modal */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className='sm:max-w-[380px] p-0 gap-0 rounded-2xl overflow-hidden border shadow-2xl bg-background'>
-          {/* Header */}
-          <div className='flex items-center gap-4 p-5 border-b bg-muted/50'>
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
-              className='h-12 w-12 rounded-full bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/20 dark:shadow-emerald-500/20'
-            >
-              <MdCheck className='h-6 w-6 text-white' />
-            </motion.div>
-            <div className='min-w-0'>
-              <motion.p
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.15 }}
-                className='font-semibold text-base text-foreground'
-              >
-                Mark as Complete
-              </motion.p>
-              <motion.p
-                initial={{ opacity: 0, y: 5 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className='text-sm text-muted-foreground truncate'
-              >
-                {label}
-              </motion.p>
-            </div>
-          </div>
-
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.25 }}
-            className='p-5 space-y-4'
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              handleConfirmWithNote()
+            }}
           >
-            {/* Note Section */}
-            {showNoteOnComplete && (
-              <div className='space-y-2'>
-                <label className='text-sm font-medium text-muted-foreground'>
-                  Add a note (optional)
-                </label>
-                <Textarea
-                  placeholder='Add details about this task...'
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  rows={2}
-                  className='resize-none text-sm'
-                  autoFocus={!showDocumentUpload}
-                />
+            {/* Header */}
+            <div className='flex items-center gap-4 p-5 border-b bg-muted/50'>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 15, delay: 0.1 }}
+                className='h-12 w-12 rounded-full bg-emerald-600 dark:bg-emerald-500 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-600/20 dark:shadow-emerald-500/20'
+              >
+                <MdCheck className='h-6 w-6 text-white' />
+              </motion.div>
+              <div className='min-w-0'>
+                <motion.p
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className='font-semibold text-base text-foreground'
+                >
+                  Mark as Complete
+                </motion.p>
+                <motion.p
+                  initial={{ opacity: 0, y: 5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className='text-sm text-muted-foreground truncate'
+                >
+                  {label}
+                </motion.p>
               </div>
-            )}
+            </div>
 
-            {/* Document Upload Section */}
-            {showDocumentUpload && (
-              <div className='space-y-2'>
-                <label className='text-sm font-medium text-muted-foreground'>
-                  Attach documents (optional)
-                </label>
-                <div className='relative'>
-                  <input
-                    type='file'
-                    accept='.pdf,.doc,.docx,.png,.jpg,.jpeg'
-                    multiple
-                    onChange={handleFileSelect}
-                    className='absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10'
+            {/* Content */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.25 }}
+              className='p-5 space-y-4'
+            >
+              {/* Note Section */}
+              {showNoteOnComplete && (
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium text-muted-foreground'>
+                    Add a note (optional)
+                  </label>
+                  <Textarea
+                    placeholder='Add details about this task...'
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    rows={2}
+                    className='resize-none text-sm'
+                    autoFocus={!showDocumentUpload}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault()
+                        handleConfirmWithNote()
+                      }
+                    }}
                   />
-                  <div className='flex items-center justify-center gap-2 py-4 px-3 border-2 border-dashed rounded-lg border-muted-foreground/25 hover:border-muted-foreground/40 transition-colors bg-muted/30'>
-                    <MdAttachFile className='h-5 w-5 text-muted-foreground' />
-                    <span className='text-sm text-muted-foreground'>
-                      Drop files or click to browse
-                    </span>
-                  </div>
+                  <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to complete</p>
                 </div>
+              )}
 
-                {/* File List */}
-                {files.length > 0 && (
-                  <div className='space-y-1.5 mt-2'>
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        className='flex items-center gap-2 p-2 rounded-md border bg-muted/30 text-sm'
-                      >
-                        {file.type.startsWith('image/') ? (
-                          <MdImage className='h-4 w-4 text-muted-foreground shrink-0' />
-                        ) : (
-                          <MdDescription className='h-4 w-4 text-muted-foreground shrink-0' />
-                        )}
-                        <span className='flex-1 truncate'>{file.name}</span>
-                        <span className='text-xs text-muted-foreground shrink-0'>
-                          {formatFileSize(file.size)}
-                        </span>
-                        <button
-                          type='button'
-                          onClick={() => removeFile(file.id)}
-                          className='p-0.5 hover:bg-muted rounded text-muted-foreground hover:text-destructive transition-colors'
-                        >
-                          <MdClose className='h-4 w-4' />
-                        </button>
-                      </div>
-                    ))}
+              {/* Document Upload Section */}
+              {showDocumentUpload && (
+                <div className='space-y-2'>
+                  <label className='text-sm font-medium text-muted-foreground'>
+                    Attach documents (optional)
+                  </label>
+                  <div className='relative'>
+                    <input
+                      type='file'
+                      accept='.pdf,.doc,.docx,.png,.jpg,.jpeg'
+                      multiple
+                      onChange={handleFileSelect}
+                      className='absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10'
+                    />
+                    <div className='flex items-center justify-center gap-2 py-4 px-3 border-2 border-dashed rounded-lg border-muted-foreground/25 hover:border-muted-foreground/40 transition-colors bg-muted/30'>
+                      <MdAttachFile className='h-5 w-5 text-muted-foreground' />
+                      <span className='text-sm text-muted-foreground'>
+                        Drop files or click to browse
+                      </span>
+                    </div>
                   </div>
-                )}
-              </div>
-            )}
-          </motion.div>
 
-          {/* Footer */}
-          <div className='flex justify-end gap-3 p-5 pt-0'>
-            <Button
-              variant='ghost'
-              onClick={handleCancel}
-              className='text-muted-foreground hover:text-foreground'
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmWithNote}
-              className='gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white px-5'
-            >
-              <MdCheck className='h-4 w-4' />
-              Complete
-            </Button>
-          </div>
+                  {/* File List */}
+                  {files.length > 0 && (
+                    <div className='space-y-1.5 mt-2'>
+                      {files.map((file) => (
+                        <div
+                          key={file.id}
+                          className='flex items-center gap-2 p-2 rounded-md border bg-muted/30 text-sm'
+                        >
+                          {file.type.startsWith('image/') ? (
+                            <MdImage className='h-4 w-4 text-muted-foreground shrink-0' />
+                          ) : (
+                            <MdDescription className='h-4 w-4 text-muted-foreground shrink-0' />
+                          )}
+                          <span className='flex-1 truncate'>{file.name}</span>
+                          <span className='text-xs text-muted-foreground shrink-0'>
+                            {formatFileSize(file.size)}
+                          </span>
+                          <button
+                            type='button'
+                            onClick={() => removeFile(file.id)}
+                            className='p-0.5 hover:bg-muted rounded text-muted-foreground hover:text-destructive transition-colors'
+                          >
+                            <MdClose className='h-4 w-4' />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+            </motion.div>
+
+            {/* Footer */}
+            <div className='flex justify-end gap-3 p-5 pt-0'>
+              <Button
+                type='button'
+                variant='ghost'
+                onClick={handleCancel}
+                className='text-muted-foreground hover:text-foreground'
+              >
+                Cancel
+              </Button>
+              <Button
+                type='submit'
+                className='gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 text-white px-5'
+              >
+                <MdCheck className='h-4 w-4' />
+                Complete
+                <span className='ml-1 text-[10px] opacity-50 font-mono'>↵</span>
+              </Button>
+            </div>
+          </form>
         </DialogContent>
       </Dialog>
 
       <div className='flex-1 min-w-0'>
-        <label
-          htmlFor={id}
-          className={cn(
-            'text-sm font-medium cursor-pointer select-none',
-            checked && 'text-muted-foreground line-through',
-            disabled && 'cursor-not-allowed opacity-50'
+        <div className='flex items-center gap-2'>
+          <label
+            htmlFor={id}
+            className={cn(
+              'text-sm font-medium cursor-pointer select-none',
+              checked && 'text-muted-foreground line-through',
+              disabled && 'cursor-not-allowed opacity-50'
+            )}
+          >
+            {label}
+          </label>
+          {/* Edit button - shown when completed and onEdit is provided */}
+          {checked && completion && onEdit && (
+            <Button
+              variant='ghost'
+              size='sm'
+              className='h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground'
+              onClick={(e) => {
+                e.stopPropagation()
+                onEdit(completion)
+              }}
+            >
+              <MdEdit className='h-3 w-3 mr-0.5' />
+              Edit
+            </Button>
           )}
-        >
-          {label}
-        </label>
+        </div>
         {description && (
           <p className='text-xs text-muted-foreground mt-0.5'>{description}</p>
         )}

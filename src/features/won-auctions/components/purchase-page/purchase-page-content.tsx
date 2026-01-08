@@ -9,9 +9,6 @@ import {
   MdDescription,
   MdCreditCard,
   MdDirectionsBoat,
-  MdNotes,
-  MdEdit,
-  MdSave,
   MdAccountBalanceWallet,
   MdTrendingUp,
   MdAccessTime,
@@ -20,8 +17,7 @@ import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Textarea } from '@/components/ui/textarea'
+import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 import { type Purchase, type Document } from '../../data/won-auctions'
@@ -32,6 +28,7 @@ import { calculateWorkflowProgress } from '../../utils/workflow'
 import { UnifiedDocumentPanel } from '../unified-modal/document-panel/unified-document-panel'
 import { OverviewPanel } from '../unified-modal/overview/overview-panel'
 import { CostsBreakdownPanel } from './costs-breakdown-panel'
+import { CustomerPortalPreview } from './customer-portal-preview'
 
 interface PurchasePageContentProps {
   auction: Purchase
@@ -48,7 +45,8 @@ interface PurchasePageContentProps {
   onRecordPayment: () => void
   onUpdateShipping: () => void
   onGenerateInvoice: () => void
-  onNotesUpdate?: (notes: string) => void
+  onOpenExportCertificate?: () => void
+  onFinalize?: () => void
 }
 
 export function PurchasePageContent({
@@ -66,11 +64,9 @@ export function PurchasePageContent({
   onRecordPayment,
   onUpdateShipping,
   onGenerateInvoice,
-  onNotesUpdate,
+  onOpenExportCertificate,
+  onFinalize,
 }: PurchasePageContentProps) {
-  // Notes state for editing
-  const [isEditingNotes, setIsEditingNotes] = useState(false)
-  const [notesValue, setNotesValue] = useState(auction.notes || '')
   const paymentProgress =
     auction.totalAmount > 0
       ? Math.round((auction.paidAmount / auction.totalAmount) * 100)
@@ -145,14 +141,6 @@ export function PurchasePageContent({
 
   const taskProgress = calculateTaskProgress()
 
-  // Handle notes save
-  const handleSaveNotes = () => {
-    if (onNotesUpdate) {
-      onNotesUpdate(notesValue)
-    }
-    setIsEditingNotes(false)
-  }
-
   // Material Design tabs configuration
   const tabs = [
     { id: 'overview', label: 'Overview', icon: MdDashboard },
@@ -161,7 +149,6 @@ export function PurchasePageContent({
     { id: 'payments', label: 'Payments', icon: MdCreditCard, badge: `${paymentProgress}%`, badgeColor: paymentProgress >= 100 ? 'emerald' : 'primary' },
     { id: 'costs', label: 'Our Costs', icon: MdAccountBalanceWallet, badge: auction.ourCosts?.items.length || undefined },
     { id: 'shipping', label: 'Shipping', icon: MdDirectionsBoat, isLive: auction.shipment && auction.status === 'shipping' },
-    { id: 'notes', label: 'Notes', icon: MdNotes },
   ]
 
   // Refs for tab indicator animation
@@ -263,114 +250,95 @@ export function PurchasePageContent({
 
       <ScrollArea className='flex-1'>
         {/* Overview Tab */}
-        <TabsContent value='overview' className='mt-0 p-4'>
-          <div className='space-y-4'>
-            {/* Quick Stats Row */}
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-              {/* Workflow Progress */}
-              <Card className='border shadow-sm'>
-                <CardContent className='p-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className={cn(
-                      'h-10 w-10 rounded-xl flex items-center justify-center',
-                      calculateWorkflowProgress(workflow) >= 100
-                        ? 'bg-emerald-500/10'
-                        : 'bg-primary/10'
-                    )}>
-                      <MdTrendingUp className={cn(
-                        'h-5 w-5',
-                        calculateWorkflowProgress(workflow) >= 100
-                          ? 'text-emerald-500'
-                          : 'text-primary'
-                      )} />
+        <TabsContent value='overview' className='mt-0 p-3'>
+          <div className='grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-3'>
+            {/* Left Column: Stats + Payment */}
+            <div className='space-y-3'>
+              {/* Quick Stats Row */}
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-2'>
+                {/* Workflow Progress */}
+                <Card className='border shadow-sm'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center gap-2'>
+                      <div className='h-8 w-8 rounded-lg bg-muted flex items-center justify-center'>
+                        <MdTrendingUp className='h-4 w-4 text-muted-foreground' />
+                      </div>
+                      <div>
+                        <p className='text-[10px] text-muted-foreground leading-tight'>Progress</p>
+                        <p className='text-lg font-bold font-data'>
+                          {calculateWorkflowProgress(workflow)}%
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='text-xs text-muted-foreground'>Progress</p>
-                      <p className={cn(
-                        'text-xl font-bold font-data',
-                        calculateWorkflowProgress(workflow) >= 100
-                          ? 'text-emerald-600'
-                          : 'text-foreground'
-                      )}>
-                        {calculateWorkflowProgress(workflow)}%
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Current Stage */}
-              <Card className='border shadow-sm'>
-                <CardContent className='p-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className='h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center'>
-                      <MdAccessTime className='h-5 w-5 text-primary' />
+                {/* Current Stage */}
+                <Card className='border shadow-sm'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center gap-2'>
+                      <div className='h-8 w-8 rounded-lg bg-muted flex items-center justify-center'>
+                        <MdAccessTime className='h-4 w-4 text-muted-foreground' />
+                      </div>
+                      <div>
+                        <p className='text-[10px] text-muted-foreground leading-tight'>Stage</p>
+                        <p className='text-lg font-bold font-data'>{workflow.currentStage}/8</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='text-xs text-muted-foreground'>Stage</p>
-                      <p className='text-xl font-bold font-data'>{workflow.currentStage}/8</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Tasks Completed */}
-              <Card className='border shadow-sm'>
-                <CardContent className='p-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className={cn(
-                      'h-10 w-10 rounded-xl flex items-center justify-center',
-                      taskProgress.completed === taskProgress.total && taskProgress.total > 0
-                        ? 'bg-emerald-500/10'
-                        : 'bg-muted'
-                    )}>
-                      <MdCheckCircle className={cn(
-                        'h-5 w-5',
-                        taskProgress.completed === taskProgress.total && taskProgress.total > 0
-                          ? 'text-emerald-500'
-                          : 'text-muted-foreground'
-                      )} />
+                {/* Tasks Completed */}
+                <Card className='border shadow-sm'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center gap-2'>
+                      <div className='h-8 w-8 rounded-lg bg-muted flex items-center justify-center'>
+                        <MdCheckCircle className='h-4 w-4 text-muted-foreground' />
+                      </div>
+                      <div>
+                        <p className='text-[10px] text-muted-foreground leading-tight'>Tasks</p>
+                        <p className='text-lg font-bold font-data'>
+                          {taskProgress.completed}/{taskProgress.total}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='text-xs text-muted-foreground'>Tasks</p>
-                      <p className='text-xl font-bold font-data'>
-                        {taskProgress.completed}/{taskProgress.total}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
 
-              {/* Documents */}
-              <Card className='border shadow-sm'>
-                <CardContent className='p-4'>
-                  <div className='flex items-center gap-3'>
-                    <div className='h-10 w-10 rounded-xl bg-muted flex items-center justify-center'>
-                      <MdDescription className='h-5 w-5 text-muted-foreground' />
+                {/* Documents */}
+                <Card className='border shadow-sm'>
+                  <CardContent className='p-3'>
+                    <div className='flex items-center gap-2'>
+                      <div className='h-8 w-8 rounded-lg bg-muted flex items-center justify-center'>
+                        <MdDescription className='h-4 w-4 text-muted-foreground' />
+                      </div>
+                      <div>
+                        <p className='text-[10px] text-muted-foreground leading-tight'>Documents</p>
+                        <p className='text-lg font-bold font-data'>{auction.documents.length}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className='text-xs text-muted-foreground'>Documents</p>
-                      <p className='text-xl font-bold font-data'>{auction.documents.length}</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                  </CardContent>
+                </Card>
+              </div>
 
-            {/* Payment Summary Card */}
-            <Card className='overflow-hidden border-0 shadow-lg'>
-              <div className={cn(
-                'relative',
-                paymentProgress >= 100
-                  ? 'bg-gradient-to-br from-emerald-900 via-emerald-950 to-black'
-                  : 'bg-gradient-to-br from-zinc-800 via-zinc-900 to-black'
-              )}>
-                <CardContent className='relative p-6'>
-                  <div className='flex flex-col md:flex-row md:items-center md:justify-between gap-6'>
-                    {/* Left - Total Amount */}
-                    <div>
-                      <p className='text-white/60 text-sm font-medium mb-1'>Total Purchase Value</p>
-                      <p className='text-4xl font-bold text-white tracking-tight font-data'>
+              {/* Payment Summary Card */}
+              <Card className='border shadow-sm'>
+                <CardContent className='p-3'>
+                  {/* Inline header */}
+                  <div className='flex items-center justify-between mb-3'>
+                    <div className='flex items-center gap-2'>
+                      <MdCreditCard className='h-4 w-4 text-muted-foreground' />
+                      <span className='text-sm font-semibold'>Payment Summary</span>
+                    </div>
+                    <span className='text-xs text-muted-foreground font-data font-medium'>{paymentProgress}%</span>
+                  </div>
+
+                  {/* Compact 3-column grid */}
+                  <div className='grid grid-cols-3 gap-2 mb-3'>
+                    {/* Total Amount */}
+                    <div className='p-2 rounded-lg bg-muted/50'>
+                      <p className='text-[10px] text-muted-foreground'>Total</p>
+                      <p className='text-base font-bold font-data truncate'>
                         {new Intl.NumberFormat('ja-JP', {
                           style: 'currency',
                           currency: auction.currency,
@@ -378,50 +346,45 @@ export function PurchasePageContent({
                         }).format(auction.totalAmount)}
                       </p>
                     </div>
-
-                    {/* Right - Stats */}
-                    <div className='flex gap-6'>
-                      <div className='text-center'>
-                        <p className='text-white/60 text-xs font-medium mb-1'>Paid</p>
-                        <p className='text-2xl font-bold text-white font-data'>
-                          {new Intl.NumberFormat('ja-JP', {
-                            style: 'currency',
-                            currency: auction.currency,
-                            minimumFractionDigits: 0,
-                          }).format(auction.paidAmount)}
-                        </p>
-                      </div>
-                      <div className='text-center'>
-                        <p className='text-white/60 text-xs font-medium mb-1'>Outstanding</p>
-                        <p className='text-2xl font-bold text-white font-data'>
-                          {new Intl.NumberFormat('ja-JP', {
-                            style: 'currency',
-                            currency: auction.currency,
-                            minimumFractionDigits: 0,
-                          }).format(auction.totalAmount - auction.paidAmount)}
-                        </p>
-                      </div>
+                    {/* Paid */}
+                    <div className='p-2 rounded-lg bg-muted/50'>
+                      <p className='text-[10px] text-muted-foreground'>Paid</p>
+                      <p className='text-base font-bold font-data text-emerald-600 truncate'>
+                        {new Intl.NumberFormat('ja-JP', {
+                          style: 'currency',
+                          currency: auction.currency,
+                          minimumFractionDigits: 0,
+                        }).format(auction.paidAmount)}
+                      </p>
+                    </div>
+                    {/* Outstanding */}
+                    <div className='p-2 rounded-lg bg-muted/50'>
+                      <p className='text-[10px] text-muted-foreground'>Outstanding</p>
+                      <p className='text-base font-bold font-data text-orange-600 truncate'>
+                        {new Intl.NumberFormat('ja-JP', {
+                          style: 'currency',
+                          currency: auction.currency,
+                          minimumFractionDigits: 0,
+                        }).format(auction.totalAmount - auction.paidAmount)}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Progress Bar */}
-                  <div className='mt-6'>
-                    <div className='flex items-center justify-between text-xs text-white/60 mb-2'>
-                      <span>Payment Progress</span>
-                      <span className='font-data'>{paymentProgress}%</span>
-                    </div>
-                    <div className='h-2 bg-white/20 rounded-full overflow-hidden'>
-                      <motion.div
-                        className='h-full bg-white rounded-full'
-                        initial={{ width: 0 }}
-                        animate={{ width: `${paymentProgress}%` }}
-                        transition={{ duration: 0.5, ease: 'easeOut' }}
-                      />
-                    </div>
+                  {/* Compact Progress Bar */}
+                  <div className='h-1.5 bg-muted rounded-full overflow-hidden'>
+                    <motion.div
+                      className='h-full bg-primary rounded-full'
+                      initial={{ width: 0 }}
+                      animate={{ width: `${paymentProgress}%` }}
+                      transition={{ duration: 0.5, ease: 'easeOut' }}
+                    />
                   </div>
                 </CardContent>
-              </div>
-            </Card>
+              </Card>
+            </div>
+
+            {/* Right Column: Customer Portal Preview */}
+            <CustomerPortalPreview auction={auction} workflow={workflow} />
           </div>
         </TabsContent>
 
@@ -434,6 +397,8 @@ export function PurchasePageContent({
             onWorkflowUpdate={onWorkflowUpdate}
             currentUser={currentUser}
             yards={yards}
+            onOpenExportCertificate={onOpenExportCertificate}
+            onFinalize={onFinalize}
           />
         </TabsContent>
 
@@ -557,91 +522,6 @@ export function PurchasePageContent({
                 </div>
               )}
             </div>
-          </div>
-        </TabsContent>
-
-        {/* Notes Tab */}
-        <TabsContent value='notes' className='mt-0 p-6'>
-          <div className='max-w-4xl mx-auto'>
-            <Card className='overflow-hidden hover:shadow-lg transition-shadow'>
-              <CardHeader className='pb-3 border-b bg-muted/50'>
-                <div className='flex items-center justify-between'>
-                  <CardTitle className='text-base font-semibold flex items-center gap-3'>
-                    <div className='h-10 w-10 rounded-xl bg-foreground flex items-center justify-center shadow-md'>
-                      <MdNotes className='h-5 w-5 text-background' />
-                    </div>
-                    Internal Notes
-                  </CardTitle>
-                  {!isEditingNotes ? (
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      onClick={() => setIsEditingNotes(true)}
-                      className='gap-2'
-                    >
-                      <MdEdit className='h-4 w-4' />
-                      Edit
-                    </Button>
-                  ) : (
-                    <div className='flex gap-2'>
-                      <Button
-                        variant='outline'
-                        size='sm'
-                        onClick={() => {
-                          setIsEditingNotes(false)
-                          setNotesValue(auction.notes || '')
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        size='sm'
-                        onClick={handleSaveNotes}
-                        className='gap-2'
-                      >
-                        <MdSave className='h-4 w-4' />
-                        Save
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </CardHeader>
-              <CardContent className='pt-4'>
-                {isEditingNotes ? (
-                  <Textarea
-                    placeholder='Add internal notes about this purchase...'
-                    value={notesValue}
-                    onChange={(e) => setNotesValue(e.target.value)}
-                    rows={8}
-                    className='resize-none'
-                  />
-                ) : (
-                  <div className='min-h-[200px]'>
-                    {auction.notes ? (
-                      <p className='text-sm text-muted-foreground whitespace-pre-wrap'>
-                        {auction.notes}
-                      </p>
-                    ) : (
-                      <div className='text-center py-12'>
-                        <MdNotes className='h-16 w-16 text-muted-foreground/20 mx-auto mb-4' />
-                        <p className='text-muted-foreground mb-4'>No notes added yet</p>
-                        <Button
-                          variant='outline'
-                          onClick={() => setIsEditingNotes(true)}
-                          className='gap-2'
-                        >
-                          <MdEdit className='h-4 w-4' />
-                          Add Notes
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-                <p className='text-xs text-muted-foreground mt-4 border-t pt-4'>
-                  Notes are internal and visible only to staff members.
-                </p>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </ScrollArea>

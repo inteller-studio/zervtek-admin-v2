@@ -188,49 +188,53 @@ export function DHLDocumentsStage({
                     Enter the DHL tracking number and select the documents being sent.
                   </DialogDescription>
                 </DialogHeader>
-                <div className='space-y-4 py-4'>
-                  <div className='space-y-2'>
-                    <Label>DHL Tracking Number</Label>
-                    <Input
-                      placeholder='Enter tracking number'
-                      value={trackingNumber}
-                      onChange={(e) => setTrackingNumber(e.target.value)}
-                    />
-                  </div>
+                <form onSubmit={(e) => { e.preventDefault(); handleSendDocuments(); }}>
+                  <div className='space-y-4 py-4'>
+                    <div className='space-y-2'>
+                      <Label>DHL Tracking Number</Label>
+                      <Input
+                        autoFocus
+                        placeholder='Enter tracking number'
+                        value={trackingNumber}
+                        onChange={(e) => setTrackingNumber(e.target.value)}
+                      />
+                    </div>
 
-                  <div className='space-y-2'>
-                    <Label>Documents Included</Label>
-                    <div className='space-y-2 rounded-lg border p-3'>
-                      {STANDARD_DOCUMENTS.map((doc) => (
-                        <div key={doc.id} className='flex items-center gap-2'>
-                          <Checkbox
-                            id={doc.id}
-                            checked={selectedDocs.includes(doc.id)}
-                            onCheckedChange={() => handleDocToggle(doc.id)}
-                          />
-                          <label
-                            htmlFor={doc.id}
-                            className='text-sm cursor-pointer'
-                          >
-                            {doc.label}
-                          </label>
-                        </div>
-                      ))}
+                    <div className='space-y-2'>
+                      <Label>Documents Included</Label>
+                      <div className='space-y-2 rounded-lg border p-3'>
+                        {STANDARD_DOCUMENTS.map((doc) => (
+                          <div key={doc.id} className='flex items-center gap-2'>
+                            <Checkbox
+                              id={doc.id}
+                              checked={selectedDocs.includes(doc.id)}
+                              onCheckedChange={() => handleDocToggle(doc.id)}
+                            />
+                            <label
+                              htmlFor={doc.id}
+                              className='text-sm cursor-pointer'
+                            >
+                              {doc.label}
+                            </label>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-                <DialogFooter>
-                  <Button variant='outline' onClick={() => setDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSendDocuments}
-                    disabled={!trackingNumber.trim()}
-                  >
-                    <MdSend className='h-4 w-4 mr-2' />
-                    Confirm Sent
-                  </Button>
-                </DialogFooter>
+                  <DialogFooter>
+                    <Button type='button' variant='outline' onClick={() => setDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      type='submit'
+                      disabled={!trackingNumber.trim()}
+                    >
+                      <MdSend className='h-4 w-4 mr-2' />
+                      Confirm Sent
+                      <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
+                    </Button>
+                  </DialogFooter>
+                </form>
               </DialogContent>
             </Dialog>
           </div>

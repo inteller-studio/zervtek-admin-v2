@@ -512,29 +512,31 @@ export function TaskDetailPage({ taskId }: TaskDetailPageProps) {
                   <div className='p-6'>
                     {/* Upload Area */}
                     {auctionSheet && auctionSheetPreview ? (
-                      <div className='rounded-2xl overflow-hidden ring-1 ring-border/50 bg-secondary/20'>
+                      <div className='relative rounded-2xl overflow-hidden ring-1 ring-border/50 bg-secondary/20'>
                         {/* Image Preview */}
-                        <div className='relative aspect-[4/3] bg-muted'>
+                        <div className='relative max-h-[400px] overflow-y-auto bg-muted'>
                           {auctionSheet.type.startsWith('image/') ? (
                             // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={auctionSheetPreview}
                               alt='Auction sheet preview'
-                              className='w-full h-full object-contain'
+                              className='w-full object-contain'
                             />
                           ) : (
-                            <div className='w-full h-full flex items-center justify-center'>
+                            <div className='w-full min-h-[200px] flex items-center justify-center py-12'>
                               <div className='text-center'>
                                 <MdDescription className='h-16 w-16 mx-auto text-muted-foreground/50' />
                                 <p className='mt-2 text-sm text-muted-foreground'>PDF Document</p>
                               </div>
                             </div>
                           )}
-                          {/* Remove button */}
+                        </div>
+                        {/* Remove button - outside scroll container */}
+                        <div className='absolute top-9 right-9'>
                           <Button
                             variant='secondary'
                             size='icon'
-                            className='absolute top-3 right-3 h-9 w-9 rounded-full shadow-lg backdrop-blur-sm bg-black/40 hover:bg-black/60 text-white hover:text-white'
+                            className='h-9 w-9 rounded-full shadow-lg backdrop-blur-sm bg-black/40 hover:bg-black/60 text-white hover:text-white'
                             onClick={() => setAuctionSheet(null)}
                           >
                             <MdClose className='h-5 w-5' />
@@ -667,45 +669,51 @@ export function TaskDetailPage({ taskId }: TaskDetailPageProps) {
             {/* Inspection Content */}
             {!isTranslation && (
               <div className='space-y-6'>
-                <div className='grid grid-cols-1 xl:grid-cols-2 gap-6'>
-                  <div className={cn(
-                    'rounded-3xl overflow-hidden',
-                    'bg-gradient-to-b from-primary/[0.02] to-card',
-                    'shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.04)]',
-                    'ring-1 ring-border/40'
-                  )}>
-                    <div className='px-6 py-5 border-b border-border/50 bg-gradient-to-r from-secondary/40 to-secondary/20'>
-                      <h2 className='text-base font-semibold tracking-tight'>Inspection Media</h2>
-                      <p className='text-[13px] text-muted-foreground mt-1'>Upload photos and videos</p>
-                    </div>
-                    <div className='p-6'>
-                      <MediaUploadSection
-                        media={request.inspectionMedia || []}
-                        onAddMedia={handleAddMedia}
-                        onDeleteMedia={handleDeleteMedia}
-                        disabled={isCompleted}
-                        currentUser={CURRENT_USER_NAME}
-                      />
+                <div className='flex flex-col xl:flex-row gap-6'>
+                  {/* Media Section - Takes more space */}
+                  <div className='flex-1'>
+                    <div className={cn(
+                      'rounded-3xl overflow-hidden',
+                      'bg-gradient-to-b from-primary/[0.02] to-card',
+                      'shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.04)]',
+                      'ring-1 ring-border/40'
+                    )}>
+                      <div className='px-6 py-5 border-b border-border/50 bg-gradient-to-r from-secondary/40 to-secondary/20'>
+                        <h2 className='text-base font-semibold tracking-tight'>Inspection Media</h2>
+                        <p className='text-[13px] text-muted-foreground mt-1'>Upload photos and videos</p>
+                      </div>
+                      <div className='p-6'>
+                        <MediaUploadSection
+                          media={request.inspectionMedia || []}
+                          onAddMedia={handleAddMedia}
+                          onDeleteMedia={handleDeleteMedia}
+                          disabled={isCompleted}
+                          currentUser={CURRENT_USER_NAME}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className={cn(
-                    'rounded-3xl overflow-hidden',
-                    'bg-gradient-to-b from-primary/[0.02] to-card',
-                    'shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.04)]',
-                    'ring-1 ring-border/40'
-                  )}>
-                    <div className='px-6 py-5 border-b border-border/50 bg-gradient-to-r from-secondary/40 to-secondary/20'>
-                      <h2 className='text-base font-semibold tracking-tight'>Inspection Notes</h2>
-                      <p className='text-[13px] text-muted-foreground mt-1'>Add findings and observations</p>
-                    </div>
-                    <div className='p-6'>
-                      <InspectionNotes
-                        notes={request.inspectionNotes || []}
-                        onAddNote={handleAddNote}
-                        disabled={isCompleted}
-                        currentUser={CURRENT_USER_NAME}
-                      />
+                  {/* Notes Section - Sticky on the right */}
+                  <div className='xl:w-80 flex-shrink-0'>
+                    <div className={cn(
+                      'rounded-3xl overflow-hidden sticky top-20',
+                      'bg-gradient-to-b from-primary/[0.02] to-card',
+                      'shadow-[0_1px_3px_rgba(0,0,0,0.05),0_4px_12px_rgba(0,0,0,0.04)]',
+                      'ring-1 ring-border/40'
+                    )}>
+                      <div className='px-6 py-5 border-b border-border/50 bg-gradient-to-r from-secondary/40 to-secondary/20'>
+                        <h2 className='text-base font-semibold tracking-tight'>Inspection Notes</h2>
+                        <p className='text-[13px] text-muted-foreground mt-1'>Add findings and observations</p>
+                      </div>
+                      <div className='p-6'>
+                        <InspectionNotes
+                          notes={request.inspectionNotes || []}
+                          onAddNote={handleAddNote}
+                          disabled={isCompleted}
+                          currentUser={CURRENT_USER_NAME}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

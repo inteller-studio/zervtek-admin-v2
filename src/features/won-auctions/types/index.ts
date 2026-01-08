@@ -8,6 +8,7 @@ export type PurchasesDialogTypeBase =
   | 'shipping'
   | 'payment'
   | 'invoice'
+  | 'export-certificate'
 
 export type PurchasesDialogType = PurchasesDialogTypeBase | null
 

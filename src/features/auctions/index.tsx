@@ -8,6 +8,7 @@ import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -152,10 +153,10 @@ export function Auctions() {
   const [selectedEquipment, setSelectedEquipment] = useState<string[]>([])
   const [yearFrom, setYearFrom] = useState('')
   const [yearTo, setYearTo] = useState('')
-  const [priceFrom, setPriceFrom] = useState('')
-  const [priceTo, setPriceTo] = useState('')
-  const [mileageFrom, setMileageFrom] = useState('')
-  const [mileageTo, setMileageTo] = useState('')
+  const [priceFrom, setPriceFrom] = useState<number>(0)
+  const [priceTo, setPriceTo] = useState<number>(0)
+  const [mileageFrom, setMileageFrom] = useState<number>(0)
+  const [mileageTo, setMileageTo] = useState<number>(0)
   const [auctionDateFrom, setAuctionDateFrom] = useState<Date | undefined>()
   const [auctionDateTo, setAuctionDateTo] = useState<Date | undefined>()
   const [lotNumber, setLotNumber] = useState('')
@@ -189,6 +190,8 @@ export function Auctions() {
 
   // Calculate active filter count
   const activeFilterCount = [
+    make,
+    model,
     selectedColors.length > 0,
     selectedScores.length > 0,
     selectedVehicleTypes.length > 0,
@@ -208,6 +211,8 @@ export function Auctions() {
   ].filter(Boolean).length
 
   const clearAllFilters = () => {
+    setMake('')
+    setModel('')
     setSelectedColors([])
     setSelectedScores([])
     setSelectedVehicleTypes([])
@@ -216,10 +221,10 @@ export function Auctions() {
     setSelectedEquipment([])
     setYearFrom('')
     setYearTo('')
-    setPriceFrom('')
-    setPriceTo('')
-    setMileageFrom('')
-    setMileageTo('')
+    setPriceFrom(0)
+    setPriceTo(0)
+    setMileageFrom(0)
+    setMileageTo(0)
     setAuctionDateFrom(undefined)
     setAuctionDateTo(undefined)
     setLotNumber('')
@@ -230,17 +235,19 @@ export function Auctions() {
   const getActiveFilterTags = () => {
     const tags: { key: string; label: string }[] = []
 
+    if (make) tags.push({ key: 'make', label: make })
+    if (model) tags.push({ key: 'model', label: model })
     if (yearFrom || yearTo) {
       tags.push({ key: 'year', label: `${yearFrom || 'Any'} - ${yearTo || 'Any'}` })
     }
     if (priceFrom || priceTo) {
-      const from = priceFrom ? `¥${parseInt(priceFrom).toLocaleString()}` : 'Any'
-      const to = priceTo ? `¥${parseInt(priceTo).toLocaleString()}` : 'Any'
+      const from = priceFrom ? `¥${priceFrom.toLocaleString()}` : 'Any'
+      const to = priceTo ? `¥${priceTo.toLocaleString()}` : 'Any'
       tags.push({ key: 'price', label: `${from} - ${to}` })
     }
     if (mileageFrom || mileageTo) {
-      const from = mileageFrom ? `${parseInt(mileageFrom).toLocaleString()}km` : 'Any'
-      const to = mileageTo ? `${parseInt(mileageTo).toLocaleString()}km` : 'Any'
+      const from = mileageFrom ? `${mileageFrom.toLocaleString()}km` : 'Any'
+      const to = mileageTo ? `${mileageTo.toLocaleString()}km` : 'Any'
       tags.push({ key: 'mileage', label: `${from} - ${to}` })
     }
     selectedColors.forEach(c => {
@@ -266,9 +273,11 @@ export function Auctions() {
   }
 
   const removeFilterTag = (key: string) => {
-    if (key === 'year') { setYearFrom(''); setYearTo('') }
-    else if (key === 'price') { setPriceFrom(''); setPriceTo('') }
-    else if (key === 'mileage') { setMileageFrom(''); setMileageTo('') }
+    if (key === 'make') { setMake(''); setModel('') }
+    else if (key === 'model') { setModel('') }
+    else if (key === 'year') { setYearFrom(''); setYearTo('') }
+    else if (key === 'price') { setPriceFrom(0); setPriceTo(0) }
+    else if (key === 'mileage') { setMileageFrom(0); setMileageTo(0) }
     else if (key === 'date') { setAuctionDateFrom(undefined); setAuctionDateTo(undefined) }
     else if (key === 'lhd') setIsLHD(false)
     else if (key.startsWith('color-')) setSelectedColors(selectedColors.filter(c => c !== key.replace('color-', '')))
@@ -337,11 +346,11 @@ export function Auctions() {
       const matchesYearFrom = !yearFrom || auction.vehicleInfo.year >= parseInt(yearFrom)
       const matchesYearTo = !yearTo || auction.vehicleInfo.year <= parseInt(yearTo)
 
-      const matchesPriceFrom = !priceFrom || auction.currentBid >= parseInt(priceFrom)
-      const matchesPriceTo = !priceTo || auction.currentBid <= parseInt(priceTo)
+      const matchesPriceFrom = !priceFrom || auction.currentBid >= priceFrom
+      const matchesPriceTo = !priceTo || auction.currentBid <= priceTo
 
-      const matchesMileageFrom = !mileageFrom || auction.vehicleInfo.mileage >= parseInt(mileageFrom)
-      const matchesMileageTo = !mileageTo || auction.vehicleInfo.mileage <= parseInt(mileageTo)
+      const matchesMileageFrom = !mileageFrom || auction.vehicleInfo.mileage >= mileageFrom
+      const matchesMileageTo = !mileageTo || auction.vehicleInfo.mileage <= mileageTo
 
       const matchesAuctionDateFrom = !auctionDateFrom || new Date(auction.startTime) >= auctionDateFrom
       const matchesAuctionDateTo = !auctionDateTo || new Date(auction.startTime) <= auctionDateTo
@@ -480,45 +489,6 @@ export function Auctions() {
             </Button>
           </div>
 
-          {/* Make Filter */}
-          <Select value={make} onValueChange={(value) => {
-            setMake(value === 'any' ? '' : value)
-            setModel('')
-            setCurrentPage(1)
-          }}>
-            <SelectTrigger className='w-[140px]'>
-              <MdDirectionsCar className='mr-2 h-4 w-4 text-muted-foreground' />
-              <SelectValue placeholder='Make' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='any'>Any Make</SelectItem>
-              {uniqueMakes.map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Model Filter */}
-          <Select
-            value={model}
-            onValueChange={(value) => {
-              setModel(value === 'any' ? '' : value)
-              setCurrentPage(1)
-            }}
-            disabled={!make}
-          >
-            <SelectTrigger className={cn('w-[140px]', !make && 'opacity-50')}>
-              <MdSettings className='mr-2 h-4 w-4 text-muted-foreground' />
-              <SelectValue placeholder={make ? 'Model' : 'Select make'} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='any'>Any Model</SelectItem>
-              {availableModels.map((m) => (
-                <SelectItem key={m} value={m}>{m}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
           {/* Advanced Search Button */}
           <Button
             variant={activeFilterCount > 0 ? 'default' : 'outline'}
@@ -538,13 +508,11 @@ export function Auctions() {
         {/* Filters - Row 2: Sort */}
         <div className='flex flex-wrap items-center gap-4'>
           <div className='ml-auto flex items-center gap-2'>
-            {(make || model || activeFilterCount > 0) && (
+            {activeFilterCount > 0 && (
               <Button
                 variant='ghost'
                 size='sm'
                 onClick={() => {
-                  setMake('')
-                  setModel('')
                   clearAllFilters()
                   setCurrentPage(1)
                 }}
@@ -965,6 +933,55 @@ export function Auctions() {
           {/* Scrollable Content */}
           <div className='flex-1 overflow-y-auto px-6 py-4 space-y-6'>
 
+            {/* Make & Model */}
+            <div className='space-y-3'>
+              <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Make & Model</h3>
+              <div className='grid grid-cols-2 gap-4'>
+                {/* Make Filter */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Make</Label>
+                  <Select value={make} onValueChange={(value) => {
+                    setMake(value === 'any' ? '' : value)
+                    setModel('')
+                  }}>
+                    <SelectTrigger className='h-9 w-full'>
+                      <MdDirectionsCar className='mr-2 h-4 w-4 text-muted-foreground' />
+                      <SelectValue placeholder='Any Make' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='any'>Any Make</SelectItem>
+                      {uniqueMakes.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Model Filter */}
+                <div className='space-y-2'>
+                  <Label className='text-sm font-medium'>Model</Label>
+                  <Select
+                    value={model}
+                    onValueChange={(value) => {
+                      setModel(value === 'any' ? '' : value)
+                    }}
+                    disabled={!make}
+                  >
+                    <SelectTrigger className={cn('h-9 w-full', !make && 'opacity-50')}>
+                      <MdSettings className='mr-2 h-4 w-4 text-muted-foreground' />
+                      <SelectValue placeholder={make ? 'Any Model' : 'Select make first'} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value='any'>Any Model</SelectItem>
+                      {availableModels.map((m) => (
+                        <SelectItem key={m} value={m}>{m}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
             {/* Primary Filters - Auction Date & Year */}
             <div className='space-y-3'>
               <h3 className='text-xs font-semibold uppercase tracking-wider text-muted-foreground'>Auction Date & Year</h3>
@@ -1016,55 +1033,39 @@ export function Auctions() {
               <div className='grid grid-cols-2 gap-4'>
                 {/* Price Range */}
                 <div className='space-y-2'>
-                  <Label className='text-sm font-medium'>Price</Label>
+                  <Label className='text-sm font-medium'>Price (¥)</Label>
                   <div className='flex gap-2'>
-                    <div className='relative flex-1'>
-                      <span className='absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>¥</span>
-                      <Input
-                        type='number'
-                        value={priceFrom}
-                        onChange={(e) => setPriceFrom(e.target.value)}
-                        placeholder='Min'
-                        className='h-9 pl-7 rounded-lg'
-                      />
-                    </div>
-                    <div className='relative flex-1'>
-                      <span className='absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground'>¥</span>
-                      <Input
-                        type='number'
-                        value={priceTo}
-                        onChange={(e) => setPriceTo(e.target.value)}
-                        placeholder='Max'
-                        className='h-9 pl-7 rounded-lg'
-                      />
-                    </div>
+                    <NumericInput
+                      value={priceFrom}
+                      onChange={setPriceFrom}
+                      placeholder='Min'
+                      className='h-9 rounded-lg'
+                    />
+                    <NumericInput
+                      value={priceTo}
+                      onChange={setPriceTo}
+                      placeholder='Max'
+                      className='h-9 rounded-lg'
+                    />
                   </div>
                 </div>
 
                 {/* Mileage Range */}
                 <div className='space-y-2'>
-                  <Label className='text-sm font-medium'>Mileage</Label>
+                  <Label className='text-sm font-medium'>Mileage (km)</Label>
                   <div className='flex gap-2'>
-                    <div className='relative flex-1'>
-                      <Input
-                        type='number'
-                        value={mileageFrom}
-                        onChange={(e) => setMileageFrom(e.target.value)}
-                        placeholder='Min'
-                        className='h-9 pr-10 rounded-lg'
-                      />
-                      <span className='absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground'>km</span>
-                    </div>
-                    <div className='relative flex-1'>
-                      <Input
-                        type='number'
-                        value={mileageTo}
-                        onChange={(e) => setMileageTo(e.target.value)}
-                        placeholder='Max'
-                        className='h-9 pr-10 rounded-lg'
-                      />
-                      <span className='absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground'>km</span>
-                    </div>
+                    <NumericInput
+                      value={mileageFrom}
+                      onChange={setMileageFrom}
+                      placeholder='Min'
+                      className='h-9 rounded-lg'
+                    />
+                    <NumericInput
+                      value={mileageTo}
+                      onChange={setMileageTo}
+                      placeholder='Max'
+                      className='h-9 rounded-lg'
+                    />
                   </div>
                 </div>
               </div>

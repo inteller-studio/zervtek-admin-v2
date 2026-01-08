@@ -98,6 +98,7 @@ import { RecordPaymentDialog } from './dialogs/record-payment-dialog'
 import { DocumentUploadDialog } from './dialogs/document-upload-dialog'
 import { ShippingUpdateDialog } from './dialogs/shipping-update-dialog'
 import { InvoiceDialog } from './dialogs/invoice-dialog'
+import { ExportCertificateDialog } from './dialogs/export-certificate-dialog'
 
 interface PurchaseDetailPageProps {
   auctionId: string
@@ -125,6 +126,7 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
   const [documentDialogOpen, setDocumentDialogOpen] = useState(false)
   const [shippingDialogOpen, setShippingDialogOpen] = useState(false)
   const [invoiceDialogOpen, setInvoiceDialogOpen] = useState(false)
+  const [exportCertDialogOpen, setExportCertDialogOpen] = useState(false)
 
   // Mock current user - in real app, get from auth context
   const currentUser = 'Admin User'
@@ -428,6 +430,22 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
     [auction]
   )
 
+  // Handle workflow finalization
+  const handleFinalize = useCallback(() => {
+    if (!localWorkflow || !auction) return
+
+    const finalizedWorkflow: PurchaseWorkflow = {
+      ...localWorkflow,
+      finalized: true,
+      finalizedAt: new Date(),
+      finalizedBy: currentUser,
+      updatedAt: new Date(),
+    }
+
+    handleWorkflowUpdate(finalizedWorkflow)
+    toast.success('Workflow finalized successfully')
+  }, [localWorkflow, auction, currentUser, handleWorkflowUpdate])
+
   // If auction not found
   if (!auction || !localWorkflow) {
     return (
@@ -464,14 +482,28 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
       </Header>
 
       <Main className='flex flex-1 flex-col gap-0 !p-0 overflow-hidden'>
-        {/* Page Header */}
-        <PurchasePageHeader
-          auction={auction}
-          vehicleTitle={vehicleTitle}
-          vinCopied={vinCopied}
-          onBack={handleBack}
-          onCopyVin={copyVin}
-        />
+        {/* Page Header - Hidden when Process tab is active */}
+        <AnimatePresence>
+          {activeTab !== 'workflow' && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className='overflow-hidden'
+            >
+              <PurchasePageHeader
+                auction={auction}
+                vehicleTitle={vehicleTitle}
+                vinCopied={vinCopied}
+                onBack={handleBack}
+                onCopyVin={copyVin}
+                notes={auction.notes || ''}
+                onNotesUpdate={handleNotesUpdate}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Main Content Area */}
         <div className='flex-1 flex overflow-hidden'>
@@ -491,7 +523,8 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
             onRecordPayment={() => setPaymentDialogOpen(true)}
             onUpdateShipping={() => setShippingDialogOpen(true)}
             onGenerateInvoice={handleGenerateInvoice}
-            onNotesUpdate={handleNotesUpdate}
+            onOpenExportCertificate={() => setExportCertDialogOpen(true)}
+            onFinalize={handleFinalize}
           />
         </div>
       </Main>
@@ -523,6 +556,15 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
         open={invoiceDialogOpen}
         onOpenChange={setInvoiceDialogOpen}
         auction={auction}
+      />
+
+      <ExportCertificateDialog
+        open={exportCertDialogOpen}
+        onOpenChange={setExportCertDialogOpen}
+        auction={auction}
+        workflow={localWorkflow}
+        onWorkflowUpdate={handleWorkflowUpdate}
+        currentUser={currentUser}
       />
     </>
   )

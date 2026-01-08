@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useRef } from 'react'
-import { MdDescription, MdUpload, MdClose, MdCheck, MdRadioButtonUnchecked } from 'react-icons/md'
+import { useState, useRef, FormEvent } from 'react'
+import { MdDescription, MdUpload, MdClose, MdCheck, MdRadioButtonUnchecked, MdSync } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import {
   Dialog,
@@ -47,6 +47,7 @@ export function DocumentUploadDialog({
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const [documentType, setDocumentType] = useState<Document['type'] | 'custom'>('invoice')
   const [customTypeName, setCustomTypeName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -55,8 +56,11 @@ export function DocumentUploadDialog({
     }
   }
 
-  const handleUpload = () => {
-    if (!auction || uploadedFiles.length === 0) return
+  const handleUpload = async (e?: FormEvent) => {
+    e?.preventDefault()
+    if (!auction || uploadedFiles.length === 0 || isSubmitting) return
+
+    setIsSubmitting(true)
 
     const finalType: Document['type'] = documentType === 'custom' ? 'other' : documentType
 
@@ -73,16 +77,20 @@ export function DocumentUploadDialog({
     // Find the checklist key if it's a required document type
     const checklistKey = REQUIRED_DOCUMENT_TYPES.find(d => d.key === finalType)?.checklistKey
 
-    onUpload(auction.id, newDocuments, checklistKey)
+    try {
+      onUpload(auction.id, newDocuments, checklistKey)
 
-    toast.success('Documents uploaded successfully', {
-      description: `${uploadedFiles.length} file(s) uploaded as ${documentType === 'custom' ? customTypeName || 'Other' : REQUIRED_DOCUMENT_TYPES.find(d => d.key === documentType)?.label || 'Other'}`,
-    })
+      toast.success('Documents uploaded successfully', {
+        description: `${uploadedFiles.length} file(s) uploaded as ${documentType === 'custom' ? customTypeName || 'Other' : REQUIRED_DOCUMENT_TYPES.find(d => d.key === documentType)?.label || 'Other'}`,
+      })
 
-    setUploadedFiles([])
-    setDocumentType('invoice')
-    setCustomTypeName('')
-    onOpenChange(false)
+      setUploadedFiles([])
+      setDocumentType('invoice')
+      setCustomTypeName('')
+      onOpenChange(false)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   // Check if a document type is already uploaded
@@ -110,7 +118,7 @@ export function DocumentUploadDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className='space-y-4'>
+        <form onSubmit={handleUpload} className='space-y-4'>
           {/* Document Type Selection */}
           <div className='space-y-2'>
             <Label>What type of document is this?</Label>
@@ -243,17 +251,26 @@ export function DocumentUploadDialog({
               ))}
             </div>
           )}
-        </div>
 
-        <DialogFooter>
-          <Button variant='outline' size='sm' onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button size='sm' onClick={handleUpload} disabled={uploadedFiles.length === 0}>
-            <MdUpload className='mr-2 h-4 w-4' />
-            Upload
-          </Button>
-        </DialogFooter>
+          <DialogFooter>
+            <Button type='button' variant='outline' size='sm' onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+              Cancel
+            </Button>
+            <Button type='submit' size='sm' disabled={uploadedFiles.length === 0 || isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <MdSync className='mr-2 h-4 w-4 animate-spin' />
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <MdUpload className='mr-2 h-4 w-4' />
+                  Upload
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )

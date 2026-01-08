@@ -16,11 +16,15 @@ import {
   MdDelete,
   MdOpenInNew,
   MdCameraAlt,
+  MdSettings,
+  MdEdit,
 } from 'react-icons/md'
+import Link from 'next/link'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -63,23 +67,25 @@ export function TransportStage({
 
   // Dialog state for transport arranged
   const [transportDialogOpen, setTransportDialogOpen] = useState(false)
-  const [transportAmount, setTransportAmount] = useState('')
+  const [transportAmount, setTransportAmount] = useState<number>(0)
   const [transportNotes, setTransportNotes] = useState('')
   const [transportFiles, setTransportFiles] = useState<File[]>([])
   const transportFileRef = useRef<HTMLInputElement>(null)
+  const [transportEditMode, setTransportEditMode] = useState(false)
 
   // Dialog state for photos requested
   const [photosDialogOpen, setPhotosDialogOpen] = useState(false)
-  const [photosAmount, setPhotosAmount] = useState('')
+  const [photosAmount, setPhotosAmount] = useState<number>(0)
   const [photosNotes, setPhotosNotes] = useState('')
   const [photosFiles, setPhotosFiles] = useState<File[]>([])
   const photosFileRef = useRef<HTMLInputElement>(null)
+  const [photosEditMode, setPhotosEditMode] = useState(false)
 
   // Cost dialog state
   const [costDialogOpen, setCostDialogOpen] = useState(false)
   const [costTaskKey, setCostTaskKey] = useState<TaskKey>('transportArranged')
   const [costDescription, setCostDescription] = useState('')
-  const [costAmount, setCostAmount] = useState('')
+  const [costAmount, setCostAmount] = useState<number>(0)
   const [costFile, setCostFile] = useState<File | null>(null)
   const costFileRef = useRef<HTMLInputElement>(null)
 
@@ -145,7 +151,7 @@ export function TransportStage({
   }
 
   const handleTransportComplete = () => {
-    const amount = transportAmount ? parseFloat(transportAmount) : undefined
+    const amount = transportAmount || undefined
     const attachments: WorkflowAttachment[] = transportFiles.map((file, index) => ({
       id: `transport-inv-${Date.now()}-${index}`,
       name: file.name,
@@ -177,16 +183,27 @@ export function TransportStage({
     updatedStage.status = allComplete ? 'completed' : 'in_progress'
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'transport', updatedStage))
+    const wasEditMode = transportEditMode
     handleTransportDialogClose()
-    toast.success('Transport arranged completed')
+    toast.success(wasEditMode ? 'Transport details updated' : 'Transport arranged completed')
   }
 
   const handleTransportDialogClose = () => {
     setTransportDialogOpen(false)
-    setTransportAmount('')
+    setTransportAmount(0)
     setTransportNotes('')
     setTransportFiles([])
+    setTransportEditMode(false)
     if (transportFileRef.current) transportFileRef.current.value = ''
+  }
+
+  const handleTransportEditClick = () => {
+    // Pre-populate form with existing data
+    setTransportAmount(stage.transportArrangedAmount || 0)
+    setTransportNotes(stage.transportArranged.completion?.notes || '')
+    setTransportFiles([]) // Files can't be pre-populated, but existing ones are shown separately
+    setTransportEditMode(true)
+    setTransportDialogOpen(true)
   }
 
   // Photos Requested handlers
@@ -214,7 +231,7 @@ export function TransportStage({
   }
 
   const handlePhotosComplete = () => {
-    const amount = photosAmount ? parseFloat(photosAmount) : undefined
+    const amount = photosAmount || undefined
     const attachments: WorkflowAttachment[] = photosFiles.map((file, index) => ({
       id: `photos-inv-${Date.now()}-${index}`,
       name: file.name,
@@ -246,16 +263,27 @@ export function TransportStage({
     updatedStage.status = allComplete ? 'completed' : 'in_progress'
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'transport', updatedStage))
+    const wasEditMode = photosEditMode
     handlePhotosDialogClose()
-    toast.success('Photos requested completed')
+    toast.success(wasEditMode ? 'Photos request details updated' : 'Photos requested completed')
   }
 
   const handlePhotosDialogClose = () => {
     setPhotosDialogOpen(false)
-    setPhotosAmount('')
+    setPhotosAmount(0)
     setPhotosNotes('')
     setPhotosFiles([])
+    setPhotosEditMode(false)
     if (photosFileRef.current) photosFileRef.current.value = ''
+  }
+
+  const handlePhotosEditClick = () => {
+    // Pre-populate form with existing data
+    setPhotosAmount(stage.photosRequestedAmount || 0)
+    setPhotosNotes(stage.photosRequested.completion?.notes || '')
+    setPhotosFiles([]) // Files can't be pre-populated, but existing ones are shown separately
+    setPhotosEditMode(true)
+    setPhotosDialogOpen(true)
   }
 
   // Yard Notified handler (simple, no cost)
@@ -293,7 +321,7 @@ export function TransportStage({
       toast.error('Please enter a description')
       return
     }
-    if (!costAmount || parseFloat(costAmount) <= 0) {
+    if (!costAmount || costAmount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -315,7 +343,7 @@ export function TransportStage({
       id: `transport-cost-${Date.now()}`,
       taskKey: costTaskKey,
       description: costDescription.trim(),
-      amount: parseFloat(costAmount),
+      amount: costAmount,
       currency: auction.currency || 'JPY',
       attachment,
       createdBy: currentUser,
@@ -345,7 +373,7 @@ export function TransportStage({
     setCostDialogOpen(false)
     setCostTaskKey('transportArranged')
     setCostDescription('')
-    setCostAmount('')
+    setCostAmount(0)
     setCostFile(null)
     if (costFileRef.current) costFileRef.current.value = ''
   }
@@ -388,16 +416,27 @@ export function TransportStage({
 
       {/* Yard Selection */}
       <div className='space-y-2'>
-        <Label className='text-sm font-medium'>
-          <MdBusiness className='h-4 w-4 inline mr-1.5' />
-          Select Yard
-        </Label>
+        <div className='flex items-center justify-between'>
+          <Label className='text-sm font-medium'>
+            <MdBusiness className='h-4 w-4 inline mr-1.5' />
+            Select Yard
+          </Label>
+          <Link
+            href='/admin/yards'
+            target='_blank'
+            className='flex items-center gap-1 text-xs text-primary hover:underline'
+          >
+            <MdSettings className='h-3 w-3' />
+            Manage Yards
+          </Link>
+        </div>
         <YardSelector
           yards={yards}
           selectedYardId={stage.yardId}
           onSelect={handleYardSelect}
           onAddYard={onAddYard}
           placeholder='Choose a storage yard...'
+          disabled={workflow.finalized}
         />
         {stage.yardName && (
           <p className='text-xs text-muted-foreground'>
@@ -415,23 +454,39 @@ export function TransportStage({
               id='transport-arranged'
               checked={stage.transportArranged.completed}
               onCheckedChange={handleTransportCheckboxClick}
-              disabled={!isYardSelected}
+              disabled={!isYardSelected || workflow.finalized}
               className={cn(
                 'mt-0.5',
                 stage.transportArranged.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
               )}
             />
             <div className='flex-1 min-w-0'>
-              <label
-                htmlFor='transport-arranged'
-                className={cn(
-                  'text-sm font-medium cursor-pointer select-none',
-                  stage.transportArranged.completed && 'text-muted-foreground line-through',
-                  !isYardSelected && 'cursor-not-allowed opacity-50'
+              <div className='flex items-center gap-2'>
+                <label
+                  htmlFor='transport-arranged'
+                  className={cn(
+                    'text-sm font-medium cursor-pointer select-none',
+                    stage.transportArranged.completed && 'text-muted-foreground line-through',
+                    !isYardSelected && 'cursor-not-allowed opacity-50'
+                  )}
+                >
+                  Transport Arranged
+                </label>
+                {stage.transportArranged.completed && !workflow.finalized && (
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleTransportEditClick()
+                    }}
+                  >
+                    <MdEdit className='h-3 w-3 mr-0.5' />
+                    Edit
+                  </Button>
                 )}
-              >
-                Transport Arranged
-              </label>
+              </div>
               <p className='text-xs text-muted-foreground mt-0.5'>
                 Confirm that transport to the yard has been arranged
               </p>
@@ -474,9 +529,11 @@ export function TransportStage({
                   <Button variant='ghost' size='icon' className='h-6 w-6' onClick={() => window.open(invoice.url, '_blank')}>
                     <MdOpenInNew className='h-3 w-3' />
                   </Button>
-                  <Button variant='ghost' size='icon' className='h-6 w-6 text-destructive' onClick={() => handleRemoveInvoice('transportArranged', invoice.id)}>
-                    <MdDelete className='h-3 w-3' />
-                  </Button>
+                  {!workflow.finalized && (
+                    <Button variant='ghost' size='icon' className='h-6 w-6 text-destructive' onClick={() => handleRemoveInvoice('transportArranged', invoice.id)}>
+                      <MdDelete className='h-3 w-3' />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -490,7 +547,7 @@ export function TransportStage({
           description='Inform the yard that a vehicle is coming'
           checked={stage.yardNotified.completed}
           completion={stage.yardNotified.completion}
-          disabled={!isYardSelected || !stage.transportArranged.completed}
+          disabled={!isYardSelected || !stage.transportArranged.completed || workflow.finalized}
           onCheckedChange={(checked, notes) => handleYardNotifiedChange(checked, notes)}
           showNoteOnComplete
           className='px-3'
@@ -503,23 +560,39 @@ export function TransportStage({
               id='photos-requested'
               checked={stage.photosRequested.completed}
               onCheckedChange={handlePhotosCheckboxClick}
-              disabled={!isYardSelected || !stage.yardNotified.completed}
+              disabled={!isYardSelected || !stage.yardNotified.completed || workflow.finalized}
               className={cn(
                 'mt-0.5',
                 stage.photosRequested.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
               )}
             />
             <div className='flex-1 min-w-0'>
-              <label
-                htmlFor='photos-requested'
-                className={cn(
-                  'text-sm font-medium cursor-pointer select-none',
-                  stage.photosRequested.completed && 'text-muted-foreground line-through',
-                  (!isYardSelected || !stage.yardNotified.completed) && 'cursor-not-allowed opacity-50'
+              <div className='flex items-center gap-2'>
+                <label
+                  htmlFor='photos-requested'
+                  className={cn(
+                    'text-sm font-medium cursor-pointer select-none',
+                    stage.photosRequested.completed && 'text-muted-foreground line-through',
+                    (!isYardSelected || !stage.yardNotified.completed) && 'cursor-not-allowed opacity-50'
+                  )}
+                >
+                  Photos Requested
+                </label>
+                {stage.photosRequested.completed && !workflow.finalized && (
+                  <Button
+                    variant='ghost'
+                    size='sm'
+                    className='h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground'
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handlePhotosEditClick()
+                    }}
+                  >
+                    <MdEdit className='h-3 w-3 mr-0.5' />
+                    Edit
+                  </Button>
                 )}
-              >
-                Photos Requested
-              </label>
+              </div>
               <p className='text-xs text-muted-foreground mt-0.5'>
                 Request photos of the vehicle from the yard
               </p>
@@ -562,9 +635,11 @@ export function TransportStage({
                   <Button variant='ghost' size='icon' className='h-6 w-6' onClick={() => window.open(invoice.url, '_blank')}>
                     <MdOpenInNew className='h-3 w-3' />
                   </Button>
-                  <Button variant='ghost' size='icon' className='h-6 w-6 text-destructive' onClick={() => handleRemoveInvoice('photosRequested', invoice.id)}>
-                    <MdDelete className='h-3 w-3' />
-                  </Button>
+                  {!workflow.finalized && (
+                    <Button variant='ghost' size='icon' className='h-6 w-6 text-destructive' onClick={() => handleRemoveInvoice('photosRequested', invoice.id)}>
+                      <MdDelete className='h-3 w-3' />
+                    </Button>
+                  )}
                 </div>
               ))}
             </div>
@@ -588,6 +663,7 @@ export function TransportStage({
             variant='outline'
             size='sm'
             onClick={() => setCostDialogOpen(true)}
+            disabled={workflow.finalized}
           >
             <MdAdd className='h-4 w-4 mr-1' />
             Add Invoice
@@ -632,14 +708,16 @@ export function TransportStage({
                       <MdOpenInNew className='h-4 w-4' />
                     </Button>
                   )}
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8 text-destructive hover:text-destructive'
-                    onClick={() => handleRemoveCost(cost.id)}
-                  >
-                    <MdDelete className='h-4 w-4' />
-                  </Button>
+                  {!workflow.finalized && (
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-destructive hover:text-destructive'
+                      onClick={() => handleRemoveCost(cost.id)}
+                    >
+                      <MdDelete className='h-4 w-4' />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -676,25 +754,24 @@ export function TransportStage({
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
               <MdLocalShipping className='h-5 w-5' />
-              Complete Transport Arrangement
+              {transportEditMode ? 'Edit Transport Details' : 'Complete Transport Arrangement'}
             </DialogTitle>
             <DialogDescription>
-              Add cost and attach invoices for transport (optional)
+              {transportEditMode ? 'Update the cost and invoices for transport' : 'Add cost and attach invoices for transport (optional)'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <form onSubmit={(e) => { e.preventDefault(); handleTransportComplete(); }} className='space-y-4 py-4'>
             {/* Amount */}
             <div className='space-y-2'>
               <label className='text-sm font-medium flex items-center gap-2'>
                 <MdAttachMoney className='h-4 w-4 text-muted-foreground' />
                 Transport Cost ({auction.currency || 'JPY'})
               </label>
-              <Input
-                type='number'
+              <NumericInput
                 placeholder='0'
                 value={transportAmount}
-                onChange={(e) => setTransportAmount(e.target.value)}
+                onChange={setTransportAmount}
               />
             </div>
 
@@ -710,7 +787,14 @@ export function TransportStage({
                 onChange={(e) => setTransportNotes(e.target.value)}
                 rows={2}
                 className='resize-none'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    handleTransportComplete()
+                  }
+                }}
               />
+              <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
             </div>
 
             {/* File upload */}
@@ -739,6 +823,7 @@ export function TransportStage({
                           <p className='text-xs text-muted-foreground'>{formatFileSize(file.size)}</p>
                         </div>
                         <Button
+                          type='button'
                           variant='ghost'
                           size='icon'
                           className='h-6 w-6'
@@ -749,6 +834,7 @@ export function TransportStage({
                       </div>
                     ))}
                     <Button
+                      type='button'
                       variant='outline'
                       size='sm'
                       className='w-full'
@@ -772,14 +858,15 @@ export function TransportStage({
 
             {/* Actions */}
             <div className='flex gap-2'>
-              <Button variant='outline' className='flex-1' onClick={handleTransportDialogClose}>
+              <Button type='button' variant='outline' className='flex-1' onClick={handleTransportDialogClose}>
                 Cancel
               </Button>
-              <Button className='flex-1' onClick={handleTransportComplete}>
-                Complete
+              <Button type='submit' className='flex-1'>
+                {transportEditMode ? 'Update' : 'Complete'}
+                <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -789,25 +876,24 @@ export function TransportStage({
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
               <MdCameraAlt className='h-5 w-5' />
-              Complete Photos Request
+              {photosEditMode ? 'Edit Photos Request Details' : 'Complete Photos Request'}
             </DialogTitle>
             <DialogDescription>
-              Add cost and attach invoices for photo service (optional)
+              {photosEditMode ? 'Update the cost and invoices for photo service' : 'Add cost and attach invoices for photo service (optional)'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <form onSubmit={(e) => { e.preventDefault(); handlePhotosComplete(); }} className='space-y-4 py-4'>
             {/* Amount */}
             <div className='space-y-2'>
               <label className='text-sm font-medium flex items-center gap-2'>
                 <MdAttachMoney className='h-4 w-4 text-muted-foreground' />
                 Photo Cost ({auction.currency || 'JPY'})
               </label>
-              <Input
-                type='number'
+              <NumericInput
                 placeholder='0'
                 value={photosAmount}
-                onChange={(e) => setPhotosAmount(e.target.value)}
+                onChange={setPhotosAmount}
               />
             </div>
 
@@ -823,7 +909,14 @@ export function TransportStage({
                 onChange={(e) => setPhotosNotes(e.target.value)}
                 rows={2}
                 className='resize-none'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    handlePhotosComplete()
+                  }
+                }}
               />
+              <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
             </div>
 
             {/* File upload */}
@@ -852,6 +945,7 @@ export function TransportStage({
                           <p className='text-xs text-muted-foreground'>{formatFileSize(file.size)}</p>
                         </div>
                         <Button
+                          type='button'
                           variant='ghost'
                           size='icon'
                           className='h-6 w-6'
@@ -862,6 +956,7 @@ export function TransportStage({
                       </div>
                     ))}
                     <Button
+                      type='button'
                       variant='outline'
                       size='sm'
                       className='w-full'
@@ -885,14 +980,15 @@ export function TransportStage({
 
             {/* Actions */}
             <div className='flex gap-2'>
-              <Button variant='outline' className='flex-1' onClick={handlePhotosDialogClose}>
+              <Button type='button' variant='outline' className='flex-1' onClick={handlePhotosDialogClose}>
                 Cancel
               </Button>
-              <Button className='flex-1' onClick={handlePhotosComplete}>
-                Complete
+              <Button type='submit' className='flex-1'>
+                {photosEditMode ? 'Update' : 'Complete'}
+                <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -909,12 +1005,13 @@ export function TransportStage({
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <form onSubmit={(e) => { e.preventDefault(); handleAddCost(); }} className='space-y-4 py-4'>
             {/* Task selector */}
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Related To</label>
               <div className='flex gap-2'>
                 <Button
+                  type='button'
                   variant={costTaskKey === 'transportArranged' ? 'default' : 'outline'}
                   size='sm'
                   className='flex-1'
@@ -924,6 +1021,7 @@ export function TransportStage({
                   Transport
                 </Button>
                 <Button
+                  type='button'
                   variant={costTaskKey === 'photosRequested' ? 'default' : 'outline'}
                   size='sm'
                   className='flex-1'
@@ -948,11 +1046,10 @@ export function TransportStage({
             {/* Amount */}
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Amount ({auction.currency || 'JPY'})</label>
-              <Input
-                type='number'
+              <NumericInput
                 placeholder='0'
                 value={costAmount}
-                onChange={(e) => setCostAmount(e.target.value)}
+                onChange={setCostAmount}
               />
             </div>
 
@@ -981,6 +1078,7 @@ export function TransportStage({
                       <p className='text-xs text-muted-foreground'>{formatFileSize(costFile.size)}</p>
                     </div>
                     <Button
+                      type='button'
                       variant='ghost'
                       size='icon'
                       className='h-7 w-7'
@@ -1006,15 +1104,16 @@ export function TransportStage({
 
             {/* Actions */}
             <div className='flex gap-2'>
-              <Button variant='outline' className='flex-1' onClick={handleCostDialogClose}>
+              <Button type='button' variant='outline' className='flex-1' onClick={handleCostDialogClose}>
                 Cancel
               </Button>
-              <Button className='flex-1' onClick={handleAddCost}>
+              <Button type='submit' className='flex-1'>
                 <MdAdd className='h-4 w-4 mr-2' />
                 Add Invoice
+                <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

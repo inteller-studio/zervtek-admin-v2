@@ -38,6 +38,7 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import {
   Select,
@@ -373,38 +374,34 @@ export function Security() {
             <div className='grid gap-4 md:grid-cols-2'>
               <div className='space-y-2'>
                 <Label htmlFor='passwordExpiry'>Password Expiry (days)</Label>
-                <Input
+                <NumericInput
                   id='passwordExpiry'
-                  type='number'
                   value={securitySettings.passwordExpiryDays}
-                  onChange={(e) => setSecuritySettings({ ...securitySettings, passwordExpiryDays: parseInt(e.target.value) })}
+                  onChange={(v) => setSecuritySettings({ ...securitySettings, passwordExpiryDays: v })}
                 />
               </div>
               <div className='space-y-2'>
                 <Label htmlFor='maxLoginAttempts'>Max Login Attempts</Label>
-                <Input
+                <NumericInput
                   id='maxLoginAttempts'
-                  type='number'
                   value={securitySettings.maxLoginAttempts}
-                  onChange={(e) => setSecuritySettings({ ...securitySettings, maxLoginAttempts: parseInt(e.target.value) })}
+                  onChange={(v) => setSecuritySettings({ ...securitySettings, maxLoginAttempts: v })}
                 />
               </div>
               <div className='space-y-2'>
                 <Label htmlFor='lockoutDuration'>Lockout Duration (minutes)</Label>
-                <Input
+                <NumericInput
                   id='lockoutDuration'
-                  type='number'
                   value={securitySettings.lockoutDuration}
-                  onChange={(e) => setSecuritySettings({ ...securitySettings, lockoutDuration: parseInt(e.target.value) })}
+                  onChange={(v) => setSecuritySettings({ ...securitySettings, lockoutDuration: v })}
                 />
               </div>
               <div className='space-y-2'>
                 <Label htmlFor='sessionTimeout'>Session Timeout (minutes)</Label>
-                <Input
+                <NumericInput
                   id='sessionTimeout'
-                  type='number'
                   value={securitySettings.sessionTimeout}
-                  onChange={(e) => setSecuritySettings({ ...securitySettings, sessionTimeout: parseInt(e.target.value) })}
+                  onChange={(v) => setSecuritySettings({ ...securitySettings, sessionTimeout: v })}
                 />
               </div>
             </div>
@@ -800,11 +797,10 @@ export function Security() {
                 {newBlockedIP.type === 'temporary' && (
                   <div className='space-y-2'>
                     <Label htmlFor='blockDuration'>Duration (hours)</Label>
-                    <Input
+                    <NumericInput
                       id='blockDuration'
-                      type='number'
-                      value={newBlockedIP.duration}
-                      onChange={(e) => setNewBlockedIP({ ...newBlockedIP, duration: e.target.value })}
+                      value={newBlockedIP.duration ? parseInt(newBlockedIP.duration) : 0}
+                      onChange={(v) => setNewBlockedIP({ ...newBlockedIP, duration: v.toString() })}
                     />
                   </div>
                 )}

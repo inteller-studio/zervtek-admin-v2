@@ -8,6 +8,7 @@ import { DocumentUploadDialog } from './dialogs/document-upload-dialog'
 import { DocumentManagementDialog } from './dialogs/document-management-dialog'
 import { ShippingUpdateDialog } from './dialogs/shipping-update-dialog'
 import { InvoiceDialog } from './dialogs/invoice-dialog'
+import { ExportCertificateDialog } from './dialogs/export-certificate-dialog'
 import { UnifiedPurchaseModal } from './unified-modal/unified-purchase-modal'
 import { createDefaultWorkflow } from '../utils/workflow'
 
@@ -49,6 +50,7 @@ export function WonAuctionsDialogs({
         onRecordPayment={() => setOpen('payment')}
         onUpdateShipping={() => setOpen('shipping')}
         onGenerateInvoice={() => setOpen('invoice')}
+        onOpenExportCertificate={() => setOpen('export-certificate')}
         onMarkDelivered={onMarkDelivered}
         onMarkCompleted={onMarkCompleted}
       />
@@ -99,6 +101,19 @@ export function WonAuctionsDialogs({
         open={open === 'invoice'}
         onOpenChange={() => setOpen(open === 'invoice' ? null : 'invoice')}
         auction={currentRow}
+      />
+
+      <ExportCertificateDialog
+        open={open === 'export-certificate'}
+        onOpenChange={() => setOpen(open === 'export-certificate' ? null : 'export-certificate')}
+        auction={currentRow}
+        workflow={workflow}
+        onWorkflowUpdate={(updatedWorkflow) => {
+          if (currentRow && onWorkflowUpdate) {
+            onWorkflowUpdate(currentRow.id, updatedWorkflow)
+          }
+        }}
+        currentUser='Current Admin'
       />
     </>
   )

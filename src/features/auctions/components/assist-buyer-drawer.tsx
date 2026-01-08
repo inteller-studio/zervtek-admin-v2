@@ -21,6 +21,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -452,12 +453,11 @@ export function AssistBuyerDrawer({
               <div className='space-y-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='bidAmount'>Bid Amount (¥)</Label>
-                  <Input
+                  <NumericInput
                     id='bidAmount'
-                    type='number'
                     placeholder={`Minimum: ${formatPrice(minimumBid)}`}
-                    value={bidAmount}
-                    onChange={(e) => setBidAmount(e.target.value)}
+                    value={bidAmount ? parseInt(bidAmount) : 0}
+                    onChange={(v) => setBidAmount(v.toString())}
                     className='text-lg font-semibold'
                   />
                   {bidAmount && Number(bidAmount) < minimumBid && (

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { StatsCard } from '@/features/dashboard/components/stats-card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
@@ -1866,20 +1867,18 @@ export function Invoices() {
                                 />
                               </TableCell>
                               <TableCell>
-                                <Input
-                                  type='number'
-                                  min='1'
+                                <NumericInput
+                                  min={1}
                                   value={item.quantity}
-                                  onChange={(e) => updateItem(item.id, 'quantity', Number(e.target.value))}
+                                  onChange={(v) => updateItem(item.id, 'quantity', v)}
                                 />
                               </TableCell>
                               <TableCell>
-                                <Input
-                                  type='number'
-                                  min='0'
-                                  step='0.01'
+                                <NumericInput
+                                  min={0}
+                                  allowDecimals
                                   value={item.unitPrice}
-                                  onChange={(e) => updateItem(item.id, 'unitPrice', Number(e.target.value))}
+                                  onChange={(v) => updateItem(item.id, 'unitPrice', v)}
                                 />
                               </TableCell>
                               <TableCell>
@@ -1907,14 +1906,12 @@ export function Invoices() {
                             </div>
                             <div className='flex items-center justify-between'>
                               <Label>Tax</Label>
-                              <Input
-                                type='number'
-                                min='0'
-                                step='0.01'
+                              <NumericInput
+                                min={0}
+                                allowDecimals
                                 className='w-24'
                                 value={newInvoice.tax}
-                                onChange={(e) => {
-                                  const tax = Number(e.target.value)
+                                onChange={(tax) => {
                                   const total = newInvoice.subtotal + tax + newInvoice.shipping - newInvoice.discount
                                   setNewInvoice({ ...newInvoice, tax, total })
                                 }}
@@ -1922,14 +1919,12 @@ export function Invoices() {
                             </div>
                             <div className='flex items-center justify-between'>
                               <Label>Shipping</Label>
-                              <Input
-                                type='number'
-                                min='0'
-                                step='0.01'
+                              <NumericInput
+                                min={0}
+                                allowDecimals
                                 className='w-24'
                                 value={newInvoice.shipping}
-                                onChange={(e) => {
-                                  const shipping = Number(e.target.value)
+                                onChange={(shipping) => {
                                   const total = newInvoice.subtotal + newInvoice.tax + shipping - newInvoice.discount
                                   setNewInvoice({ ...newInvoice, shipping, total })
                                 }}
@@ -1937,14 +1932,12 @@ export function Invoices() {
                             </div>
                             <div className='flex items-center justify-between'>
                               <Label>Discount</Label>
-                              <Input
-                                type='number'
-                                min='0'
-                                step='0.01'
+                              <NumericInput
+                                min={0}
+                                allowDecimals
                                 className='w-24'
                                 value={newInvoice.discount}
-                                onChange={(e) => {
-                                  const discount = Number(e.target.value)
+                                onChange={(discount) => {
                                   const total = newInvoice.subtotal + newInvoice.tax + newInvoice.shipping - discount
                                   setNewInvoice({ ...newInvoice, discount, total })
                                 }}
@@ -2517,25 +2510,23 @@ export function Invoices() {
                         </div>
                         <div className='flex items-center justify-between text-sm'>
                           <span>Shipping:</span>
-                          <Input
-                            type='number'
-                            min='0'
+                          <NumericInput
+                            min={0}
                             className='w-28'
                             value={sharedInvoiceForm.shipping}
-                            onChange={(e) =>
-                              setSharedInvoiceForm({ ...sharedInvoiceForm, shipping: Number(e.target.value) })
+                            onChange={(shipping) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, shipping })
                             }
                           />
                         </div>
                         <div className='flex items-center justify-between text-sm'>
                           <span>Discount:</span>
-                          <Input
-                            type='number'
-                            min='0'
+                          <NumericInput
+                            min={0}
                             className='w-28'
                             value={sharedInvoiceForm.discount}
-                            onChange={(e) =>
-                              setSharedInvoiceForm({ ...sharedInvoiceForm, discount: Number(e.target.value) })
+                            onChange={(discount) =>
+                              setSharedInvoiceForm({ ...sharedInvoiceForm, discount })
                             }
                           />
                         </div>

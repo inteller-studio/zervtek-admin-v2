@@ -10,7 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import type { Bid } from '../../data/bids'
 
@@ -61,12 +61,11 @@ export function SoldToOthersDialog({
           )}
           <div className='space-y-2'>
             <Label htmlFor='soldToOthersPrice'>Sold Price (¥)</Label>
-            <Input
+            <NumericInput
               id='soldToOthersPrice'
-              type='number'
               placeholder='Enter the price it sold for'
-              value={soldPrice}
-              onChange={(e) => onSoldPriceChange(e.target.value)}
+              value={soldPrice ? parseInt(soldPrice) : 0}
+              onChange={(v) => onSoldPriceChange(v.toString())}
             />
             <p className='text-xs text-muted-foreground'>
               The price at which the vehicle was sold to another bidder

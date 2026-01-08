@@ -2,12 +2,13 @@
 
 import { useRef, useState } from 'react'
 import { format } from 'date-fns'
-import { MdAttachMoney, MdError, MdUploadFile, MdDescription, MdDelete, MdOpenInNew, MdCheck, MdClose, MdChat, MdAdd, MdReceipt } from 'react-icons/md'
+import { MdAttachMoney, MdError, MdUploadFile, MdDescription, MdDelete, MdOpenInNew, MdCheck, MdClose, MdChat, MdAdd, MdReceipt, MdEdit } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Badge } from '@/components/ui/badge'
 import {
   Dialog,
@@ -48,13 +49,16 @@ export function AfterPurchaseStage({
   const [dialogOpen, setDialogOpen] = useState(false)
   const [pendingFiles, setPendingFiles] = useState<File[]>([])
   const [notes, setNotes] = useState('')
-  const [paymentAmount, setPaymentAmount] = useState('')
+  const [paymentAmount, setPaymentAmount] = useState<number>(0)
+
+  // Edit mode state
+  const [editMode, setEditMode] = useState(false)
 
   // Cost invoice dialog state
   const [costDialogOpen, setCostDialogOpen] = useState(false)
   const [costType, setCostType] = useState<CostType>('tax')
   const [costDescription, setCostDescription] = useState('')
-  const [costAmount, setCostAmount] = useState('')
+  const [costAmount, setCostAmount] = useState<number>(0)
   const [costFile, setCostFile] = useState<File | null>(null)
 
   // Handle checkbox click - open dialog to ask about invoice
@@ -74,13 +78,25 @@ export function AfterPurchaseStage({
       onWorkflowUpdate(updateWorkflowStage(workflow, 'afterPurchase', updatedStage))
     } else {
       // If checking, open dialog to ask about invoice
+      setEditMode(false)
       setDialogOpen(true)
     }
   }
 
+  // Handle edit button click - pre-populate and open dialog
+  const handleEditClick = () => {
+    // Pre-populate form with existing data
+    setPaymentAmount(stage.paymentAmount || 0)
+    setNotes(stage.paymentToAuctionHouse.completion?.notes || '')
+    // Note: We can't restore File objects from URLs, so pendingFiles stays empty
+    // Existing attachments remain on the stage and can be managed separately
+    setEditMode(true)
+    setDialogOpen(true)
+  }
+
   // Complete without invoice
   const handleCompleteWithoutInvoice = () => {
-    const amount = paymentAmount ? parseFloat(paymentAmount) : undefined
+    const amount = paymentAmount || undefined
     const updatedStage = {
       ...stage,
       status: 'completed' as const,
@@ -96,8 +112,9 @@ export function AfterPurchaseStage({
     onWorkflowUpdate(updateWorkflowStage(workflow, 'afterPurchase', updatedStage))
     setDialogOpen(false)
     setNotes('')
-    setPaymentAmount('')
-    toast.success('Payment marked as completed')
+    setPaymentAmount(0)
+    setEditMode(false)
+    toast.success(editMode ? 'Payment details updated' : 'Payment marked as completed')
   }
 
   // Handle file selection from dialog
@@ -157,7 +174,7 @@ export function AfterPurchaseStage({
       uploadedAt: new Date(),
     }))
 
-    const amount = paymentAmount ? parseFloat(paymentAmount) : undefined
+    const amount = paymentAmount || undefined
     const updatedStage = {
       ...stage,
       status: 'completed' as const,
@@ -176,9 +193,10 @@ export function AfterPurchaseStage({
     setDialogOpen(false)
     setPendingFiles([])
     setNotes('')
-    setPaymentAmount('')
+    setPaymentAmount(0)
+    setEditMode(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
-    toast.success(`Payment completed with ${attachments.length} invoice(s) attached`)
+    toast.success(editMode ? `Payment updated with ${attachments.length} invoice(s)` : `Payment completed with ${attachments.length} invoice(s) attached`)
   }
 
   const handleRemoveInvoice = (invoiceId: string) => {
@@ -195,7 +213,8 @@ export function AfterPurchaseStage({
     setDialogOpen(false)
     setPendingFiles([])
     setNotes('')
-    setPaymentAmount('')
+    setPaymentAmount(0)
+    setEditMode(false)
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
@@ -224,7 +243,7 @@ export function AfterPurchaseStage({
       return
     }
 
-    if (!costAmount || parseFloat(costAmount) <= 0) {
+    if (!costAmount || costAmount <= 0) {
       toast.error('Please enter a valid amount')
       return
     }
@@ -246,7 +265,7 @@ export function AfterPurchaseStage({
       id: `cost-${Date.now()}`,
       costType,
       description: costDescription.trim(),
-      amount: parseFloat(costAmount),
+      amount: costAmount,
       currency: auction.currency || 'JPY',
       attachment,
       createdBy: currentUser,
@@ -277,7 +296,7 @@ export function AfterPurchaseStage({
     setCostDialogOpen(false)
     setCostType('tax')
     setCostDescription('')
-    setCostAmount('')
+    setCostAmount(0)
     setCostFile(null)
     if (costFileInputRef.current) costFileInputRef.current.value = ''
   }
@@ -323,21 +342,39 @@ export function AfterPurchaseStage({
             id='payment-auction-house'
             checked={stage.paymentToAuctionHouse.completed}
             onCheckedChange={handleCheckboxClick}
+            disabled={workflow.finalized}
             className={cn(
               'mt-0.5',
               stage.paymentToAuctionHouse.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
             )}
           />
           <div className='flex-1 min-w-0'>
-            <label
-              htmlFor='payment-auction-house'
-              className={cn(
-                'text-sm font-medium cursor-pointer select-none',
-                stage.paymentToAuctionHouse.completed && 'text-muted-foreground line-through'
+            <div className='flex items-center gap-2'>
+              <label
+                htmlFor='payment-auction-house'
+                className={cn(
+                  'text-sm font-medium cursor-pointer select-none',
+                  stage.paymentToAuctionHouse.completed && 'text-muted-foreground line-through'
+                )}
+              >
+                Payment to Auction House Completed
+              </label>
+              {/* Edit button - shown when completed and not finalized */}
+              {stage.paymentToAuctionHouse.completed && !workflow.finalized && (
+                <Button
+                  variant='ghost'
+                  size='sm'
+                  className='h-5 px-1.5 text-[10px] text-muted-foreground hover:text-foreground'
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEditClick()
+                  }}
+                >
+                  <MdEdit className='h-3 w-3 mr-0.5' />
+                  Edit
+                </Button>
               )}
-            >
-              Payment to Auction House Completed
-            </label>
+            </div>
             <p className='text-xs text-muted-foreground mt-0.5'>
               Confirm that the full auction amount has been paid to the auction house
             </p>
@@ -404,14 +441,16 @@ export function AfterPurchaseStage({
                   >
                     <MdOpenInNew className='h-4 w-4' />
                   </Button>
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8 text-destructive hover:text-destructive'
-                    onClick={() => handleRemoveInvoice(invoice.id)}
-                  >
-                    <MdDelete className='h-4 w-4' />
-                  </Button>
+                  {!workflow.finalized && (
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-destructive hover:text-destructive'
+                      onClick={() => handleRemoveInvoice(invoice.id)}
+                    >
+                      <MdDelete className='h-4 w-4' />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -435,6 +474,7 @@ export function AfterPurchaseStage({
             variant='outline'
             size='sm'
             onClick={() => setCostDialogOpen(true)}
+            disabled={workflow.finalized}
           >
             <MdAdd className='h-4 w-4 mr-1' />
             Add Invoice
@@ -479,14 +519,16 @@ export function AfterPurchaseStage({
                       <MdOpenInNew className='h-4 w-4' />
                     </Button>
                   )}
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8 text-destructive hover:text-destructive'
-                    onClick={() => handleRemoveCostInvoice(cost.id)}
-                  >
-                    <MdDelete className='h-4 w-4' />
-                  </Button>
+                  {!workflow.finalized && (
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-destructive hover:text-destructive'
+                      onClick={() => handleRemoveCostInvoice(cost.id)}
+                    >
+                      <MdDelete className='h-4 w-4' />
+                    </Button>
+                  )}
                 </div>
               </div>
             ))}
@@ -533,7 +575,7 @@ export function AfterPurchaseStage({
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <form onSubmit={(e) => { e.preventDefault(); handleAddCostInvoice(); }} className='space-y-4 py-4'>
             {/* Cost Type */}
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Cost Type</label>
@@ -564,11 +606,10 @@ export function AfterPurchaseStage({
             {/* Amount */}
             <div className='space-y-2'>
               <label className='text-sm font-medium'>Amount ({auction.currency || 'JPY'})</label>
-              <Input
-                type='number'
+              <NumericInput
                 placeholder='0'
                 value={costAmount}
-                onChange={(e) => setCostAmount(e.target.value)}
+                onChange={setCostAmount}
               />
             </div>
 
@@ -599,6 +640,7 @@ export function AfterPurchaseStage({
                       </p>
                     </div>
                     <Button
+                      type='button'
                       variant='ghost'
                       size='icon'
                       className='h-7 w-7'
@@ -627,6 +669,7 @@ export function AfterPurchaseStage({
             {/* Action buttons */}
             <div className='flex gap-2'>
               <Button
+                type='button'
                 variant='outline'
                 className='flex-1'
                 onClick={handleCostDialogClose}
@@ -634,14 +677,15 @@ export function AfterPurchaseStage({
                 Cancel
               </Button>
               <Button
+                type='submit'
                 className='flex-1'
-                onClick={handleAddCostInvoice}
               >
                 <MdAdd className='h-4 w-4 mr-2' />
                 Add Invoice
+                <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
               </Button>
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
 
@@ -651,25 +695,24 @@ export function AfterPurchaseStage({
           <DialogHeader>
             <DialogTitle className='flex items-center gap-2'>
               <MdDescription className='h-5 w-5' />
-              Complete Payment
+              {editMode ? 'Edit Payment Details' : 'Complete Payment'}
             </DialogTitle>
             <DialogDescription>
-              Add notes and attach invoices for this auction house payment (optional)
+              {editMode ? 'Update payment details and attachments' : 'Add notes and attach invoices for this auction house payment (optional)'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className='space-y-4 py-4'>
+          <form onSubmit={(e) => { e.preventDefault(); pendingFiles.length > 0 ? handleCompleteWithInvoice() : handleCompleteWithoutInvoice(); }} className='space-y-4 py-4'>
             {/* Amount field */}
             <div className='space-y-2'>
               <label className='text-sm font-medium flex items-center gap-2'>
                 <MdAttachMoney className='h-4 w-4 text-muted-foreground' />
                 Payment Amount ({auction.currency || 'JPY'})
               </label>
-              <Input
-                type='number'
+              <NumericInput
                 placeholder={`e.g., ${auction.winningBid.toLocaleString()}`}
                 value={paymentAmount}
-                onChange={(e) => setPaymentAmount(e.target.value)}
+                onChange={setPaymentAmount}
               />
             </div>
 
@@ -685,7 +728,14 @@ export function AfterPurchaseStage({
                 onChange={(e) => setNotes(e.target.value)}
                 rows={2}
                 className='resize-none'
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    e.preventDefault()
+                    pendingFiles.length > 0 ? handleCompleteWithInvoice() : handleCompleteWithoutInvoice()
+                  }
+                }}
               />
+              <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
             </div>
 
             {/* File upload area */}
@@ -718,6 +768,7 @@ export function AfterPurchaseStage({
                           </p>
                         </div>
                         <Button
+                          type='button'
                           variant='ghost'
                           size='icon'
                           className='h-7 w-7'
@@ -728,6 +779,7 @@ export function AfterPurchaseStage({
                       </div>
                     ))}
                     <Button
+                      type='button'
                       variant='outline'
                       size='sm'
                       className='w-full mt-2'
@@ -755,23 +807,25 @@ export function AfterPurchaseStage({
             {/* Action buttons */}
             <div className='flex gap-2'>
               <Button
-                variant='outline'
+                type='submit'
+                variant={pendingFiles.length > 0 ? 'outline' : 'default'}
                 className='flex-1'
-                onClick={handleCompleteWithoutInvoice}
               >
-                {pendingFiles.length === 0 ? 'Complete' : 'Skip Files'}
+                {pendingFiles.length === 0 ? (editMode ? 'Update' : 'Complete') : 'Skip Files'}
+                <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
               </Button>
               {pendingFiles.length > 0 && (
                 <Button
+                  type='button'
                   className='flex-1'
                   onClick={handleCompleteWithInvoice}
                 >
                   <MdUploadFile className='h-4 w-4 mr-2' />
-                  Attach & Complete
+                  {editMode ? 'Update' : 'Attach & Complete'}
                 </Button>
               )}
             </div>
-          </div>
+          </form>
         </DialogContent>
       </Dialog>
     </div>

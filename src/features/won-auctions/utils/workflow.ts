@@ -95,6 +95,7 @@ export const createDefaultBookingStage = (): BookingStage => ({
   status: 'pending',
   bookingRequested: createEmptyTask(),
   shippingMethod: null,
+  shippingAgentId: null,
   bookingDetails: {},
   bookingStatus: 'pending',
   sentSIAndEC: createEmptyTask(),
@@ -130,6 +131,7 @@ export const createDefaultWorkflow = (): PurchaseWorkflow => ({
     shipped: createDefaultShippedStage(),
     dhlDocuments: createDefaultDHLDocumentsStage(),
   },
+  finalized: false,
   createdAt: new Date(),
   updatedAt: new Date(),
 })
@@ -257,6 +259,14 @@ export const getMaxAccessibleStage = (workflow: PurchaseWorkflow): number => {
     }
   }
   return 8
+}
+
+/** Check if all workflow stages are complete */
+export const areAllStagesComplete = (workflow: PurchaseWorkflow): boolean => {
+  for (let i = 1; i <= 8; i++) {
+    if (!isStageComplete(workflow, i)) return false
+  }
+  return true
 }
 
 // ============================================

@@ -26,6 +26,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -146,11 +147,11 @@ export function CreateInvoiceDrawer({
 
   // Pricing state
   const [invoiceType, setInvoiceType] = useState<'full' | 'deposit' | 'balance'>('full')
-  const [shippingCost, setShippingCost] = useState('')
-  const [inspectionFee, setInspectionFee] = useState('')
-  const [documentFee, setDocumentFee] = useState('')
-  const [additionalFees, setAdditionalFees] = useState('')
-  const [discount, setDiscount] = useState('')
+  const [shippingCost, setShippingCost] = useState<number>(0)
+  const [inspectionFee, setInspectionFee] = useState<number>(0)
+  const [documentFee, setDocumentFee] = useState<number>(0)
+  const [additionalFees, setAdditionalFees] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
   const [notes, setNotes] = useState('')
   const [destinationPort, setDestinationPort] = useState('')
 
@@ -181,13 +182,8 @@ export function CreateInvoiceDrawer({
   // Calculate totals
   const vehiclePrice = selectedVehicle?.price || 0
   const serviceFee = Math.round(vehiclePrice * 0.05)
-  const shippingAmount = Number(shippingCost) || 0
-  const inspectionAmount = Number(inspectionFee) || 0
-  const documentAmount = Number(documentFee) || 0
-  const additionalAmount = Number(additionalFees) || 0
-  const discountAmount = Number(discount) || 0
-  const subtotal = vehiclePrice + serviceFee + shippingAmount + inspectionAmount + documentAmount + additionalAmount
-  const total = subtotal - discountAmount
+  const subtotal = vehiclePrice + serviceFee + shippingCost + inspectionFee + documentFee + additionalFees
+  const total = subtotal - discount
 
   // Navigation
   const canProceed = () => {
@@ -220,11 +216,11 @@ export function CreateInvoiceDrawer({
     setCustomerSearch('')
     setVehicleSearch('')
     setInvoiceType('full')
-    setShippingCost('')
-    setInspectionFee('')
-    setDocumentFee('')
-    setAdditionalFees('')
-    setDiscount('')
+    setShippingCost(0)
+    setInspectionFee(0)
+    setDocumentFee(0)
+    setAdditionalFees(0)
+    setDiscount(0)
     setNotes('')
     setDestinationPort('')
   }
@@ -502,38 +498,34 @@ export function CreateInvoiceDrawer({
                 <div className='grid grid-cols-2 gap-3'>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Shipping Cost (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={shippingCost}
-                      onChange={(e) => setShippingCost(e.target.value)}
+                      onChange={setShippingCost}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Inspection Fee (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={inspectionFee}
-                      onChange={(e) => setInspectionFee(e.target.value)}
+                      onChange={setInspectionFee}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Document Fee (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={documentFee}
-                      onChange={(e) => setDocumentFee(e.target.value)}
+                      onChange={setDocumentFee}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Additional Fees (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={additionalFees}
-                      onChange={(e) => setAdditionalFees(e.target.value)}
+                      onChange={setAdditionalFees}
                     />
                   </div>
                 </div>
@@ -541,11 +533,10 @@ export function CreateInvoiceDrawer({
                 {/* Discount */}
                 <div className='space-y-2'>
                   <Label className='text-sm'>Discount (¥)</Label>
-                  <Input
-                    type='number'
+                  <NumericInput
                     placeholder='0'
                     value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
+                    onChange={setDiscount}
                   />
                 </div>
 
@@ -571,35 +562,35 @@ export function CreateInvoiceDrawer({
                       <span>Service Fee (5%)</span>
                       <span>{formatPrice(serviceFee)}</span>
                     </div>
-                    {shippingAmount > 0 && (
+                    {shippingCost > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Shipping</span>
-                        <span>{formatPrice(shippingAmount)}</span>
+                        <span>{formatPrice(shippingCost)}</span>
                       </div>
                     )}
-                    {inspectionAmount > 0 && (
+                    {inspectionFee > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Inspection</span>
-                        <span>{formatPrice(inspectionAmount)}</span>
+                        <span>{formatPrice(inspectionFee)}</span>
                       </div>
                     )}
-                    {documentAmount > 0 && (
+                    {documentFee > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Documents</span>
-                        <span>{formatPrice(documentAmount)}</span>
+                        <span>{formatPrice(documentFee)}</span>
                       </div>
                     )}
-                    {additionalAmount > 0 && (
+                    {additionalFees > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Additional</span>
-                        <span>{formatPrice(additionalAmount)}</span>
+                        <span>{formatPrice(additionalFees)}</span>
                       </div>
                     )}
                     <Separator className='my-2' />
-                    {discountAmount > 0 && (
+                    {discount > 0 && (
                       <div className='flex justify-between text-sm text-green-600'>
                         <span>Discount</span>
-                        <span>-{formatPrice(discountAmount)}</span>
+                        <span>-{formatPrice(discount)}</span>
                       </div>
                     )}
                     <div className='flex justify-between font-bold text-lg'>
@@ -695,34 +686,34 @@ export function CreateInvoiceDrawer({
                       <span>Service Fee</span>
                       <span>{formatPrice(serviceFee)}</span>
                     </div>
-                    {shippingAmount > 0 && (
+                    {shippingCost > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Shipping</span>
-                        <span>{formatPrice(shippingAmount)}</span>
+                        <span>{formatPrice(shippingCost)}</span>
                       </div>
                     )}
-                    {inspectionAmount > 0 && (
+                    {inspectionFee > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Inspection</span>
-                        <span>{formatPrice(inspectionAmount)}</span>
+                        <span>{formatPrice(inspectionFee)}</span>
                       </div>
                     )}
-                    {documentAmount > 0 && (
+                    {documentFee > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Documents</span>
-                        <span>{formatPrice(documentAmount)}</span>
+                        <span>{formatPrice(documentFee)}</span>
                       </div>
                     )}
-                    {additionalAmount > 0 && (
+                    {additionalFees > 0 && (
                       <div className='flex justify-between text-sm'>
                         <span>Additional</span>
-                        <span>{formatPrice(additionalAmount)}</span>
+                        <span>{formatPrice(additionalFees)}</span>
                       </div>
                     )}
-                    {discountAmount > 0 && (
+                    {discount > 0 && (
                       <div className='flex justify-between text-sm text-green-600'>
                         <span>Discount</span>
-                        <span>-{formatPrice(discountAmount)}</span>
+                        <span>-{formatPrice(discount)}</span>
                       </div>
                     )}
                     <Separator className='my-2' />

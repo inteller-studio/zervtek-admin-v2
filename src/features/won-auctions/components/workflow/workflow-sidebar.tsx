@@ -14,6 +14,7 @@ import {
   isStageComplete,
   canAccessStage,
   calculateStageProgress,
+  areAllStagesComplete,
 } from '../../utils/workflow'
 
 // Stage Components
@@ -75,6 +76,8 @@ interface WorkflowSidebarProps {
   currentUser: string
   yards: Yard[]
   onAddYard?: () => void
+  onOpenExportCertificate?: () => void
+  onFinalize?: () => void
 }
 
 export function WorkflowSidebar({
@@ -86,6 +89,8 @@ export function WorkflowSidebar({
   currentUser,
   yards,
   onAddYard,
+  onOpenExportCertificate,
+  onFinalize,
 }: WorkflowSidebarProps) {
   // Track which stage we're viewing (can be different from workflow.currentStage)
   const [viewingStage, setViewingStage] = useState(() => {
@@ -154,7 +159,7 @@ export function WorkflowSidebar({
       case 4:
         return <RepairStoredStage {...commonProps} />
       case 5:
-        return <DocumentsReceivedStage {...commonProps} />
+        return <DocumentsReceivedStage {...commonProps} onOpenExportCertificate={onOpenExportCertificate} />
       case 6:
         return <BookingStage {...commonProps} />
       case 7:
@@ -397,34 +402,56 @@ export function WorkflowSidebar({
             <span className='hidden sm:inline'>Previous</span>
           </Button>
 
-          {/* Progress Indicator */}
+          {/* Progress / Finalized Status */}
           <div className='flex items-center gap-2'>
-            <Badge
-              variant={isCurrentStageComplete ? 'default' : 'secondary'}
-              className={cn(
-                'text-xs transition-colors',
-                isCurrentStageComplete && 'bg-emerald-500 hover:bg-emerald-600'
-              )}
-            >
-              {progress.completed}/{progress.total} tasks
-            </Badge>
-            <span className='text-xs text-muted-foreground'>
-              Stage {viewingStage} of 8
-            </span>
+            {workflow.finalized ? (
+              <Badge className='bg-emerald-500 hover:bg-emerald-600 gap-1'>
+                <MdLock className='h-3 w-3' />
+                Finalized
+              </Badge>
+            ) : (
+              <>
+                <Badge
+                  variant={isCurrentStageComplete ? 'default' : 'secondary'}
+                  className={cn(
+                    'text-xs transition-colors',
+                    isCurrentStageComplete && 'bg-emerald-500 hover:bg-emerald-600'
+                  )}
+                >
+                  {progress.completed}/{progress.total} tasks
+                </Badge>
+                <span className='text-xs text-muted-foreground'>
+                  Stage {viewingStage} of 8
+                </span>
+              </>
+            )}
           </div>
 
-          {/* Next Button */}
-          <Button
-            size='sm'
-            onClick={goToNext}
-            disabled={!canGoNext}
-            className='gap-1.5'
-          >
-            <span className='hidden sm:inline'>
-              {viewingStage === 8 ? 'Complete' : 'Next'}
-            </span>
-            <MdArrowForward className='h-4 w-4' />
-          </Button>
+          {/* Next / Finalize Button */}
+          {workflow.finalized ? (
+            <div className='w-[88px]' />
+          ) : areAllStagesComplete(workflow) ? (
+            <Button
+              size='sm'
+              onClick={onFinalize}
+              className='gap-1.5 bg-emerald-600 hover:bg-emerald-700'
+            >
+              <MdCheck className='h-4 w-4' />
+              <span className='hidden sm:inline'>Finalize</span>
+            </Button>
+          ) : (
+            <Button
+              size='sm'
+              onClick={goToNext}
+              disabled={!canGoNext}
+              className='gap-1.5'
+            >
+              <span className='hidden sm:inline'>
+                {viewingStage === 8 ? 'Complete' : 'Next'}
+              </span>
+              <MdArrowForward className='h-4 w-4' />
+            </Button>
+          )}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
-import { MdDirectionsBoat, MdViewInAr, MdAnchor } from 'react-icons/md'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MdDirectionsBoat, MdViewInAr, MdAnchor, MdOpenInNew } from 'react-icons/md'
+import Link from 'next/link'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -25,6 +25,9 @@ import {
 } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
+import { ShippingAgentSelector } from '../shared/shipping-agent-selector'
+import { mockShippingAgents } from '../../../../shipping-agents/data/shipping-agents'
+import { type ShippingAgent } from '../../../../shipping-agents/types'
 
 interface BookingStageProps {
   auction: Purchase
@@ -59,6 +62,16 @@ export function BookingStage({
     const updatedStage = {
       ...stage,
       shippingMethod: method,
+      status: 'in_progress' as const,
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
+  }
+
+  const handleShippingAgentChange = (agent: ShippingAgent | null) => {
+    const updatedStage = {
+      ...stage,
+      shippingAgentId: agent?.id || null,
+      shippingAgentName: agent?.name,
       status: 'in_progress' as const,
     }
     onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
@@ -112,28 +125,6 @@ export function BookingStage({
 
   return (
     <div className='space-y-4'>
-      {/* Info Alert */}
-      <Alert>
-        <MdDirectionsBoat className='h-4 w-4' />
-        <AlertDescription>
-          Request shipping booking, select method, and manage shipping documentation.
-        </AlertDescription>
-      </Alert>
-
-      {/* Booking Request */}
-      <div className='border rounded-lg'>
-        <WorkflowCheckbox
-          id='booking-requested'
-          label='Booking Requested'
-          description='Confirm that a shipping booking has been requested from the forwarder'
-          checked={stage.bookingRequested.completed}
-          completion={stage.bookingRequested.completion}
-          onCheckedChange={handleBookingRequestedChange}
-          showNoteOnComplete
-          className='px-3'
-        />
-      </div>
-
       {/* Shipping Method Selection */}
       <div className='space-y-3'>
         <Label className='text-sm font-medium'>Shipping Method</Label>
@@ -141,17 +132,15 @@ export function BookingStage({
           value={stage.shippingMethod || undefined}
           onValueChange={(value) => handleShippingMethodChange(value as ShippingMethod)}
           className='grid grid-cols-2 gap-3'
-          disabled={!stage.bookingRequested.completed}
         >
           <Label
             htmlFor='roro'
             className={cn(
               'flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
-              stage.shippingMethod === 'roro' && 'border-primary bg-primary/5',
-              !stage.bookingRequested.completed && 'opacity-50 cursor-not-allowed'
+              stage.shippingMethod === 'roro' && 'border-primary bg-primary/5'
             )}
           >
-            <RadioGroupItem value='roro' id='roro' disabled={!stage.bookingRequested.completed} />
+            <RadioGroupItem value='roro' id='roro' />
             <div className='flex items-center gap-2'>
               <MdDirectionsBoat className='h-4 w-4 text-blue-600' />
               <div>
@@ -164,11 +153,10 @@ export function BookingStage({
             htmlFor='container'
             className={cn(
               'flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
-              stage.shippingMethod === 'container' && 'border-primary bg-primary/5',
-              !stage.bookingRequested.completed && 'opacity-50 cursor-not-allowed'
+              stage.shippingMethod === 'container' && 'border-primary bg-primary/5'
             )}
           >
-            <RadioGroupItem value='container' id='container' disabled={!stage.bookingRequested.completed} />
+            <RadioGroupItem value='container' id='container' />
             <div className='flex items-center gap-2'>
               <MdViewInAr className='h-4 w-4 text-amber-600' />
               <div>
@@ -178,6 +166,44 @@ export function BookingStage({
             </div>
           </Label>
         </RadioGroup>
+      </div>
+
+      {/* Shipping Agent Selection - shows after shipping method is selected */}
+      {stage.shippingMethod && (
+        <div className='space-y-2'>
+          <div className='flex items-center justify-between'>
+            <Label className='text-sm font-medium'>Shipping Agent</Label>
+            <Link
+              href='/admin/shipping-agents'
+              target='_blank'
+              className='text-xs text-primary hover:underline flex items-center gap-1'
+            >
+              Manage Agents
+              <MdOpenInNew className='h-3 w-3' />
+            </Link>
+          </div>
+          <ShippingAgentSelector
+            agents={mockShippingAgents}
+            selectedAgentId={stage.shippingAgentId}
+            onSelect={handleShippingAgentChange}
+            placeholder='Select a shipping agent...'
+          />
+        </div>
+      )}
+
+      {/* Booking Request */}
+      <div className='border rounded-lg'>
+        <WorkflowCheckbox
+          id='booking-requested'
+          label='Booking Requested'
+          description='Confirm that a shipping booking has been requested from the forwarder'
+          checked={stage.bookingRequested.completed}
+          completion={stage.bookingRequested.completion}
+          disabled={!stage.shippingMethod}
+          onCheckedChange={handleBookingRequestedChange}
+          showNoteOnComplete
+          className='px-3'
+        />
       </div>
 
       {/* Booking Details */}
@@ -321,9 +347,9 @@ export function BookingStage({
       )}
 
       {/* Status Message */}
-      {!stage.bookingRequested.completed && (
+      {!stage.shippingMethod && (
         <p className='text-xs text-muted-foreground text-center'>
-          Request a booking to enable shipping details
+          Select a shipping method to continue
         </p>
       )}
     </div>

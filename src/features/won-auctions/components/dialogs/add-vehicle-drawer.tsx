@@ -40,6 +40,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import {
   Popover,
@@ -96,7 +97,7 @@ export function AddVehicleDrawer({
   const [model, setModel] = useState('')
   const [year, setYear] = useState('')
   const [vin, setVin] = useState('')
-  const [mileage, setMileage] = useState('')
+  const [mileage, setMileage] = useState<number>(0)
   const [color, setColor] = useState('')
 
   // Customer Search
@@ -124,12 +125,12 @@ export function AddVehicleDrawer({
 
   // Invoice Options (Step 2)
   const [invoiceType, setInvoiceType] = useState<'full' | 'deposit' | 'balance'>('full')
-  const [vehiclePrice, setVehiclePrice] = useState('')
-  const [shippingCost, setShippingCost] = useState('')
-  const [inspectionFee, setInspectionFee] = useState('')
-  const [documentFee, setDocumentFee] = useState('')
-  const [additionalFees, setAdditionalFees] = useState('')
-  const [discount, setDiscount] = useState('')
+  const [vehiclePrice, setVehiclePrice] = useState<number>(0)
+  const [shippingCost, setShippingCost] = useState<number>(0)
+  const [inspectionFee, setInspectionFee] = useState<number>(0)
+  const [documentFee, setDocumentFee] = useState<number>(0)
+  const [additionalFees, setAdditionalFees] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
 
   // Filter customers based on search query
   const filteredCustomers = useMemo(() => {
@@ -204,7 +205,7 @@ export function AddVehicleDrawer({
     setModel('')
     setYear('')
     setVin('')
-    setMileage('')
+    setMileage(0)
     setColor('')
     setSelectedCustomer(null)
     setCustomerSearchQuery('')
@@ -215,12 +216,12 @@ export function AddVehicleDrawer({
     setDestinationPort('')
     setNotes('')
     setInvoiceType('full')
-    setVehiclePrice('')
-    setShippingCost('')
-    setInspectionFee('')
-    setDocumentFee('')
-    setAdditionalFees('')
-    setDiscount('')
+    setVehiclePrice(0)
+    setShippingCost(0)
+    setInspectionFee(0)
+    setDocumentFee(0)
+    setAdditionalFees(0)
+    setDiscount(0)
   }
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -305,14 +306,41 @@ export function AddVehicleDrawer({
     onOpenChange(open)
   }
 
+  // Handle Enter key for form navigation/submission
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ignore if target is a textarea (allow normal Enter behavior)
+    if (e.target instanceof HTMLTextAreaElement) {
+      // Only submit on Cmd/Ctrl + Enter in textarea
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        if (step === 2 && !isSubmitting) {
+          handleCreateInvoice()
+        } else if (step === 1) {
+          handleNext()
+        }
+      }
+      return
+    }
+
+    // Enter key navigates to next step or submits
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (step === 2 && !isSubmitting) {
+        handleCreateInvoice()
+      } else if (step === 1) {
+        handleNext()
+      }
+    }
+  }, [step, isSubmitting])
+
   // Calculate totals for invoice
-  const price = Number(vehiclePrice) || 0
+  const price = vehiclePrice
   const serviceFee = Math.round(price * 0.05)
-  const shippingAmount = Number(shippingCost) || 0
-  const inspectionAmount = Number(inspectionFee) || 0
-  const documentAmount = Number(documentFee) || 0
-  const additionalAmount = Number(additionalFees) || 0
-  const discountAmount = Number(discount) || 0
+  const shippingAmount = shippingCost
+  const inspectionAmount = inspectionFee
+  const documentAmount = documentFee
+  const additionalAmount = additionalFees
+  const discountAmount = discount
   const subtotal = price + serviceFee + shippingAmount + inspectionAmount + documentAmount + additionalAmount
   const total = subtotal - discountAmount
 
@@ -330,7 +358,7 @@ export function AddVehicleDrawer({
         model,
         year: Number(year) || new Date().getFullYear(),
         vin: vin || 'N/A',
-        mileage: Number(mileage) || 0,
+        mileage: mileage,
         color: color || 'N/A',
         images: imageUrls,
       },
@@ -408,7 +436,7 @@ export function AddVehicleDrawer({
 
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className='flex flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg'>
+      <SheetContent className='flex flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg' onKeyDown={handleKeyDown}>
         {/* Header */}
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4'>
@@ -441,7 +469,7 @@ export function AddVehicleDrawer({
                       Make <span className='text-red-500'>*</span>
                     </Label>
                     <Select value={make} onValueChange={setMake}>
-                      <SelectTrigger>
+                      <SelectTrigger autoFocus>
                         <SelectValue placeholder='Select make' />
                       </SelectTrigger>
                       <SelectContent>
@@ -467,6 +495,7 @@ export function AddVehicleDrawer({
                     <Input
                       id='year'
                       type='number'
+                      inputMode='numeric'
                       placeholder='e.g., 2024'
                       value={year}
                       onChange={(e) => setYear(e.target.value)}
@@ -496,13 +525,12 @@ export function AddVehicleDrawer({
                     />
                   </div>
                   <div className='space-y-2'>
-                    <Label htmlFor='mileage'>Mileage</Label>
-                    <Input
+                    <Label htmlFor='mileage'>Mileage (km)</Label>
+                    <NumericInput
                       id='mileage'
-                      type='number'
-                      placeholder='e.g., 50000'
+                      placeholder='e.g., 50,000'
                       value={mileage}
-                      onChange={(e) => setMileage(e.target.value)}
+                      onChange={setMileage}
                     />
                   </div>
                 </div>
@@ -842,60 +870,54 @@ export function AddVehicleDrawer({
                   <Label>
                     Vehicle Price (¥) <span className='text-red-500'>*</span>
                   </Label>
-                  <Input
-                    type='number'
-                    placeholder='e.g., 2500000'
+                  <NumericInput
+                    placeholder='e.g., 2,500,000'
                     value={vehiclePrice}
-                    onChange={(e) => setVehiclePrice(e.target.value)}
+                    onChange={setVehiclePrice}
                   />
                 </div>
 
                 <div className='grid grid-cols-2 gap-3'>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Shipping Cost (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={shippingCost}
-                      onChange={(e) => setShippingCost(e.target.value)}
+                      onChange={setShippingCost}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Inspection Fee (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={inspectionFee}
-                      onChange={(e) => setInspectionFee(e.target.value)}
+                      onChange={setInspectionFee}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Document Fee (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={documentFee}
-                      onChange={(e) => setDocumentFee(e.target.value)}
+                      onChange={setDocumentFee}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Additional Fees (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={additionalFees}
-                      onChange={(e) => setAdditionalFees(e.target.value)}
+                      onChange={setAdditionalFees}
                     />
                   </div>
                 </div>
 
                 <div className='space-y-2'>
                   <Label className='text-sm'>Discount (¥)</Label>
-                  <Input
-                    type='number'
+                  <NumericInput
                     placeholder='0'
                     value={discount}
-                    onChange={(e) => setDiscount(e.target.value)}
+                    onChange={setDiscount}
                   />
                 </div>
               </div>

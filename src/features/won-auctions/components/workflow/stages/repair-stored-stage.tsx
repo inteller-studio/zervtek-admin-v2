@@ -209,29 +209,40 @@ export function RepairStoredStage({
                 If no repairs or storage documentation is needed for this vehicle, you can skip this stage.
               </DialogDescription>
             </DialogHeader>
-            <div className='space-y-4 py-4'>
-              <div className='space-y-2'>
-                <Label>Reason (optional)</Label>
-                <Textarea
-                  placeholder='e.g., Vehicle in perfect condition, no repairs needed...'
-                  value={skipReason}
-                  onChange={(e) => setSkipReason(e.target.value)}
-                  rows={2}
-                />
+            <form onSubmit={(e) => { e.preventDefault(); handleSkipStage(); }}>
+              <div className='space-y-4 py-4'>
+                <div className='space-y-2'>
+                  <Label>Reason (optional)</Label>
+                  <Textarea
+                    autoFocus
+                    placeholder='e.g., Vehicle in perfect condition, no repairs needed...'
+                    value={skipReason}
+                    onChange={(e) => setSkipReason(e.target.value)}
+                    rows={2}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault()
+                        handleSkipStage()
+                      }
+                    }}
+                  />
+                  <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button variant='outline' onClick={() => setSkipDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleSkipStage}
-                className='bg-amber-500 hover:bg-amber-600 text-white'
-              >
-                <MdSkipNext className='h-4 w-4 mr-2' />
-                Skip Stage
-              </Button>
-            </DialogFooter>
+              <DialogFooter>
+                <Button type='button' variant='outline' onClick={() => setSkipDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type='submit'
+                  className='bg-amber-500 hover:bg-amber-600 text-white'
+                >
+                  <MdSkipNext className='h-4 w-4 mr-2' />
+                  Skip Stage
+                  <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
       </div>
@@ -251,62 +262,75 @@ export function RepairStoredStage({
                 Record comments, photos, or invoices for this vehicle.
               </DialogDescription>
             </DialogHeader>
-            <div className='space-y-4 py-4'>
-              <div className='space-y-2'>
-                <Label>Update Type</Label>
-                <Select
-                  value={updateType}
-                  onValueChange={(value) => setUpdateType(value as RepairUpdateType)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UPDATE_TYPES.map((type) => (
-                      <SelectItem key={type.value} value={type.value}>
-                        <div className='flex items-center gap-2'>
-                          <type.icon className='h-4 w-4' />
-                          {type.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className='space-y-2'>
-                <Label>Description</Label>
-                <Textarea
-                  placeholder='Enter details about the update...'
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={3}
-                />
-              </div>
-              {(updateType === 'photo' || updateType === 'invoice') && (
+            <form onSubmit={(e) => { e.preventDefault(); handleAddUpdate(); }}>
+              <div className='space-y-4 py-4'>
                 <div className='space-y-2'>
-                  <Label>Attachments</Label>
-                  <WorkflowFileUpload
-                    onFilesSelected={setFiles}
-                    accept={updateType === 'photo' ? '.png,.jpg,.jpeg,.webp' : '.pdf,.doc,.docx,.png,.jpg'}
-                    maxFiles={5}
-                    maxSize={10 * 1024 * 1024}
-                    label={`Drop ${updateType === 'photo' ? 'photos' : 'files'} here`}
-                    description={updateType === 'photo' ? 'PNG, JPG up to 10MB' : 'PDF, DOC, images up to 10MB'}
-                  />
+                  <Label>Update Type</Label>
+                  <Select
+                    value={updateType}
+                    onValueChange={(value) => setUpdateType(value as RepairUpdateType)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {UPDATE_TYPES.map((type) => (
+                        <SelectItem key={type.value} value={type.value}>
+                          <div className='flex items-center gap-2'>
+                            <type.icon className='h-4 w-4' />
+                            {type.label}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              )}
-            </div>
-            <DialogFooter>
-              <Button variant='outline' onClick={() => setDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAddUpdate}
-                disabled={!content.trim() && files.length === 0}
-              >
-                Add Update
-              </Button>
-            </DialogFooter>
+                <div className='space-y-2'>
+                  <Label>Description</Label>
+                  <Textarea
+                    autoFocus
+                    placeholder='Enter details about the update...'
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    rows={3}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                        e.preventDefault()
+                        if (content.trim() || files.length > 0) {
+                          handleAddUpdate()
+                        }
+                      }
+                    }}
+                  />
+                  <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
+                </div>
+                {(updateType === 'photo' || updateType === 'invoice') && (
+                  <div className='space-y-2'>
+                    <Label>Attachments</Label>
+                    <WorkflowFileUpload
+                      onFilesSelected={setFiles}
+                      accept={updateType === 'photo' ? '.png,.jpg,.jpeg,.webp' : '.pdf,.doc,.docx,.png,.jpg'}
+                      maxFiles={5}
+                      maxSize={10 * 1024 * 1024}
+                      label={`Drop ${updateType === 'photo' ? 'photos' : 'files'} here`}
+                      description={updateType === 'photo' ? 'PNG, JPG up to 10MB' : 'PDF, DOC, images up to 10MB'}
+                    />
+                  </div>
+                )}
+              </div>
+              <DialogFooter>
+                <Button type='button' variant='outline' onClick={() => setDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button
+                  type='submit'
+                  disabled={!content.trim() && files.length === 0}
+                >
+                  Add Update
+                  <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
+                </Button>
+              </DialogFooter>
+            </form>
           </DialogContent>
         </Dialog>
 

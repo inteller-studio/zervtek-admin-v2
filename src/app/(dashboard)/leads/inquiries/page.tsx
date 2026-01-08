@@ -1,7 +1,5 @@
-'use client'
-
-import { InquiriesPage } from '@/features/leads/components/inquiries-page'
+import { redirect } from 'next/navigation'
 
 export default function LeadsInquiriesPage() {
-  return <InquiriesPage />
+  redirect('/leads')
 }

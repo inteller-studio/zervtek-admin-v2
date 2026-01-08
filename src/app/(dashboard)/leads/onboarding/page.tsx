@@ -1,7 +1,5 @@
-'use client'
-
-import { OnboardingPage } from '@/features/leads/components/onboarding-page'
+import { redirect } from 'next/navigation'
 
 export default function LeadsOnboardingPage() {
-  return <OnboardingPage />
+  redirect('/leads')
 }

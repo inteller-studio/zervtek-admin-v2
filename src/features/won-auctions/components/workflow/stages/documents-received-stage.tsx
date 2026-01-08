@@ -1,21 +1,45 @@
 'use client'
 
-import { MdFactCheck, MdError, MdDirectionsCar, MdBlock } from 'react-icons/md'
+import { MdFactCheck, MdError, MdDirectionsCar, MdBlock, MdVerified, MdUpload } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { type Purchase } from '../../../data/won-auctions'
-import { type PurchaseWorkflow } from '../../../types/workflow'
+import { type PurchaseWorkflow, type AccessoriesChecklist, type AccessoriesSubItems } from '../../../types/workflow'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
+import { MdVpnKey, MdDescription, MdMenuBook, MdCollections, MdBuildCircle, MdMoreHoriz } from 'react-icons/md'
+
+const ACCESSORIES_LIST: { key: keyof AccessoriesChecklist; label: string; description: string; icon: React.ElementType; hasSubItems?: boolean; hasInput?: boolean }[] = [
+  { key: 'spareKeys', label: 'Spare Keys', description: 'Additional keys for the vehicle', icon: MdVpnKey },
+  { key: 'maintenanceRecords', label: 'Maintenance Records', description: 'Service history and maintenance documentation', icon: MdDescription },
+  { key: 'manuals', label: 'Manuals', description: "Owner's manual and instruction booklets", icon: MdMenuBook },
+  { key: 'catalogues', label: 'Catalogues', description: 'Parts catalogues and promotional materials', icon: MdCollections },
+  { key: 'accessories', label: 'Accessories', description: 'Select included accessories', icon: MdBuildCircle, hasSubItems: true },
+  { key: 'others', label: 'Others', description: 'Any other items not listed above', icon: MdMoreHoriz, hasInput: true },
+]
+
+const ACCESSORIES_SUB_ITEMS: { key: keyof AccessoriesSubItems; label: string }[] = [
+  { key: 'remotes', label: 'Remotes' },
+  { key: 'shiftKnobs', label: 'Shift Knobs' },
+  { key: 'floorMats', label: 'Floor Mats' },
+  { key: 'originalRemote', label: 'Original Remote' },
+  { key: 'antenna', label: 'Antenna' },
+  { key: 'jackSet', label: 'Jack Set' },
+  { key: 'toolKit', label: 'Tool Kit' },
+]
 
 interface DocumentsReceivedStageProps {
   auction: Purchase
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
+  onOpenExportCertificate?: () => void
 }
 
 export function DocumentsReceivedStage({
@@ -23,6 +47,7 @@ export function DocumentsReceivedStage({
   workflow,
   onWorkflowUpdate,
   currentUser,
+  onOpenExportCertificate,
 }: DocumentsReceivedStageProps) {
   const stage = workflow.stages.documentsReceived
 
@@ -46,6 +71,15 @@ export function DocumentsReceivedStage({
             exportCertificateCreated: { completed: false },
           }
         : undefined,
+      // Initialize accessories checklist
+      accessories: stage.accessories || {
+        spareKeys: false,
+        maintenanceRecords: false,
+        manuals: false,
+        catalogues: false,
+        accessories: false,
+        others: false,
+      },
     }
     onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
   }
@@ -93,6 +127,75 @@ export function DocumentsReceivedStage({
       ...stage,
       unregisteredTasks: updatedTasks,
       status: allComplete ? ('completed' as const) : ('in_progress' as const),
+    }
+
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
+  }
+
+  const getDefaultAccessories = (): AccessoriesChecklist => ({
+    spareKeys: false,
+    maintenanceRecords: false,
+    manuals: false,
+    catalogues: false,
+    accessories: false,
+    accessoriesSubItems: {
+      remotes: false,
+      shiftKnobs: false,
+      floorMats: false,
+      originalRemote: false,
+      antenna: false,
+      jackSet: false,
+      toolKit: false,
+    },
+    others: false,
+    othersText: '',
+  })
+
+  const handleAccessoryChange = (key: keyof AccessoriesChecklist, checked: boolean) => {
+    const currentAccessories = stage.accessories || getDefaultAccessories()
+    const updatedAccessories = {
+      ...currentAccessories,
+      [key]: checked,
+    }
+
+    const updatedStage = {
+      ...stage,
+      accessories: updatedAccessories,
+    }
+
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
+  }
+
+  const handleAccessorySubItemChange = (key: keyof AccessoriesSubItems, checked: boolean) => {
+    const currentAccessories = stage.accessories || getDefaultAccessories()
+    const updatedSubItems = {
+      ...(currentAccessories.accessoriesSubItems || getDefaultAccessories().accessoriesSubItems!),
+      [key]: checked,
+    }
+
+    const updatedAccessories = {
+      ...currentAccessories,
+      accessoriesSubItems: updatedSubItems,
+    }
+
+    const updatedStage = {
+      ...stage,
+      accessories: updatedAccessories,
+    }
+
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
+  }
+
+  const handleOthersTextChange = (text: string) => {
+    const currentAccessories = stage.accessories || getDefaultAccessories()
+    const updatedAccessories = {
+      ...currentAccessories,
+      othersText: text,
+    }
+
+    const updatedStage = {
+      ...stage,
+      accessories: updatedAccessories,
     }
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
@@ -191,19 +294,70 @@ export function DocumentsReceivedStage({
               showNoteOnComplete
               className='px-3'
             />
-            <WorkflowCheckbox
-              id='export-cert-created'
-              label='Create Export Certificate'
-              description='Generate the export certificate for the vehicle'
-              checked={stage.registeredTasks.exportCertificateCreated.completed}
-              completion={stage.registeredTasks.exportCertificateCreated.completion}
-              disabled={!stage.registeredTasks.deregistered.completed}
-              onCheckedChange={(checked, notes) =>
-                handleRegisteredTaskChange('exportCertificateCreated', checked, notes)
-              }
-              showNoteOnComplete
-              className='px-3'
-            />
+            {/* Export Certificate - Custom UI with upload button */}
+            <div className='flex items-start gap-3 py-2 px-3'>
+              <div
+                className={cn(
+                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
+                  stage.registeredTasks.exportCertificateCreated.completed
+                    ? 'bg-foreground border-foreground'
+                    : 'border-muted-foreground/40',
+                  !stage.registeredTasks.deregistered.completed && 'opacity-50'
+                )}
+              >
+                {stage.registeredTasks.exportCertificateCreated.completed && (
+                  <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
+                    <path
+                      d='M5 12l5 5L20 7'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={3}
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
+                  </svg>
+                )}
+              </div>
+              <div className='flex-1 min-w-0'>
+                <div className='flex items-center justify-between gap-2'>
+                  <div>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        stage.registeredTasks.exportCertificateCreated.completed &&
+                          'text-muted-foreground line-through'
+                      )}
+                    >
+                      Create Export Certificate
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
+                      Upload the export certificate for the vehicle
+                    </p>
+                  </div>
+                  {onOpenExportCertificate && !stage.registeredTasks.exportCertificateCreated.completed && (
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      className='shrink-0 gap-1.5 h-7 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300'
+                      disabled={!stage.registeredTasks.deregistered.completed}
+                      onClick={onOpenExportCertificate}
+                    >
+                      <MdUpload className='h-3.5 w-3.5' />
+                      Upload
+                    </Button>
+                  )}
+                </div>
+                {stage.registeredTasks.exportCertificateCreated.completion && (
+                  <div className='flex items-center gap-2 mt-1 text-xs text-muted-foreground'>
+                    <MdVerified className='h-3 w-3 text-emerald-500' />
+                    <span>
+                      {stage.registeredTasks.exportCertificateCreated.completion.notes ||
+                        `Uploaded by ${stage.registeredTasks.exportCertificateCreated.completion.completedBy}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
             <WorkflowCheckbox
               id='sent-deregistration-copy'
               label='Send Deregistration Copy to Auction House'
@@ -240,18 +394,154 @@ export function DocumentsReceivedStage({
           <Separator />
           <Label className='text-sm font-medium'>Unregistered Vehicle Tasks</Label>
           <div className='border rounded-lg'>
-            <WorkflowCheckbox
-              id='export-cert-unregistered'
-              label='Create Export Certificate'
-              description='Generate the export certificate for the unregistered vehicle'
-              checked={stage.unregisteredTasks.exportCertificateCreated.completed}
-              completion={stage.unregisteredTasks.exportCertificateCreated.completion}
-              onCheckedChange={(checked, notes) =>
-                handleUnregisteredTaskChange('exportCertificateCreated', checked, notes)
-              }
-              showNoteOnComplete
-              className='px-3'
-            />
+            {/* Export Certificate - Custom UI with upload button */}
+            <div className='flex items-start gap-3 py-2 px-3'>
+              <div
+                className={cn(
+                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
+                  stage.unregisteredTasks.exportCertificateCreated.completed
+                    ? 'bg-foreground border-foreground'
+                    : 'border-muted-foreground/40'
+                )}
+              >
+                {stage.unregisteredTasks.exportCertificateCreated.completed && (
+                  <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
+                    <path
+                      d='M5 12l5 5L20 7'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={3}
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                    />
+                  </svg>
+                )}
+              </div>
+              <div className='flex-1 min-w-0'>
+                <div className='flex items-center justify-between gap-2'>
+                  <div>
+                    <p
+                      className={cn(
+                        'text-sm font-medium',
+                        stage.unregisteredTasks.exportCertificateCreated.completed &&
+                          'text-muted-foreground line-through'
+                      )}
+                    >
+                      Create Export Certificate
+                    </p>
+                    <p className='text-xs text-muted-foreground'>
+                      Upload the export certificate for the unregistered vehicle
+                    </p>
+                  </div>
+                  {onOpenExportCertificate && !stage.unregisteredTasks.exportCertificateCreated.completed && (
+                    <Button
+                      size='sm'
+                      variant='outline'
+                      className='shrink-0 gap-1.5 h-7 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300'
+                      onClick={onOpenExportCertificate}
+                    >
+                      <MdUpload className='h-3.5 w-3.5' />
+                      Upload
+                    </Button>
+                  )}
+                </div>
+                {stage.unregisteredTasks.exportCertificateCreated.completion && (
+                  <div className='flex items-center gap-2 mt-1 text-xs text-muted-foreground'>
+                    <MdVerified className='h-3 w-3 text-emerald-500' />
+                    <span>
+                      {stage.unregisteredTasks.exportCertificateCreated.completion.notes ||
+                        `Uploaded by ${stage.unregisteredTasks.exportCertificateCreated.completion.completedBy}`}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Accessories Checklist - Shows for both registered and unregistered */}
+      {stage.isRegistered !== null && (
+        <div className='space-y-2'>
+          <Separator />
+          <Label className='text-sm font-medium'>Included Accessories</Label>
+          <div className='border rounded-lg divide-y'>
+            {ACCESSORIES_LIST.map((item) => {
+              const Icon = item.icon
+              const isChecked = stage.accessories?.[item.key] ?? false
+              return (
+                <div key={item.key}>
+                  <label
+                    className='flex items-center gap-3 py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors'
+                  >
+                    <div
+                      onClick={() => handleAccessoryChange(item.key, !isChecked)}
+                      className={cn(
+                        'h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer',
+                        isChecked
+                          ? 'bg-foreground border-foreground'
+                          : 'border-muted-foreground/40 hover:border-muted-foreground/60'
+                      )}
+                    >
+                      {isChecked && (
+                        <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
+                          <path
+                            d='M5 12l5 5L20 7'
+                            fill='none'
+                            stroke='currentColor'
+                            strokeWidth={3}
+                            strokeLinecap='round'
+                            strokeLinejoin='round'
+                          />
+                        </svg>
+                      )}
+                    </div>
+                    <Icon className='h-4 w-4 text-muted-foreground shrink-0' />
+                    <div className='flex-1 min-w-0' onClick={() => handleAccessoryChange(item.key, !isChecked)}>
+                      <p className={cn('text-sm font-medium', isChecked && 'text-muted-foreground')}>
+                        {item.label}
+                      </p>
+                      <p className='text-xs text-muted-foreground'>{item.description}</p>
+                    </div>
+                  </label>
+
+                  {/* Accessories Sub-items */}
+                  {item.hasSubItems && isChecked && (
+                    <div className='pb-3 px-3 pl-11'>
+                      <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
+                        {ACCESSORIES_SUB_ITEMS.map((subItem) => {
+                          const subChecked = stage.accessories?.accessoriesSubItems?.[subItem.key] ?? false
+                          return (
+                            <label
+                              key={subItem.key}
+                              className='flex items-center gap-2 cursor-pointer'
+                            >
+                              <Checkbox
+                                checked={subChecked}
+                                onCheckedChange={(checked) => handleAccessorySubItemChange(subItem.key, !!checked)}
+                              />
+                              <span className='text-sm'>{subItem.label}</span>
+                            </label>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Others Input */}
+                  {item.hasInput && isChecked && (
+                    <div className='pb-3 px-3 pl-11'>
+                      <Input
+                        placeholder='Enter other items...'
+                        value={stage.accessories?.othersText || ''}
+                        onChange={(e) => handleOthersTextChange(e.target.value)}
+                        className='text-sm'
+                      />
+                    </div>
+                  )}
+                </div>
+              )
+            })}
           </div>
         </div>
       )}

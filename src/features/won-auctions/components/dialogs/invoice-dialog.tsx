@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import {
@@ -65,8 +66,8 @@ export function InvoiceDialog({
   const [invoiceType, setInvoiceType] = useState<'full' | 'deposit' | 'balance'>('full')
   const [includeShipping, setIncludeShipping] = useState(true)
   const [includeCustoms, setIncludeCustoms] = useState(true)
-  const [additionalFees, setAdditionalFees] = useState('')
-  const [discount, setDiscount] = useState('')
+  const [additionalFees, setAdditionalFees] = useState<number>(0)
+  const [discount, setDiscount] = useState<number>(0)
   const [notes, setNotes] = useState('')
   const [dueInDays, setDueInDays] = useState('14')
 
@@ -79,8 +80,8 @@ export function InvoiceDialog({
   const vehiclePrice = auction.winningBid
   const shippingCost = includeShipping ? auction.shippingCost : 0
   const insuranceFee = includeCustoms ? auction.insuranceFee : 0
-  const additionalAmount = Number(additionalFees) || 0
-  const discountAmount = Number(discount) || 0
+  const additionalAmount = additionalFees
+  const discountAmount = discount
   const subtotal = vehiclePrice + shippingCost + insuranceFee + additionalAmount
   const total = subtotal - discountAmount
   const amountDue = invoiceType === 'deposit'
@@ -110,8 +111,8 @@ export function InvoiceDialog({
     setInvoiceType('full')
     setIncludeShipping(true)
     setIncludeCustoms(true)
-    setAdditionalFees('')
-    setDiscount('')
+    setAdditionalFees(0)
+    setDiscount(0)
     setNotes('')
     setDueInDays('14')
   }
@@ -141,9 +142,36 @@ export function InvoiceDialog({
     onOpenChange(open)
   }
 
+  // Handle Enter key for form navigation/submission
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    // Ignore if target is a textarea (allow normal Enter behavior)
+    if (e.target instanceof HTMLTextAreaElement) {
+      // Only submit on Cmd/Ctrl + Enter in textarea
+      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault()
+        if (currentStep === maxSteps && !isSubmitting) {
+          handleSubmit()
+        } else if (currentStep < maxSteps) {
+          nextStep()
+        }
+      }
+      return
+    }
+
+    // Enter key navigates to next step or submits
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      if (currentStep === maxSteps && !isSubmitting) {
+        handleSubmit()
+      } else if (currentStep < maxSteps) {
+        nextStep()
+      }
+    }
+  }, [currentStep, maxSteps, isSubmitting])
+
   return (
     <Sheet open={open} onOpenChange={handleOpenChange}>
-      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-lg'>
+      <SheetContent className='flex flex-col gap-0 p-0 sm:max-w-lg' onKeyDown={handleKeyDown}>
         {/* Header */}
         <div className='border-b bg-muted/30'>
           <SheetHeader className='p-4'>
@@ -214,7 +242,7 @@ export function InvoiceDialog({
                 <div className='space-y-2'>
                   <Label>Invoice Type</Label>
                   <Select value={invoiceType} onValueChange={(v: 'full' | 'deposit' | 'balance') => setInvoiceType(v)}>
-                    <SelectTrigger>
+                    <SelectTrigger autoFocus>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -274,27 +302,25 @@ export function InvoiceDialog({
                 <div className='grid grid-cols-2 gap-3'>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Additional Fees (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={additionalFees}
-                      onChange={(e) => setAdditionalFees(e.target.value)}
+                      onChange={setAdditionalFees}
                     />
                   </div>
                   <div className='space-y-2'>
                     <Label className='text-sm'>Discount (¥)</Label>
-                    <Input
-                      type='number'
+                    <NumericInput
                       placeholder='0'
                       value={discount}
-                      onChange={(e) => setDiscount(e.target.value)}
+                      onChange={setDiscount}
                     />
                   </div>
                 </div>
 
                 {/* Notes */}
                 <div className='space-y-2'>
-                  <Label className='text-sm'>Notes <span className='text-muted-foreground font-normal'>(Optional)</span></Label>
+                  <Label className='text-sm'>Notes <span className='text-muted-foreground font-normal'>(Optional - ⌘/Ctrl+Enter to continue)</span></Label>
                   <Textarea
                     placeholder='Add any notes for this invoice...'
                     value={notes}

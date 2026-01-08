@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { NumericInput } from '@/components/ui/numeric-input'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import {
@@ -288,7 +289,12 @@ export function YardFormDialog({
                   <FormItem>
                     <FormLabel>Capacity (Vehicles)</FormLabel>
                     <FormControl>
-                      <Input type='number' min={1} {...field} />
+                      <NumericInput
+                        min={1}
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

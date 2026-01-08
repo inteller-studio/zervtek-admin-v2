@@ -114,6 +114,7 @@ export function MediaUploadSection({
                 <span className='text-sm font-medium'>Images</span>
                 <span className='text-xs text-muted-foreground bg-secondary px-2 py-0.5 rounded-full'>{images.length}</span>
               </div>
+              <div className='max-h-[400px] overflow-y-auto pr-1'>
               <div className='grid grid-cols-4 gap-2.5'>
                 {images.map((item) => (
                   <div
@@ -162,6 +163,7 @@ export function MediaUploadSection({
                     <MdAdd className='h-6 w-6 text-muted-foreground' />
                   </div>
                 )}
+              </div>
               </div>
             </div>
           )}

@@ -72,6 +72,7 @@ interface UnifiedPurchaseModalProps {
   onRecordPayment?: () => void
   onUpdateShipping?: () => void
   onGenerateInvoice?: () => void
+  onOpenExportCertificate?: () => void
   onMarkDelivered?: (auction: Purchase) => void
   onMarkCompleted?: (auction: Purchase) => void
 }
@@ -86,6 +87,7 @@ export function UnifiedPurchaseModal({
   onRecordPayment,
   onUpdateShipping,
   onGenerateInvoice,
+  onOpenExportCertificate,
   onMarkDelivered,
   onMarkCompleted,
 }: UnifiedPurchaseModalProps) {
@@ -426,6 +428,7 @@ export function UnifiedPurchaseModal({
                         onWorkflowUpdate={handleWorkflowUpdate}
                         currentUser={currentUser}
                         yards={activeYards}
+                        onOpenExportCertificate={onOpenExportCertificate}
                       />
                     </AnimatedTabsContent>
 
