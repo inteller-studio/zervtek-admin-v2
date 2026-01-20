@@ -31,9 +31,12 @@ import {
 } from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { type Purchase, type CostItem, type OurCosts } from '../../data/won-auctions'
+import { type PurchaseWorkflow } from '../../types/workflow'
+import { mergeAllCosts } from '../../utils/workflow'
 
 interface CostsBreakdownPanelProps {
   auction: Purchase
+  workflow?: PurchaseWorkflow
   onAddCost?: () => void
 }
 
@@ -58,25 +61,14 @@ const formatCurrency = (amount: number, currency: string = 'JPY') => {
   }).format(amount)
 }
 
-export function CostsBreakdownPanel({ auction, onAddCost }: CostsBreakdownPanelProps) {
+export function CostsBreakdownPanel({ auction, workflow, onAddCost }: CostsBreakdownPanelProps) {
   const [selectedCategory, setSelectedCategory] = useState<CostItem['category'] | 'all'>('all')
   const [showAllCategories, setShowAllCategories] = useState(false)
 
-  // Get costs data or create empty structure
-  const costs: OurCosts = auction.ourCosts || {
-    items: [],
-    totalCost: 0,
-    categoryTotals: {
-      auction: 0,
-      transport: 0,
-      repair: 0,
-      documents: 0,
-      shipping: 0,
-      customs: 0,
-      storage: 0,
-      other: 0,
-    },
-  }
+  // Merge purchase costs with workflow costs into a unified view
+  const costs: OurCosts = useMemo(() => {
+    return mergeAllCosts(auction.ourCosts, workflow)
+  }, [auction.ourCosts, workflow])
 
   // Filter items by category
   const filteredItems = useMemo(() => {

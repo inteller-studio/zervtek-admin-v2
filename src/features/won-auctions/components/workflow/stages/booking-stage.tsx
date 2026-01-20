@@ -21,6 +21,7 @@ import {
   type PurchaseWorkflow,
   type ShippingMethod,
   type BookingStatus,
+  type TaskCompletion,
   SHIPPING_METHODS,
 } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
@@ -121,6 +122,23 @@ export function BookingStage({
     onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
   }
 
+  // Edit handlers for inline note editing
+  const handleBookingRequestedEdit = (completion: TaskCompletion) => {
+    const updatedStage = {
+      ...stage,
+      bookingRequested: { ...stage.bookingRequested, completion },
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
+  }
+
+  const handleTaskEdit = (task: 'sentSIAndEC' | 'receivedSO', completion: TaskCompletion) => {
+    const updatedStage = {
+      ...stage,
+      [task]: { ...stage[task], completion },
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
+  }
+
   const isBookingConfirmed = stage.bookingStatus === 'confirmed'
 
   return (
@@ -201,6 +219,7 @@ export function BookingStage({
           completion={stage.bookingRequested.completion}
           disabled={!stage.shippingMethod}
           onCheckedChange={handleBookingRequestedChange}
+          onEdit={handleBookingRequestedEdit}
           showNoteOnComplete
           className='px-3'
         />
@@ -325,6 +344,7 @@ export function BookingStage({
                 onCheckedChange={(checked, notes) =>
                   handleTaskChange('sentSIAndEC', checked, notes)
                 }
+                onEdit={(completion) => handleTaskEdit('sentSIAndEC', completion)}
                 showNoteOnComplete
                 className='px-3'
               />
@@ -338,6 +358,7 @@ export function BookingStage({
                 onCheckedChange={(checked, notes) =>
                   handleTaskChange('receivedSO', checked, notes)
                 }
+                onEdit={(completion) => handleTaskEdit('receivedSO', completion)}
                 showNoteOnComplete
                 className='px-3'
               />

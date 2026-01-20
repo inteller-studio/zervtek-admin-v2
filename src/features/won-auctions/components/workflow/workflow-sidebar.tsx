@@ -2,11 +2,22 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { MdCheck, MdLock, MdArrowBack, MdArrowForward, MdCheckCircle } from 'react-icons/md'
+import { MdCheck, MdLock, MdArrowBack, MdArrowForward, MdCheckCircle, MdWarning } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
 import { cn } from '@/lib/utils'
 import { type Purchase } from '../../data/won-auctions'
 import { type PurchaseWorkflow, WORKFLOW_STAGES } from '../../types/workflow'
@@ -157,7 +168,7 @@ export function WorkflowSidebar({
       case 3:
         return <PaymentProcessingStage {...commonProps} />
       case 4:
-        return <RepairStoredStage {...commonProps} />
+        return <RepairStoredStage {...commonProps} onComplete={goToNext} />
       case 5:
         return <DocumentsReceivedStage {...commonProps} onOpenExportCertificate={onOpenExportCertificate} />
       case 6:
@@ -357,18 +368,63 @@ export function WorkflowSidebar({
             >
               {/* Stage Header */}
               <div className='mb-4'>
-                <div className='flex items-center gap-3 mb-1'>
-                  <h2 className='text-lg font-semibold text-foreground'>
-                    {currentStageData?.label}
-                  </h2>
-                  {isCurrentStageComplete && (
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      transition={{ type: 'spring', stiffness: 400, damping: 15 }}
-                    >
-                      <MdCheckCircle className='h-5 w-5 text-emerald-500' />
-                    </motion.div>
+                <div className='flex items-center justify-between mb-1'>
+                  <div className='flex items-center gap-3'>
+                    <h2 className='text-lg font-semibold text-foreground'>
+                      {currentStageData?.label}
+                    </h2>
+                    {isCurrentStageComplete && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: 'spring', stiffness: 400, damping: 15 }}
+                      >
+                        <MdCheckCircle className='h-5 w-5 text-emerald-500' />
+                      </motion.div>
+                    )}
+                  </div>
+                  {/* Finalize Button in Header */}
+                  {!workflow.finalized && areAllStagesComplete(workflow) && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size='sm'
+                          className='gap-1.5 bg-emerald-600 hover:bg-emerald-700'
+                        >
+                          <MdCheck className='h-4 w-4' />
+                          Finalize
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <div className='flex items-center gap-3'>
+                            <div className='h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center'>
+                              <MdWarning className='h-5 w-5 text-amber-600 dark:text-amber-400' />
+                            </div>
+                            <AlertDialogTitle>Finalize Purchase Workflow?</AlertDialogTitle>
+                          </div>
+                          <AlertDialogDescription className='pt-2'>
+                            This action cannot be undone. Once finalized, the workflow will be locked and no further changes can be made to any stage.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={onFinalize}
+                            className='bg-emerald-600 hover:bg-emerald-700'
+                          >
+                            <MdCheck className='h-4 w-4 mr-2' />
+                            Yes, Finalize
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                  {workflow.finalized && (
+                    <Badge className='bg-emerald-500 hover:bg-emerald-600 gap-1'>
+                      <MdLock className='h-3 w-3' />
+                      Finalized
+                    </Badge>
                   )}
                 </div>
                 <p className='text-sm text-muted-foreground'>
@@ -402,56 +458,34 @@ export function WorkflowSidebar({
             <span className='hidden sm:inline'>Previous</span>
           </Button>
 
-          {/* Progress / Finalized Status */}
+          {/* Progress Status */}
           <div className='flex items-center gap-2'>
-            {workflow.finalized ? (
-              <Badge className='bg-emerald-500 hover:bg-emerald-600 gap-1'>
-                <MdLock className='h-3 w-3' />
-                Finalized
-              </Badge>
-            ) : (
-              <>
-                <Badge
-                  variant={isCurrentStageComplete ? 'default' : 'secondary'}
-                  className={cn(
-                    'text-xs transition-colors',
-                    isCurrentStageComplete && 'bg-emerald-500 hover:bg-emerald-600'
-                  )}
-                >
-                  {progress.completed}/{progress.total} tasks
-                </Badge>
-                <span className='text-xs text-muted-foreground'>
-                  Stage {viewingStage} of 8
-                </span>
-              </>
-            )}
+            <Badge
+              variant={isCurrentStageComplete ? 'default' : 'secondary'}
+              className={cn(
+                'text-xs transition-colors',
+                isCurrentStageComplete && 'bg-emerald-500 hover:bg-emerald-600'
+              )}
+            >
+              {progress.completed}/{progress.total} tasks
+            </Badge>
+            <span className='text-xs text-muted-foreground'>
+              Stage {viewingStage} of 8
+            </span>
           </div>
 
-          {/* Next / Finalize Button */}
-          {workflow.finalized ? (
-            <div className='w-[88px]' />
-          ) : areAllStagesComplete(workflow) ? (
-            <Button
-              size='sm'
-              onClick={onFinalize}
-              className='gap-1.5 bg-emerald-600 hover:bg-emerald-700'
-            >
-              <MdCheck className='h-4 w-4' />
-              <span className='hidden sm:inline'>Finalize</span>
-            </Button>
-          ) : (
-            <Button
-              size='sm'
-              onClick={goToNext}
-              disabled={!canGoNext}
-              className='gap-1.5'
-            >
-              <span className='hidden sm:inline'>
-                {viewingStage === 8 ? 'Complete' : 'Next'}
-              </span>
-              <MdArrowForward className='h-4 w-4' />
-            </Button>
-          )}
+          {/* Next Button */}
+          <Button
+            size='sm'
+            onClick={goToNext}
+            disabled={!canGoNext}
+            className='gap-1.5'
+          >
+            <span className='hidden sm:inline'>
+              {viewingStage === 8 ? 'Complete' : 'Next'}
+            </span>
+            <MdArrowForward className='h-4 w-4' />
+          </Button>
         </div>
       </div>
     </div>

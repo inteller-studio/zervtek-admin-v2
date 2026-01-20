@@ -11,6 +11,7 @@ import { type Purchase } from '../../../data/won-auctions'
 import {
   type PurchaseWorkflow,
   type BLDeliveryMethod,
+  type TaskCompletion,
   BL_DELIVERY_METHODS,
 } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
@@ -89,6 +90,23 @@ export function ShippedStage({
     checkAndUpdateCompletion(updatedStage)
   }
 
+  // Edit handlers for inline note editing
+  const handleBLPaidEdit = (completion: TaskCompletion) => {
+    const updatedStage = {
+      ...stage,
+      blPaid: { ...stage.blPaid, completion },
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'shipped', updatedStage))
+  }
+
+  const handleRecycleEdit = (completion: TaskCompletion) => {
+    const updatedStage = {
+      ...stage,
+      recycleApplied: { ...stage.recycleApplied, completion },
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'shipped', updatedStage))
+  }
+
   const checkAndUpdateCompletion = (updatedStage: typeof stage) => {
     // Check if all required tasks are complete
     const allComplete =
@@ -163,6 +181,7 @@ export function ShippedStage({
           completion={stage.blPaid.completion}
           disabled={!stage.blCopy.uploaded}
           onCheckedChange={handleBLPaidChange}
+          onEdit={handleBLPaidEdit}
           showNoteOnComplete
           className='px-3'
         />
@@ -249,6 +268,7 @@ export function ShippedStage({
           checked={stage.recycleApplied.completed}
           completion={stage.recycleApplied.completion}
           onCheckedChange={handleRecycleChange}
+          onEdit={handleRecycleEdit}
           showNoteOnComplete
           className='px-3'
         />

@@ -1,21 +1,18 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import { format } from 'date-fns'
 import { motion } from 'framer-motion'
 import {
   MdDashboard,
   MdCheckCircle,
   MdDescription,
   MdCreditCard,
-  MdDirectionsBoat,
   MdAccountBalanceWallet,
   MdTrendingUp,
   MdAccessTime,
 } from 'react-icons/md'
 import { Tabs, TabsContent } from '@/components/ui/tabs'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
@@ -147,8 +144,7 @@ export function PurchasePageContent({
     { id: 'workflow', label: 'Process', icon: MdCheckCircle, badge: taskProgress.total > 0 ? `${taskProgress.completed}/${taskProgress.total}` : undefined, badgeColor: taskProgress.completed === taskProgress.total && taskProgress.total > 0 ? 'emerald' : 'default' },
     { id: 'documents', label: 'Documents', icon: MdDescription, badge: auction.documents.length > 0 ? auction.documents.length : undefined },
     { id: 'payments', label: 'Payments', icon: MdCreditCard, badge: `${paymentProgress}%`, badgeColor: paymentProgress >= 100 ? 'emerald' : 'primary' },
-    { id: 'costs', label: 'Our Costs', icon: MdAccountBalanceWallet, badge: auction.ourCosts?.items.length || undefined },
-    { id: 'shipping', label: 'Shipping', icon: MdDirectionsBoat, isLive: auction.shipment && auction.status === 'shipping' },
+    { id: 'costs', label: 'Financials', icon: MdAccountBalanceWallet, badge: auction.ourCosts?.items.length || undefined },
   ]
 
   // Refs for tab indicator animation
@@ -219,13 +215,6 @@ export function PurchasePageContent({
                     </Badge>
                   )}
 
-                  {/* Live Indicator */}
-                  {tab.isLive && (
-                    <span className='relative flex h-2 w-2'>
-                      <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75' />
-                      <span className='relative inline-flex rounded-full h-2 w-2 bg-purple-500' />
-                    </span>
-                  )}
                 </button>
               )
             })}
@@ -422,107 +411,9 @@ export function PurchasePageContent({
           />
         </TabsContent>
 
-        {/* Our Costs Tab */}
+        {/* Financials Tab */}
         <TabsContent value='costs' className='mt-0'>
-          <CostsBreakdownPanel auction={auction} />
-        </TabsContent>
-
-        <TabsContent value='shipping' className='mt-0 p-4'>
-          <div className='rounded-lg border bg-card overflow-hidden'>
-            <div className='px-4 py-3 bg-muted/50 border-b'>
-              <h3 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2'>
-                <MdDirectionsBoat className='h-4 w-4 text-foreground' />
-                Shipping Details
-              </h3>
-            </div>
-
-            <div className='p-4'>
-              {auction.shipment ? (
-                <div className='space-y-4'>
-                  <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-                    <div className='space-y-1'>
-                      <p className='text-xs text-muted-foreground'>Carrier</p>
-                      <p className='font-semibold'>{auction.shipment.carrier}</p>
-                    </div>
-                    <div className='space-y-1'>
-                      <p className='text-xs text-muted-foreground'>Tracking Number</p>
-                      <p className='font-mono font-medium text-sm'>{auction.shipment.trackingNumber}</p>
-                    </div>
-                    <div className='space-y-1'>
-                      <p className='text-xs text-muted-foreground'>Status</p>
-                      <Badge variant='outline' className='capitalize'>
-                        {auction.shipment.status.replace('_', ' ')}
-                      </Badge>
-                    </div>
-                    <div className='space-y-1'>
-                      <p className='text-xs text-muted-foreground'>Current Location</p>
-                      <p className='font-medium'>{auction.shipment.currentLocation}</p>
-                    </div>
-                  </div>
-
-                  {auction.shipment.estimatedDelivery && (
-                    <div className='p-3 rounded-lg bg-muted/50 border border-border'>
-                      <p className='text-xs text-muted-foreground mb-1'>Estimated Delivery</p>
-                      <p className='font-bold text-lg text-foreground'>
-                        {format(new Date(auction.shipment.estimatedDelivery), 'MMMM d, yyyy')}
-                      </p>
-                    </div>
-                  )}
-
-                  {auction.shipment.events && auction.shipment.events.length > 0 && (
-                    <div>
-                      <h4 className='text-sm font-semibold mb-3 flex items-center gap-2'>
-                        <span className='w-2 h-2 rounded-full bg-foreground' />
-                        Tracking Events
-                      </h4>
-                      <div className='space-y-0'>
-                        {auction.shipment.events.map((event, index) => (
-                          <div
-                            key={index}
-                            className='flex gap-4 text-sm relative pl-6 pb-4'
-                          >
-                            {index < auction.shipment!.events!.length - 1 && (
-                              <div className='absolute left-[9px] top-3 bottom-0 w-0.5 bg-muted' />
-                            )}
-                            <div className={cn(
-                              'absolute left-0 top-1.5 w-5 h-5 rounded-full border-2 bg-background flex items-center justify-center',
-                              index === 0 ? 'border-foreground' : 'border-muted'
-                            )}>
-                              {index === 0 && (
-                                <span className='w-2 h-2 rounded-full bg-foreground' />
-                              )}
-                            </div>
-                            <div className='flex-1'>
-                              <div className='flex items-center justify-between mb-1'>
-                                <p className='font-medium'>{event.status}</p>
-                                <span className='text-xs text-muted-foreground'>
-                                  {format(new Date(event.date), 'MMM d, HH:mm')}
-                                </span>
-                              </div>
-                              <p className='text-muted-foreground text-sm'>{event.description}</p>
-                              <p className='text-xs text-muted-foreground mt-0.5'>{event.location}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  <Button variant='outline' onClick={onUpdateShipping}>
-                    Update Shipping Info
-                  </Button>
-                </div>
-              ) : (
-                <div className='text-center py-12'>
-                  <MdDirectionsBoat className='h-16 w-16 text-muted-foreground/20 mx-auto mb-4' />
-                  <p className='text-muted-foreground mb-4'>No shipping information yet</p>
-                  <Button variant='outline' onClick={onUpdateShipping}>
-                    Add Shipping Details
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          <CostsBreakdownPanel auction={auction} workflow={workflow} />
         </TabsContent>
       </ScrollArea>
     </Tabs>

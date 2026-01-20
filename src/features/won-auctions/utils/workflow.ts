@@ -18,8 +18,12 @@ import {
   type DHLDocumentsStage,
   type DocumentChecklist,
   type WorkflowStageKey,
+  type CostType,
+  type CostInvoice,
+  type TransportCost,
   WORKFLOW_STAGES,
 } from '../types/workflow'
+import { type CostItem, type OurCosts } from '../data/won-auctions'
 
 // ============================================
 // Default State Creators
@@ -518,4 +522,187 @@ export const getStageValidationErrors = (
   }
 
   return errors
+}
+
+// ============================================
+// Cost Aggregation
+// ============================================
+
+/** Map workflow cost types to CostItem categories */
+const mapCostTypeToCategory = (costType: CostType): CostItem['category'] => {
+  switch (costType) {
+    case 'tax':
+      return 'other'
+    case 'auction_fee':
+      return 'auction'
+    case 'transport':
+      return 'transport'
+    case 'inspection':
+      return 'documents'
+    case 'storage':
+      return 'storage'
+    case 'other':
+      return 'other'
+    default:
+      return 'other'
+  }
+}
+
+/** Convert a CostInvoice to CostItem format */
+const convertCostInvoiceToCostItem = (invoice: CostInvoice): CostItem => ({
+  id: invoice.id,
+  category: mapCostTypeToCategory(invoice.costType),
+  description: invoice.description,
+  amount: invoice.amount,
+  currency: invoice.currency,
+  date: invoice.createdAt,
+  paidTo: undefined,
+  invoiceRef: undefined,
+  notes: undefined,
+  recordedBy: invoice.createdBy,
+  recordedAt: invoice.createdAt,
+})
+
+/** Convert a TransportCost to CostItem format */
+const convertTransportCostToCostItem = (cost: TransportCost): CostItem => ({
+  id: cost.id,
+  category: 'transport',
+  description: cost.description,
+  amount: cost.amount,
+  currency: cost.currency,
+  date: cost.createdAt,
+  paidTo: undefined,
+  invoiceRef: undefined,
+  notes: undefined,
+  recordedBy: cost.createdBy,
+  recordedAt: cost.createdAt,
+})
+
+/** Aggregate costs from workflow stages into CostItem format */
+export const aggregateWorkflowCosts = (workflow: PurchaseWorkflow): CostItem[] => {
+  const items: CostItem[] = []
+
+  // ===== AfterPurchase Stage =====
+
+  // 1. Payment to Auction House amount
+  if (workflow.stages.afterPurchase.paymentAmount) {
+    items.push({
+      id: 'auction-payment',
+      category: 'auction',
+      description: 'Payment to Auction House',
+      amount: workflow.stages.afterPurchase.paymentAmount,
+      currency: workflow.stages.afterPurchase.paymentCurrency || 'JPY',
+      date: workflow.stages.afterPurchase.paymentToAuctionHouse.completion?.completedAt || new Date(),
+      recordedBy: workflow.stages.afterPurchase.paymentToAuctionHouse.completion?.completedBy || 'System',
+      recordedAt: workflow.stages.afterPurchase.paymentToAuctionHouse.completion?.completedAt || new Date(),
+    })
+  }
+
+  // 2. Cost invoices from AfterPurchase stage
+  if (workflow.stages.afterPurchase.costInvoices) {
+    for (const invoice of workflow.stages.afterPurchase.costInvoices) {
+      items.push(convertCostInvoiceToCostItem(invoice))
+    }
+  }
+
+  // ===== Transport Stage =====
+
+  // 3. Transport Arranged amount
+  if (workflow.stages.transport.transportArrangedAmount) {
+    items.push({
+      id: 'transport-arranged',
+      category: 'transport',
+      description: 'Transport Arrangement',
+      amount: workflow.stages.transport.transportArrangedAmount,
+      currency: workflow.stages.transport.transportArrangedCurrency || 'JPY',
+      date: workflow.stages.transport.transportArranged.completion?.completedAt || new Date(),
+      recordedBy: workflow.stages.transport.transportArranged.completion?.completedBy || 'System',
+      recordedAt: workflow.stages.transport.transportArranged.completion?.completedAt || new Date(),
+    })
+  }
+
+  // 4. Photos Requested amount
+  if (workflow.stages.transport.photosRequestedAmount) {
+    items.push({
+      id: 'photos-requested',
+      category: 'other',
+      description: 'Photos Requested',
+      amount: workflow.stages.transport.photosRequestedAmount,
+      currency: workflow.stages.transport.photosRequestedCurrency || 'JPY',
+      date: workflow.stages.transport.photosRequested.completion?.completedAt || new Date(),
+      recordedBy: workflow.stages.transport.photosRequested.completion?.completedBy || 'System',
+      recordedAt: workflow.stages.transport.photosRequested.completion?.completedAt || new Date(),
+    })
+  }
+
+  // 5. Transport costs array
+  if (workflow.stages.transport.costs) {
+    for (const cost of workflow.stages.transport.costs) {
+      items.push(convertTransportCostToCostItem(cost))
+    }
+  }
+
+  return items
+}
+
+/** Calculate category totals from cost items */
+export const calculateCategoryTotals = (items: CostItem[]): OurCosts['categoryTotals'] => {
+  const totals: OurCosts['categoryTotals'] = {
+    auction: 0,
+    transport: 0,
+    repair: 0,
+    documents: 0,
+    shipping: 0,
+    customs: 0,
+    storage: 0,
+    other: 0,
+  }
+
+  for (const item of items) {
+    totals[item.category] += item.amount
+  }
+
+  return totals
+}
+
+/** Merge purchase costs with workflow costs into a unified OurCosts structure */
+export const mergeAllCosts = (
+  purchaseCosts: OurCosts | undefined,
+  workflow: PurchaseWorkflow | undefined
+): OurCosts => {
+  // Start with empty costs
+  const baseCosts: OurCosts = {
+    items: [],
+    totalCost: 0,
+    categoryTotals: {
+      auction: 0,
+      transport: 0,
+      repair: 0,
+      documents: 0,
+      shipping: 0,
+      customs: 0,
+      storage: 0,
+      other: 0,
+    },
+  }
+
+  // Add purchase costs if available
+  if (purchaseCosts) {
+    baseCosts.items.push(...purchaseCosts.items)
+  }
+
+  // Add workflow costs if available
+  if (workflow) {
+    const workflowCostItems = aggregateWorkflowCosts(workflow)
+    baseCosts.items.push(...workflowCostItems)
+  }
+
+  // Recalculate totals from all items
+  baseCosts.categoryTotals = calculateCategoryTotals(baseCosts.items)
+  baseCosts.totalCost = Object.values(baseCosts.categoryTotals).reduce((a, b) => a + b, 0)
+
+  // Sort items by date (most recent first)
+  baseCosts.items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+
+  return baseCosts
 }

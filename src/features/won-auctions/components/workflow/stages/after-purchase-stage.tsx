@@ -2,10 +2,10 @@
 
 import { useRef, useState } from 'react'
 import { format } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MdAttachMoney, MdError, MdUploadFile, MdDescription, MdDelete, MdOpenInNew, MdCheck, MdClose, MdChat, MdAdd, MdReceipt, MdEdit } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Textarea } from '@/components/ui/textarea'
 import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
@@ -338,16 +338,48 @@ export function AfterPurchaseStage({
       {/* Task - Custom checkbox with click handler */}
       <div className='border rounded-lg p-3'>
         <div className='flex items-start gap-3 py-2'>
-          <Checkbox
+          <motion.button
+            type='button'
+            role='checkbox'
+            aria-checked={stage.paymentToAuctionHouse.completed}
             id='payment-auction-house'
-            checked={stage.paymentToAuctionHouse.completed}
-            onCheckedChange={handleCheckboxClick}
             disabled={workflow.finalized}
+            onClick={() => !workflow.finalized && handleCheckboxClick()}
             className={cn(
-              'mt-0.5',
-              stage.paymentToAuctionHouse.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
+              'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+              stage.paymentToAuctionHouse.completed
+                ? 'bg-foreground border-foreground'
+                : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60',
+              workflow.finalized && 'opacity-50 cursor-not-allowed'
             )}
-          />
+            whileTap={!workflow.finalized ? { scale: 0.85 } : undefined}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+          >
+            <AnimatePresence>
+              {stage.paymentToAuctionHouse.completed && (
+                <motion.svg
+                  viewBox='0 0 24 24'
+                  className='h-3.5 w-3.5 text-background'
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                >
+                  <motion.path
+                    d='M5 12l5 5L20 7'
+                    fill='none'
+                    stroke='currentColor'
+                    strokeWidth={3}
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ duration: 0.2, delay: 0.1 }}
+                  />
+                </motion.svg>
+              )}
+            </AnimatePresence>
+          </motion.button>
           <div className='flex-1 min-w-0'>
             <div className='flex items-center gap-2'>
               <label
@@ -400,13 +432,21 @@ export function AfterPurchaseStage({
           </div>
 
           {/* Status indicator */}
-          {stage.paymentToAuctionHouse.completed && (
-            <div className='shrink-0'>
-              <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
-                <MdCheck className='h-3 w-3 text-background' />
-              </div>
-            </div>
-          )}
+          <AnimatePresence>
+            {stage.paymentToAuctionHouse.completed && (
+              <motion.div
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0, opacity: 0 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className='shrink-0'
+              >
+                <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
+                  <MdCheck className='h-3 w-3 text-background' />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

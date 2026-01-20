@@ -18,8 +18,6 @@ import {
   MdChat,
   MdConfirmationNumber,
   MdHelpOutline,
-  MdPersonAdd,
-  MdInbox,
   MdAccountBalance,
 } from 'react-icons/md'
 import { type NavGroup, type User, type Team } from '../types'
@@ -28,7 +26,6 @@ import { bids } from '@/features/bids/data/bids'
 import { requests } from '@/features/requests/data/requests'
 import { customers } from '@/features/customers/data/customers'
 import { getTicketStats } from '@/features/support/data/tickets'
-import { getSubmissionStats } from '@/features/leads/data/submissions'
 
 // Count customers assigned to current user (simulated - in production this would use auth context)
 const CURRENT_USER_ID = 'staff-001'
@@ -42,12 +39,6 @@ const pendingInspectionsCount = requests.filter((r) => r.type === 'inspection' &
 // Support ticket stats
 const ticketStats = getTicketStats()
 const openTicketsCount = ticketStats.open + ticketStats.inProgress
-
-// Submissions/Inquiries stats
-const submissionStats = getSubmissionStats()
-const newSubmissionsCount = submissionStats.byStatus.new
-const newInquiriesCount = submissionStats.byType.inquiry
-const unscheduledOnboardingCount = submissionStats.byType.onboarding
 
 // Role group shortcuts
 const SALES_ROLES = [ROLES.ADMIN, ROLES.MANAGER, ROLES.SALES_STAFF] as const
@@ -130,31 +121,6 @@ export const sidebarNavGroups: NavGroup[] = [
         icon: MdAccountCircle,
         badge: myCustomersCount > 0 ? String(myCustomersCount) : undefined,
         roles: [ROLES.MANAGER, ROLES.SALES_STAFF],
-      },
-      {
-        title: 'Leads',
-        icon: MdInbox,
-        badge: newSubmissionsCount > 0 ? String(newSubmissionsCount) : undefined,
-        items: [
-          {
-            title: 'Inquiries',
-            url: '/leads/inquiries',
-            icon: MdDirectionsCar,
-            badge: newInquiriesCount > 0 ? String(newInquiriesCount) : undefined,
-          },
-          {
-            title: 'Onboarding',
-            url: '/leads/onboarding',
-            icon: MdFactCheck,
-            badge: unscheduledOnboardingCount > 0 ? String(unscheduledOnboardingCount) : undefined,
-          },
-          {
-            title: 'Assign',
-            url: '/leads/assign',
-            icon: MdPersonAdd,
-            roles: [...ADMIN_ONLY],
-          },
-        ],
       },
     ],
   },

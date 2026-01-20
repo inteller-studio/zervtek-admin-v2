@@ -6,6 +6,7 @@ import { requests } from './data/requests'
 import { TVHeader } from './components/tv-display/tv-header'
 import { TVKanbanBoard } from './components/tv-display/tv-kanban-board'
 import type { TVDisplayRequest } from './components/tv-display/tv-task-card'
+import { MaintenanceOverlay } from '@/components/ui/maintenance-overlay'
 
 export function TVDisplay() {
   const [currentTime, setCurrentTime] = useState(new Date())
@@ -75,6 +76,7 @@ export function TVDisplay() {
         isFullscreen ? 'fixed inset-0 z-50 overflow-auto p-10' : 'p-8'
       }`}
     >
+      <MaintenanceOverlay />
       <div className="mx-auto max-w-[1920px]">
         <TVHeader
           currentTime={currentTime}

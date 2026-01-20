@@ -339,7 +339,6 @@ export function CustomerProfileModal({
                     tabs={[
                       { id: 'overview', label: 'Overview' },
                       { id: 'financial', label: 'Financial' },
-                      { id: 'leads', label: 'Leads' },
                       { id: 'activity', label: 'Activity' },
                     ]}
                     value={activeProfileTab}
@@ -455,45 +454,6 @@ export function CustomerProfileModal({
                         <div className="rounded-xl border border-border/50 bg-card/50 p-4">
                           <h3 className="text-sm font-medium text-muted-foreground mb-2">Notes</h3>
                           <p className="text-sm">{customer.notes}</p>
-                        </div>
-                      )}
-                    </AnimatedTabsContent>
-
-                    <AnimatedTabsContent value="leads" className="mt-6 space-y-4">
-                      {/* Mock leads - in production this would come from API */}
-                      {[
-                        { id: '1', vehicle: '2023 Toyota Supra GR', type: 'Price Inquiry', date: '2 days ago', status: 'pending' },
-                        { id: '2', vehicle: '2022 Nissan GT-R Nismo', type: 'Availability', date: '5 days ago', status: 'responded' },
-                        { id: '3', vehicle: '2021 Honda NSX', type: 'Shipping Quote', date: '1 week ago', status: 'closed' },
-                      ].map((lead) => (
-                        <div
-                          key={lead.id}
-                          className="flex items-center justify-between rounded-lg border border-border/50 bg-card/50 p-3"
-                        >
-                          <div className="space-y-1">
-                            <p className="text-sm font-medium">{lead.vehicle}</p>
-                            <p className="text-xs text-muted-foreground">{lead.type}</p>
-                          </div>
-                          <div className="text-right">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                'text-xs',
-                                lead.status === 'pending' && 'bg-amber-500/10 text-amber-600 border-amber-500/20',
-                                lead.status === 'responded' && 'bg-blue-500/10 text-blue-600 border-blue-500/20',
-                                lead.status === 'closed' && 'bg-slate-500/10 text-slate-600 border-slate-500/20'
-                              )}
-                            >
-                              {lead.status.charAt(0).toUpperCase() + lead.status.slice(1)}
-                            </Badge>
-                            <p className="mt-1 text-xs text-muted-foreground">{lead.date}</p>
-                          </div>
-                        </div>
-                      ))}
-                      {/* Empty state if no leads */}
-                      {false && (
-                        <div className="rounded-xl border border-border/50 bg-card/50 p-8 text-center">
-                          <p className="text-sm text-muted-foreground">No leads yet</p>
                         </div>
                       )}
                     </AnimatedTabsContent>

@@ -2,8 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { MdBuild, MdAdd, MdChat, MdImage, MdDescription, MdSkipNext, MdUndo } from 'react-icons/md'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { MdBuild, MdAdd, MdChat, MdImage, MdDescription } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -30,6 +29,7 @@ import {
   type PurchaseWorkflow,
   type RepairUpdate,
   type RepairUpdateType,
+  type TaskCompletion,
 } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
@@ -40,6 +40,7 @@ interface RepairStoredStageProps {
   workflow: PurchaseWorkflow
   onWorkflowUpdate: (workflow: PurchaseWorkflow) => void
   currentUser: string
+  onComplete?: () => void
 }
 
 const UPDATE_TYPES: { value: RepairUpdateType; label: string; icon: typeof MdChat }[] = [
@@ -53,11 +54,10 @@ export function RepairStoredStage({
   workflow,
   onWorkflowUpdate,
   currentUser,
+  onComplete,
 }: RepairStoredStageProps) {
   const stage = workflow.stages.repairStored
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [skipDialogOpen, setSkipDialogOpen] = useState(false)
-  const [skipReason, setSkipReason] = useState('')
   const [updateType, setUpdateType] = useState<RepairUpdateType>('comment')
   const [content, setContent] = useState('')
   const [files, setFiles] = useState<{ id: string; name: string; size: number; type: string; file: File }[]>([])
@@ -102,30 +102,17 @@ export function RepairStoredStage({
       status: checked ? ('completed' as const) : ('in_progress' as const),
     }
     onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
-  }
 
-  const handleSkipStage = () => {
-    const updatedStage = {
-      ...stage,
-      skipped: true,
-      skippedBy: currentUser,
-      skippedAt: new Date(),
-      skipReason: skipReason.trim() || undefined,
-      status: 'skipped' as const,
+    // Navigate to next step when marked complete
+    if (checked && onComplete) {
+      onComplete()
     }
-    onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
-    setSkipDialogOpen(false)
-    setSkipReason('')
   }
 
-  const handleUndoSkip = () => {
+  const handleMarkCompleteEdit = (completion: TaskCompletion) => {
     const updatedStage = {
       ...stage,
-      skipped: false,
-      skippedBy: undefined,
-      skippedAt: undefined,
-      skipReason: undefined,
-      status: 'pending' as const,
+      markedComplete: { ...stage.markedComplete, completion },
     }
     onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
   }
@@ -135,118 +122,8 @@ export function RepairStoredStage({
     return updateType?.icon || MdChat
   }
 
-  // If stage is skipped, show skipped state
-  if (stage.skipped) {
-    return (
-      <div className='space-y-4'>
-        {/* Skipped State */}
-        <div className='rounded-lg border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 p-4'>
-          <div className='flex items-start gap-3'>
-            <div className='h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0'>
-              <MdSkipNext className='h-5 w-5 text-amber-600 dark:text-amber-400' />
-            </div>
-            <div className='flex-1 min-w-0'>
-              <h3 className='font-semibold text-amber-800 dark:text-amber-200'>Stage Skipped</h3>
-              <p className='text-sm text-amber-700 dark:text-amber-300 mt-0.5'>
-                This stage was skipped and no repair/storage work was needed.
-              </p>
-              {stage.skipReason && (
-                <p className='text-sm text-amber-600 dark:text-amber-400 mt-2 italic'>
-                  "{stage.skipReason}"
-                </p>
-              )}
-              <p className='text-xs text-amber-600 dark:text-amber-400 mt-2'>
-                Skipped by {stage.skippedBy} on {stage.skippedAt ? format(new Date(stage.skippedAt), 'MMM d, yyyy h:mm a') : 'unknown'}
-              </p>
-            </div>
-          </div>
-          <div className='mt-4 pt-3 border-t border-amber-200 dark:border-amber-800'>
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleUndoSkip}
-              className='gap-2 border-amber-300 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:text-amber-300 dark:hover:bg-amber-900/50'
-            >
-              <MdUndo className='h-4 w-4' />
-              Undo Skip
-            </Button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className='space-y-4'>
-      {/* Header with Skip Button */}
-      <div className='flex items-center justify-between gap-3'>
-        <div className='flex items-center gap-2'>
-          <div className='h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center'>
-            <MdBuild className='h-4 w-4 text-primary' />
-          </div>
-          <div>
-            <p className='text-sm font-medium'>Repair & Storage</p>
-            <p className='text-xs text-muted-foreground'>Track repairs or skip if not needed</p>
-          </div>
-        </div>
-
-        {/* Skip Stage Button - Prominent placement */}
-        <Dialog open={skipDialogOpen} onOpenChange={setSkipDialogOpen}>
-          <DialogTrigger asChild>
-            <Button
-              variant='outline'
-              size='sm'
-              className='gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-400 dark:border-amber-700 dark:text-amber-400 dark:hover:bg-amber-950 dark:hover:text-amber-300'
-            >
-              <MdSkipNext className='h-4 w-4' />
-              Skip Stage
-            </Button>
-          </DialogTrigger>
-          <DialogContent className='max-w-md'>
-            <DialogHeader>
-              <DialogTitle>Skip Repair/Storage Stage?</DialogTitle>
-              <DialogDescription>
-                If no repairs or storage documentation is needed for this vehicle, you can skip this stage.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={(e) => { e.preventDefault(); handleSkipStage(); }}>
-              <div className='space-y-4 py-4'>
-                <div className='space-y-2'>
-                  <Label>Reason (optional)</Label>
-                  <Textarea
-                    autoFocus
-                    placeholder='e.g., Vehicle in perfect condition, no repairs needed...'
-                    value={skipReason}
-                    onChange={(e) => setSkipReason(e.target.value)}
-                    rows={2}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                        e.preventDefault()
-                        handleSkipStage()
-                      }
-                    }}
-                  />
-                  <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
-                </div>
-              </div>
-              <DialogFooter>
-                <Button type='button' variant='outline' onClick={() => setSkipDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button
-                  type='submit'
-                  className='bg-amber-500 hover:bg-amber-600 text-white'
-                >
-                  <MdSkipNext className='h-4 w-4 mr-2' />
-                  Skip Stage
-                  <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-
       {/* Add Update Button */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger asChild>
@@ -418,6 +295,7 @@ export function RepairStoredStage({
           checked={stage.markedComplete.completed}
           completion={stage.markedComplete.completion}
           onCheckedChange={handleMarkComplete}
+          onEdit={handleMarkCompleteEdit}
           showNoteOnComplete
           className='px-3'
         />

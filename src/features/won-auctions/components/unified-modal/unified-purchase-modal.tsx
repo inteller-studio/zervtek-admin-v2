@@ -141,11 +141,11 @@ export function UnifiedPurchaseModal({
       // Call parent handler
       onWorkflowUpdate(auction.id, updatedWorkflow)
 
-      // Auto-advance to next stage if current is complete
+      // Update currentStage in workflow if current stage is complete (for progress tracking)
+      // but DON'T auto-navigate - user can click Next to advance
       const currentStageComplete = isStageComplete(updatedWorkflow, updatedWorkflow.currentStage)
       if (currentStageComplete && updatedWorkflow.currentStage < 8) {
         const nextStage = updatedWorkflow.currentStage + 1
-        const nextStageKey = getStageKey(nextStage)
 
         // Update workflow with new current stage
         const advancedWorkflow = {
@@ -155,15 +155,6 @@ export function UnifiedPurchaseModal({
         }
         setLocalWorkflow(advancedWorkflow)
         onWorkflowUpdate(auction.id, advancedWorkflow)
-
-        // Switch accordion to next stage
-        if (nextStageKey) {
-          setActiveStage(nextStageKey)
-        }
-
-        toast.success(
-          `Stage ${updatedWorkflow.currentStage} completed! Moving to Stage ${nextStage}.`
-        )
       }
     },
     [auction, onWorkflowUpdate]

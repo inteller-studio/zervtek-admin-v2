@@ -8,7 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
 import { cn } from '@/lib/utils'
 import { type Purchase } from '../../../data/won-auctions'
-import { type PurchaseWorkflow, type AccessoriesChecklist, type AccessoriesSubItems } from '../../../types/workflow'
+import { type PurchaseWorkflow, type AccessoriesChecklist, type AccessoriesSubItems, type TaskCompletion } from '../../../types/workflow'
 import { Input } from '@/components/ui/input'
 import { Checkbox } from '@/components/ui/checkbox'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
@@ -127,6 +127,26 @@ export function DocumentsReceivedStage({
       ...stage,
       unregisteredTasks: updatedTasks,
       status: allComplete ? ('completed' as const) : ('in_progress' as const),
+    }
+
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
+  }
+
+  // Edit handlers for inline note editing
+  const handleRegisteredTaskEdit = (
+    task: keyof NonNullable<typeof stage.registeredTasks>,
+    completion: TaskCompletion
+  ) => {
+    if (!stage.registeredTasks) return
+
+    const updatedTasks = {
+      ...stage.registeredTasks,
+      [task]: { ...stage.registeredTasks[task], completion },
+    }
+
+    const updatedStage = {
+      ...stage,
+      registeredTasks: updatedTasks,
     }
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
@@ -278,6 +298,7 @@ export function DocumentsReceivedStage({
               onCheckedChange={(checked, notes) =>
                 handleRegisteredTaskChange('receivedNumberPlates', checked, notes)
               }
+              onEdit={(completion) => handleRegisteredTaskEdit('receivedNumberPlates', completion)}
               showNoteOnComplete
               className='px-3'
             />
@@ -291,6 +312,7 @@ export function DocumentsReceivedStage({
               onCheckedChange={(checked, notes) =>
                 handleRegisteredTaskChange('deregistered', checked, notes)
               }
+              onEdit={(completion) => handleRegisteredTaskEdit('deregistered', completion)}
               showNoteOnComplete
               className='px-3'
             />
@@ -301,7 +323,7 @@ export function DocumentsReceivedStage({
                   'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
                   stage.registeredTasks.exportCertificateCreated.completed
                     ? 'bg-foreground border-foreground'
-                    : 'border-muted-foreground/40',
+                    : 'border-muted-foreground/50 dark:border-muted-foreground/70',
                   !stage.registeredTasks.deregistered.completed && 'opacity-50'
                 )}
               >
@@ -368,6 +390,7 @@ export function DocumentsReceivedStage({
               onCheckedChange={(checked, notes) =>
                 handleRegisteredTaskChange('sentDeregistrationCopy', checked, notes)
               }
+              onEdit={(completion) => handleRegisteredTaskEdit('sentDeregistrationCopy', completion)}
               showNoteOnComplete
               className='px-3'
             />
@@ -381,6 +404,7 @@ export function DocumentsReceivedStage({
               onCheckedChange={(checked, notes) =>
                 handleRegisteredTaskChange('insuranceRefundReceived', checked, notes)
               }
+              onEdit={(completion) => handleRegisteredTaskEdit('insuranceRefundReceived', completion)}
               showNoteOnComplete
               className='px-3'
             />
@@ -401,7 +425,7 @@ export function DocumentsReceivedStage({
                   'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
                   stage.unregisteredTasks.exportCertificateCreated.completed
                     ? 'bg-foreground border-foreground'
-                    : 'border-muted-foreground/40'
+                    : 'border-muted-foreground/50 dark:border-muted-foreground/70'
                 )}
               >
                 {stage.unregisteredTasks.exportCertificateCreated.completed && (
@@ -480,7 +504,7 @@ export function DocumentsReceivedStage({
                         'h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer',
                         isChecked
                           ? 'bg-foreground border-foreground'
-                          : 'border-muted-foreground/40 hover:border-muted-foreground/60'
+                          : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60'
                       )}
                     >
                       {isChecked && (

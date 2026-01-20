@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { format } from 'date-fns'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
   MdLocalShipping,
   MdBusiness,
@@ -27,7 +28,6 @@ import { Input } from '@/components/ui/input'
 import { NumericInput } from '@/components/ui/numeric-input'
 import { Textarea } from '@/components/ui/textarea'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
   Dialog,
   DialogContent,
@@ -37,7 +37,7 @@ import {
 } from '@/components/ui/dialog'
 import { cn } from '@/lib/utils'
 import { type Purchase } from '../../../data/won-auctions'
-import { type PurchaseWorkflow, type WorkflowAttachment, type TransportCost } from '../../../types/workflow'
+import { type PurchaseWorkflow, type WorkflowAttachment, type TransportCost, type TaskCompletion } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 import { YardSelector } from '../shared/yard-selector'
@@ -300,6 +300,18 @@ export function TransportStage({
     onWorkflowUpdate(updateWorkflowStage(workflow, 'transport', updatedStage))
   }
 
+  // Yard Notified edit handler (for inline note editing)
+  const handleYardNotifiedEdit = (completion: TaskCompletion) => {
+    const updatedStage = {
+      ...stage,
+      yardNotified: {
+        ...stage.yardNotified,
+        completion,
+      },
+    }
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'transport', updatedStage))
+  }
+
   // Cost handlers
   const handleCostFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -450,16 +462,48 @@ export function TransportStage({
         {/* Transport Arranged - Custom implementation */}
         <div className='px-3'>
           <div className='flex items-start gap-3 py-3'>
-            <Checkbox
+            <motion.button
+              type='button'
+              role='checkbox'
+              aria-checked={stage.transportArranged.completed}
               id='transport-arranged'
-              checked={stage.transportArranged.completed}
-              onCheckedChange={handleTransportCheckboxClick}
               disabled={!isYardSelected || workflow.finalized}
+              onClick={() => (isYardSelected && !workflow.finalized) && handleTransportCheckboxClick()}
               className={cn(
-                'mt-0.5',
-                stage.transportArranged.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
+                'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                stage.transportArranged.completed
+                  ? 'bg-foreground border-foreground'
+                  : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60',
+                (!isYardSelected || workflow.finalized) && 'opacity-50 cursor-not-allowed'
               )}
-            />
+              whileTap={(isYardSelected && !workflow.finalized) ? { scale: 0.85 } : undefined}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <AnimatePresence>
+                {stage.transportArranged.completed && (
+                  <motion.svg
+                    viewBox='0 0 24 24'
+                    className='h-3.5 w-3.5 text-background'
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  >
+                    <motion.path
+                      d='M5 12l5 5L20 7'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={3}
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.2, delay: 0.1 }}
+                    />
+                  </motion.svg>
+                )}
+              </AnimatePresence>
+            </motion.button>
             <div className='flex-1 min-w-0'>
               <div className='flex items-center gap-2'>
                 <label
@@ -510,13 +554,21 @@ export function TransportStage({
                 </div>
               )}
             </div>
-            {stage.transportArranged.completed && (
-              <div className='shrink-0'>
-                <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
-                  <MdCheck className='h-3 w-3 text-background' />
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {stage.transportArranged.completed && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className='shrink-0'
+                >
+                  <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
+                    <MdCheck className='h-3 w-3 text-background' />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Show attached invoices */}
@@ -549,6 +601,7 @@ export function TransportStage({
           completion={stage.yardNotified.completion}
           disabled={!isYardSelected || !stage.transportArranged.completed || workflow.finalized}
           onCheckedChange={(checked, notes) => handleYardNotifiedChange(checked, notes)}
+          onEdit={handleYardNotifiedEdit}
           showNoteOnComplete
           className='px-3'
         />
@@ -556,16 +609,48 @@ export function TransportStage({
         {/* Photos Requested - Custom implementation */}
         <div className='px-3'>
           <div className='flex items-start gap-3 py-3'>
-            <Checkbox
+            <motion.button
+              type='button'
+              role='checkbox'
+              aria-checked={stage.photosRequested.completed}
               id='photos-requested'
-              checked={stage.photosRequested.completed}
-              onCheckedChange={handlePhotosCheckboxClick}
               disabled={!isYardSelected || !stage.yardNotified.completed || workflow.finalized}
+              onClick={() => (isYardSelected && stage.yardNotified.completed && !workflow.finalized) && handlePhotosCheckboxClick()}
               className={cn(
-                'mt-0.5',
-                stage.photosRequested.completed && 'bg-foreground border-foreground data-[state=checked]:bg-foreground data-[state=checked]:text-background'
+                'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+                stage.photosRequested.completed
+                  ? 'bg-foreground border-foreground'
+                  : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60',
+                (!isYardSelected || !stage.yardNotified.completed || workflow.finalized) && 'opacity-50 cursor-not-allowed'
               )}
-            />
+              whileTap={(isYardSelected && stage.yardNotified.completed && !workflow.finalized) ? { scale: 0.85 } : undefined}
+              transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+            >
+              <AnimatePresence>
+                {stage.photosRequested.completed && (
+                  <motion.svg
+                    viewBox='0 0 24 24'
+                    className='h-3.5 w-3.5 text-background'
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  >
+                    <motion.path
+                      d='M5 12l5 5L20 7'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth={3}
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      initial={{ pathLength: 0 }}
+                      animate={{ pathLength: 1 }}
+                      transition={{ duration: 0.2, delay: 0.1 }}
+                    />
+                  </motion.svg>
+                )}
+              </AnimatePresence>
+            </motion.button>
             <div className='flex-1 min-w-0'>
               <div className='flex items-center gap-2'>
                 <label
@@ -616,13 +701,21 @@ export function TransportStage({
                 </div>
               )}
             </div>
-            {stage.photosRequested.completed && (
-              <div className='shrink-0'>
-                <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
-                  <MdCheck className='h-3 w-3 text-background' />
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {stage.photosRequested.completed && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                  className='shrink-0'
+                >
+                  <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
+                    <MdCheck className='h-3 w-3 text-background' />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
           {/* Show attached invoices */}

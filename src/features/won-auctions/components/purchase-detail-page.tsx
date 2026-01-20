@@ -161,11 +161,11 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
         })
       )
 
-      // Auto-advance to next stage if current is complete
+      // Update currentStage in workflow if current stage is complete (for progress tracking)
+      // but DON'T auto-navigate - user can click Next to advance
       const currentStageComplete = isStageComplete(updatedWorkflow, updatedWorkflow.currentStage)
       if (currentStageComplete && updatedWorkflow.currentStage < 8) {
         const nextStage = updatedWorkflow.currentStage + 1
-        const nextStageKey = getStageKey(nextStage)
 
         // Update workflow with new current stage
         const advancedWorkflow = {
@@ -179,15 +179,6 @@ export function PurchaseDetailPage({ auctionId }: PurchaseDetailPageProps) {
             if (a.id !== auction.id) return a
             return { ...a, workflow: advancedWorkflow }
           })
-        )
-
-        // Switch accordion to next stage
-        if (nextStageKey) {
-          setActiveStage(nextStageKey)
-        }
-
-        toast.success(
-          `Stage ${updatedWorkflow.currentStage} completed! Moving to Stage ${nextStage}.`
         )
       }
     },

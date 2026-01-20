@@ -36,7 +36,6 @@ export const ROUTE_PERMISSIONS: RoutePermission[] = [
   // Backoffice section
   { path: '/translations', roles: BACKOFFICE_ROLES },
   { path: '/inspections', roles: BACKOFFICE_ROLES },
-  { path: '/leads', roles: BACKOFFICE_ROLES },
 
   // Communication section
   { path: '/whatsapp', roles: MANAGEMENT_ROLES },
