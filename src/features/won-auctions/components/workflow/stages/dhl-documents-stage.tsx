@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { MdSend, MdInventory2, MdCheck, MdOpenInNew } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
+import { cn } from '@/lib/utils'
 import {
   Dialog,
   DialogContent,
@@ -20,7 +21,6 @@ import {
 import { type Purchase } from '../../../data/won-auctions'
 import { type PurchaseWorkflow } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
-import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 
 interface DHLDocumentsStageProps {
   auction: Purchase
@@ -38,7 +38,6 @@ const STANDARD_DOCUMENTS = [
 ]
 
 export function DHLDocumentsStage({
-  auction,
   workflow,
   onWorkflowUpdate,
   currentUser,
@@ -203,21 +202,63 @@ export function DHLDocumentsStage({
                     <div className='space-y-2'>
                       <Label>Documents Included</Label>
                       <div className='space-y-2 rounded-lg border p-3'>
-                        {STANDARD_DOCUMENTS.map((doc) => (
-                          <div key={doc.id} className='flex items-center gap-2'>
-                            <Checkbox
-                              id={doc.id}
-                              checked={selectedDocs.includes(doc.id)}
-                              onCheckedChange={() => handleDocToggle(doc.id)}
-                            />
-                            <label
-                              htmlFor={doc.id}
-                              className='text-sm cursor-pointer'
+                        {STANDARD_DOCUMENTS.map((doc) => {
+                          const isChecked = selectedDocs.includes(doc.id)
+                          return (
+                            <div
+                              key={doc.id}
+                              className='flex items-center gap-2 cursor-pointer'
+                              onClick={() => handleDocToggle(doc.id)}
                             >
-                              {doc.label}
-                            </label>
-                          </div>
-                        ))}
+                              <motion.button
+                                type='button'
+                                role='checkbox'
+                                aria-checked={isChecked}
+                                id={doc.id}
+                                className={cn(
+                                  'h-4 w-4 rounded border-2 flex items-center justify-center transition-colors',
+                                  isChecked
+                                    ? 'bg-foreground border-foreground'
+                                    : 'border-muted-foreground/50 hover:border-foreground/60'
+                                )}
+                                whileTap={{ scale: 0.85 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <AnimatePresence>
+                                  {isChecked && (
+                                    <motion.svg
+                                      viewBox='0 0 24 24'
+                                      className='h-2.5 w-2.5 text-background'
+                                      initial={{ scale: 0, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0, opacity: 0 }}
+                                      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                                    >
+                                      <motion.path
+                                        d='M5 12l5 5L20 7'
+                                        fill='none'
+                                        stroke='currentColor'
+                                        strokeWidth={3}
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                        initial={{ pathLength: 0 }}
+                                        animate={{ pathLength: 1 }}
+                                        transition={{ duration: 0.2, delay: 0.1 }}
+                                      />
+                                    </motion.svg>
+                                  )}
+                                </AnimatePresence>
+                              </motion.button>
+                              <label
+                                htmlFor={doc.id}
+                                className='text-sm cursor-pointer'
+                              >
+                                {doc.label}
+                              </label>
+                            </div>
+                          )
+                        })}
                       </div>
                     </div>
                   </div>

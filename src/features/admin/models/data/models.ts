@@ -21,7 +21,6 @@ export interface ModelSEO {
   updatedAt: Date
 }
 
-const makes = ['Toyota', 'Honda', 'BMW', 'Mercedes-Benz', 'Audi', 'Nissan', 'Lexus', 'Porsche']
 const modelsByMake: Record<string, { model: string; category: string }[]> = {
   'Toyota': [
     { model: 'Camry', category: 'sedan' },

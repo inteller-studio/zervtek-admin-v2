@@ -156,6 +156,8 @@ export function ExportCertificateDialog({
         }
         onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
       } else if (isUnregistered && stage.unregisteredTasks) {
+        // For unregistered vehicles, there's only one task (exportCertificateCreated)
+        // So when it's complete, the stage is complete
         const updatedStage = {
           ...stage,
           unregisteredTasks: {
@@ -167,6 +169,7 @@ export function ExportCertificateDialog({
               noteText
             ),
           },
+          status: 'completed' as const,
         }
         onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
       }

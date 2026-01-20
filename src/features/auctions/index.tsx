@@ -56,10 +56,8 @@ import {
   MdHelp,
   MdDirectionsCar,
   MdSettings,
-  MdCameraAlt,
   MdContentCopy,
   MdCheck,
-  MdLink,
   MdZoomIn,
   MdFullscreen,
   MdPhotoLibrary,
@@ -301,7 +299,7 @@ export function Auctions() {
 
   // Filtered and sorted auctions
   const filteredAuctions = useMemo(() => {
-    let filtered = auctions.filter((auction) => {
+    const filtered = auctions.filter((auction) => {
       let matchesSearch = true
 
       if (searchTerm !== '') {

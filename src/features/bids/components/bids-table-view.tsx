@@ -125,6 +125,7 @@ export function BidsTableView({
                   <p className='font-semibold'>¥{bid.amount.toLocaleString()}</p>
                 </TableCell>
                 <TableCell>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                   <Badge variant={getStatusVariant(bid.status) as any}>
                     {getStatusLabel(bid.status)}
                   </Badge>

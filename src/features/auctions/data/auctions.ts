@@ -48,7 +48,7 @@ const bidderNames = [
 ]
 
 // Generate VIN-like string
-const generateVIN = (index: number): string => {
+const generateVIN = (_index: number): string => {
   const chars = 'ABCDEFGHJKLMNPRSTUVWXYZ0123456789'
   let vin = ''
   for (let i = 0; i < 17; i++) {

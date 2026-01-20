@@ -147,7 +147,7 @@ export function CustomerDetailPage({ customerId }: CustomerDetailPageProps) {
         <Main className='flex flex-1 items-center justify-center'>
           <div className='text-center'>
             <h2 className='text-xl font-semibold'>Customer Not Found</h2>
-            <p className='text-muted-foreground mt-2'>The customer you're looking for doesn't exist.</p>
+            <p className='text-muted-foreground mt-2'>The customer you&apos;re looking for doesn&apos;t exist.</p>
             <button
               onClick={handleBack}
               className='mt-4 text-primary hover:underline'

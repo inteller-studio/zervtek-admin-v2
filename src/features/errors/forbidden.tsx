@@ -11,7 +11,7 @@ export function ForbiddenError() {
         <h1 className='text-[7rem] leading-tight font-bold'>403</h1>
         <span className='font-medium'>Access Forbidden</span>
         <p className='text-muted-foreground text-center'>
-          You don't have necessary permission <br />
+          You don&apos;t have necessary permission <br />
           to view this resource.
         </p>
         <div className='mt-6 flex gap-4'>

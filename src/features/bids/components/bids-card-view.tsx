@@ -68,6 +68,7 @@ export function BidsCardView({ bids, onViewBid }: BidsCardViewProps) {
                   {format(bid.timestamp, 'MMM dd, yyyy h:mm a')}
                 </CardDescription>
               </div>
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
               <Badge variant={getStatusVariant(bid.status) as any}>
                 {getStatusLabel(bid.status)}
               </Badge>

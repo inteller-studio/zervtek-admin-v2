@@ -30,7 +30,7 @@ export function BidDetailPage({ bidId }: BidDetailPageProps) {
         <div className='text-center'>
           <h2 className='text-xl font-semibold mb-2'>Bid Not Found</h2>
           <p className='text-muted-foreground mb-4'>
-            The bid you're looking for doesn't exist or has been removed.
+            The bid you&apos;re looking for doesn&apos;t exist or has been removed.
           </p>
           <button
             onClick={() => router.push('/bids')}

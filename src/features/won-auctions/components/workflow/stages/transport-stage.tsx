@@ -829,7 +829,7 @@ export function TransportStage({
           </div>
         ) : (
           <p className='text-xs text-muted-foreground text-center py-4'>
-            No invoices added yet. Click "Add Invoice" to track transport costs.
+            No invoices added yet. Click &quot;Add Invoice&quot; to track transport costs.
           </p>
         )}
       </div>

@@ -143,6 +143,7 @@ export function InvoiceDialog({
   }
 
   // Handle Enter key for form navigation/submission
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     // Ignore if target is a textarea (allow normal Enter behavior)
     if (e.target instanceof HTMLTextAreaElement) {

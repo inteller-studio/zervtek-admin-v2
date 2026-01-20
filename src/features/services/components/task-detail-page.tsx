@@ -453,6 +453,7 @@ export function TaskDetailPage({ taskId }: TaskDetailPageProps) {
                           <span className='relative inline-flex rounded-full h-2 w-2 bg-blue-500' />
                         </span>
                       )}
+                      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                       <Badge variant={getStatusVariant(request.status) as any} className='capitalize'>
                         {request.status.replace('_', ' ')}
                       </Badge>

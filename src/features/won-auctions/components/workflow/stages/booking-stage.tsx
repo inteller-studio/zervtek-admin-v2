@@ -1,11 +1,10 @@
 'use client'
 
-import { MdDirectionsBoat, MdViewInAr, MdAnchor, MdOpenInNew } from 'react-icons/md'
+import { MdDirectionsBoat, MdViewInAr, MdOpenInNew } from 'react-icons/md'
 import Link from 'next/link'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { Badge } from '@/components/ui/badge'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import {
   Select,
@@ -22,7 +21,8 @@ import {
   type ShippingMethod,
   type BookingStatus,
   type TaskCompletion,
-  SHIPPING_METHODS,
+  type ContainerSize,
+  CONTAINER_SIZES,
 } from '../../../types/workflow'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
@@ -38,7 +38,6 @@ interface BookingStageProps {
 }
 
 export function BookingStage({
-  auction,
   workflow,
   onWorkflowUpdate,
   currentUser,
@@ -78,7 +77,7 @@ export function BookingStage({
     onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
   }
 
-  const handleBookingDetailsChange = (field: string, value: string | Date) => {
+  const handleBookingDetailsChange = (field: string, value: string | Date | number) => {
     const updatedStage = {
       ...stage,
       bookingDetails: {
@@ -104,20 +103,25 @@ export function BookingStage({
     checked: boolean,
     notes?: string
   ) => {
-    const updatedStage = {
-      ...stage,
-      [task]: updateTaskCompletion(stage[task], checked, currentUser, notes),
-    }
+    const updatedTask = updateTaskCompletion(stage[task], checked, currentUser, notes)
+
+    // Determine current state for completion check
+    const sentSIAndECCompleted = task === 'sentSIAndEC' ? checked : stage.sentSIAndEC.completed
+    const receivedSOCompleted = task === 'receivedSO' ? checked : stage.receivedSO.completed
 
     // Check if all required tasks are complete
     const allComplete =
       stage.bookingRequested.completed &&
       stage.shippingMethod !== null &&
       stage.bookingStatus === 'confirmed' &&
-      (task === 'sentSIAndEC' ? checked : stage.sentSIAndEC.completed) &&
-      (task === 'receivedSO' ? checked : stage.receivedSO.completed)
+      sentSIAndECCompleted &&
+      receivedSOCompleted
 
-    updatedStage.status = allComplete ? 'completed' : 'in_progress'
+    const updatedStage = {
+      ...stage,
+      [task]: updatedTask,
+      status: allComplete ? ('completed' as const) : ('in_progress' as const),
+    }
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'booking', updatedStage))
   }
@@ -149,16 +153,18 @@ export function BookingStage({
         <RadioGroup
           value={stage.shippingMethod || undefined}
           onValueChange={(value) => handleShippingMethodChange(value as ShippingMethod)}
+          disabled={isBookingConfirmed}
           className='grid grid-cols-2 gap-3'
         >
           <Label
             htmlFor='roro'
             className={cn(
-              'flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
-              stage.shippingMethod === 'roro' && 'border-primary bg-primary/5'
+              'flex items-center gap-3 rounded-lg border p-3 transition-colors',
+              stage.shippingMethod === 'roro' && 'border-primary bg-primary/5',
+              isBookingConfirmed ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
             )}
           >
-            <RadioGroupItem value='roro' id='roro' />
+            <RadioGroupItem value='roro' id='roro' disabled={isBookingConfirmed} />
             <div className='flex items-center gap-2'>
               <MdDirectionsBoat className='h-4 w-4 text-blue-600' />
               <div>
@@ -170,11 +176,12 @@ export function BookingStage({
           <Label
             htmlFor='container'
             className={cn(
-              'flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-colors',
-              stage.shippingMethod === 'container' && 'border-primary bg-primary/5'
+              'flex items-center gap-3 rounded-lg border p-3 transition-colors',
+              stage.shippingMethod === 'container' && 'border-primary bg-primary/5',
+              isBookingConfirmed ? 'cursor-not-allowed opacity-70' : 'cursor-pointer'
             )}
           >
-            <RadioGroupItem value='container' id='container' />
+            <RadioGroupItem value='container' id='container' disabled={isBookingConfirmed} />
             <div className='flex items-center gap-2'>
               <MdViewInAr className='h-4 w-4 text-amber-600' />
               <div>
@@ -205,6 +212,7 @@ export function BookingStage({
             selectedAgentId={stage.shippingAgentId}
             onSelect={handleShippingAgentChange}
             placeholder='Select a shipping agent...'
+            disabled={isBookingConfirmed}
           />
         </div>
       )}
@@ -239,8 +247,9 @@ export function BookingStage({
                 <Select
                   value={stage.bookingStatus}
                   onValueChange={(value) => handleBookingStatusChange(value as BookingStatus)}
+                  disabled={isBookingConfirmed}
                 >
-                  <SelectTrigger className='h-7 w-32 text-xs'>
+                  <SelectTrigger className={cn('h-7 w-32 text-xs', isBookingConfirmed && 'opacity-70')}>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -252,6 +261,7 @@ export function BookingStage({
               </div>
             </div>
 
+            {/* Common Fields - Both RoRo and Container */}
             <div className='grid grid-cols-2 gap-3'>
               <div className='space-y-1.5'>
                 <Label className='text-xs'>Booking Number</Label>
@@ -259,6 +269,7 @@ export function BookingStage({
                   placeholder='BK-12345'
                   value={stage.bookingDetails.bookingNumber || ''}
                   onChange={(e) => handleBookingDetailsChange('bookingNumber', e.target.value)}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
@@ -268,6 +279,7 @@ export function BookingStage({
                   placeholder='MV Pacific Star'
                   value={stage.bookingDetails.vesselName || ''}
                   onChange={(e) => handleBookingDetailsChange('vesselName', e.target.value)}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
@@ -277,6 +289,7 @@ export function BookingStage({
                   placeholder='VOY-001'
                   value={stage.bookingDetails.voyageNumber || ''}
                   onChange={(e) => handleBookingDetailsChange('voyageNumber', e.target.value)}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
@@ -286,6 +299,7 @@ export function BookingStage({
                   placeholder='Yokohama'
                   value={stage.bookingDetails.portOfLoading || ''}
                   onChange={(e) => handleBookingDetailsChange('portOfLoading', e.target.value)}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
@@ -295,11 +309,12 @@ export function BookingStage({
                   placeholder='Colombo'
                   value={stage.bookingDetails.portOfDischarge || ''}
                   onChange={(e) => handleBookingDetailsChange('portOfDischarge', e.target.value)}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
               <div className='space-y-1.5'>
-                <Label className='text-xs'>ETD</Label>
+                <Label className='text-xs'>ETD (Departure)</Label>
                 <Input
                   type='date'
                   value={
@@ -308,10 +323,113 @@ export function BookingStage({
                       : ''
                   }
                   onChange={(e) => handleBookingDetailsChange('etd', new Date(e.target.value))}
+                  disabled={isBookingConfirmed}
+                  className='h-8 text-sm'
+                />
+              </div>
+              <div className='space-y-1.5'>
+                <Label className='text-xs'>ETA (Arrival)</Label>
+                <Input
+                  type='date'
+                  value={
+                    stage.bookingDetails.eta
+                      ? new Date(stage.bookingDetails.eta).toISOString().split('T')[0]
+                      : ''
+                  }
+                  onChange={(e) => handleBookingDetailsChange('eta', new Date(e.target.value))}
+                  disabled={isBookingConfirmed}
                   className='h-8 text-sm'
                 />
               </div>
             </div>
+
+            {/* Container-Specific Fields */}
+            {stage.shippingMethod === 'container' && (
+              <>
+                <Separator className='my-3' />
+                <div className='space-y-3'>
+                  <Label className='text-xs font-medium text-muted-foreground'>Container Details</Label>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>Container Number</Label>
+                      <Input
+                        placeholder='ABCD1234567'
+                        value={stage.bookingDetails.containerNumber || ''}
+                        onChange={(e) => handleBookingDetailsChange('containerNumber', e.target.value)}
+                        disabled={isBookingConfirmed}
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>Container Size</Label>
+                      <Select
+                        value={stage.bookingDetails.containerSize || ''}
+                        onValueChange={(value) => handleBookingDetailsChange('containerSize', value as ContainerSize)}
+                        disabled={isBookingConfirmed}
+                      >
+                        <SelectTrigger className={cn('h-8 text-sm', isBookingConfirmed && 'opacity-70')}>
+                          <SelectValue placeholder='Select size' />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {CONTAINER_SIZES.map((size) => (
+                            <SelectItem key={size.value} value={size.value}>
+                              {size.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>Seal Number</Label>
+                      <Input
+                        placeholder='SL12345'
+                        value={stage.bookingDetails.sealNumber || ''}
+                        onChange={(e) => handleBookingDetailsChange('sealNumber', e.target.value)}
+                        disabled={isBookingConfirmed}
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>CFS Location</Label>
+                      <Input
+                        placeholder='Tokyo CFS'
+                        value={stage.bookingDetails.cfsLocation || ''}
+                        onChange={(e) => handleBookingDetailsChange('cfsLocation', e.target.value)}
+                        disabled={isBookingConfirmed}
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>Stuffing Date</Label>
+                      <Input
+                        type='date'
+                        value={
+                          stage.bookingDetails.stuffingDate
+                            ? new Date(stage.bookingDetails.stuffingDate).toISOString().split('T')[0]
+                            : ''
+                        }
+                        onChange={(e) => handleBookingDetailsChange('stuffingDate', new Date(e.target.value))}
+                        disabled={isBookingConfirmed}
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                    <div className='space-y-1.5'>
+                      <Label className='text-xs'>Units per Container</Label>
+                      <Input
+                        type='number'
+                        min={1}
+                        max={4}
+                        placeholder='1'
+                        value={stage.bookingDetails.unitsPerContainer || ''}
+                        onChange={(e) => handleBookingDetailsChange('unitsPerContainer', parseInt(e.target.value) || 1)}
+                        disabled={isBookingConfirmed}
+                        className='h-8 text-sm'
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            )}
 
             <div className='space-y-1.5'>
               <Label className='text-xs'>Notes</Label>
@@ -319,6 +437,7 @@ export function BookingStage({
                 placeholder='Additional booking notes...'
                 value={stage.bookingDetails.notes || ''}
                 onChange={(e) => handleBookingDetailsChange('notes', e.target.value)}
+                disabled={isBookingConfirmed}
                 rows={2}
                 className='text-sm'
               />

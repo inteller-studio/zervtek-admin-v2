@@ -131,19 +131,19 @@ export function FinancialDashboard() {
 
   // Cost breakdown pie data
   const costBreakdownData = useMemo(() => {
-    return costAnalysis.costBreakdown.map((item) => ({
+    return costAnalysis.costsByCategory.map((item: { category: string; amount: number }) => ({
       name: categoryLabels[item.category] || item.category,
       value: item.amount,
     }))
-  }, [costAnalysis.costBreakdown])
+  }, [costAnalysis.costsByCategory])
 
   // Cost trend data
   const costTrendData = useMemo(() => {
-    return costAnalysis.costTrend.map((item) => ({
+    return costAnalysis.costTrends.map((item: { period: string; costs: number }) => ({
       period: item.period,
-      amount: item.amount,
+      amount: item.costs,
     }))
-  }, [costAnalysis.costTrend])
+  }, [costAnalysis.costTrends])
 
   return (
     <div className='space-y-6'>
@@ -336,7 +336,7 @@ export function FinancialDashboard() {
                       fill='#8884d8'
                       dataKey='value'
                     >
-                      {paymentMethodData.map((_, index) => (
+                      {paymentMethodData.map((_entry: { name: string; value: number }, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -367,7 +367,7 @@ export function FinancialDashboard() {
                       fill='#8884d8'
                       dataKey='value'
                     >
-                      {costBreakdownData.map((_, index) => (
+                      {costBreakdownData.map((_entry: { name: string; value: number }, index: number) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>

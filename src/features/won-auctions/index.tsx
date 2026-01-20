@@ -12,7 +12,7 @@ import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import { Button } from '@/components/ui/button'
-import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
+import { AnimatedTabs, type TabItem } from '@/components/ui/animated-tabs'
 import { useDateNavigation } from '@/hooks/use-date-navigation'
 
 import {
@@ -40,7 +40,7 @@ function WonAuctionsContent() {
   const [viewMode, setViewMode] = useState<ViewMode>('card')
   const [activeTab, setActiveTab] = useState<Purchase['status']>('payment_pending')
 
-  const { setOpen, setCurrentRow, setInitialMode } = useWonAuctions()
+  const { setOpen, setCurrentRow } = useWonAuctions()
 
   // Date Navigation
   const {

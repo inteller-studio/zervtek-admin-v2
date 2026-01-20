@@ -12,7 +12,6 @@ import {
   RefreshCw,
   Settings,
   User,
-  LogOut,
   Home,
   Search,
 } from 'lucide-react'

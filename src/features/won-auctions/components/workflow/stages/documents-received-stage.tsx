@@ -1,8 +1,9 @@
 'use client'
 
-import { MdFactCheck, MdError, MdDirectionsCar, MdBlock, MdVerified, MdUpload } from 'react-icons/md'
+import { motion, AnimatePresence } from 'framer-motion'
+import { MdFactCheck, MdError, MdDirectionsCar, MdBlock, MdCheck, MdPerson, MdAccessTime } from 'react-icons/md'
+import { format } from 'date-fns'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Separator } from '@/components/ui/separator'
@@ -10,7 +11,6 @@ import { cn } from '@/lib/utils'
 import { type Purchase } from '../../../data/won-auctions'
 import { type PurchaseWorkflow, type AccessoriesChecklist, type AccessoriesSubItems, type TaskCompletion } from '../../../types/workflow'
 import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
 import { updateWorkflowStage, updateTaskCompletion } from '../../../utils/workflow'
 import { WorkflowCheckbox } from '../shared/workflow-checkbox'
 import { MdVpnKey, MdDescription, MdMenuBook, MdCollections, MdBuildCircle, MdMoreHoriz } from 'react-icons/md'
@@ -43,7 +43,6 @@ interface DocumentsReceivedStageProps {
 }
 
 export function DocumentsReceivedStage({
-  auction,
   workflow,
   onWorkflowUpdate,
   currentUser,
@@ -147,6 +146,25 @@ export function DocumentsReceivedStage({
     const updatedStage = {
       ...stage,
       registeredTasks: updatedTasks,
+    }
+
+    onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
+  }
+
+  const handleUnregisteredTaskEdit = (
+    task: keyof NonNullable<typeof stage.unregisteredTasks>,
+    completion: TaskCompletion
+  ) => {
+    if (!stage.unregisteredTasks) return
+
+    const updatedTasks = {
+      ...stage.unregisteredTasks,
+      [task]: { ...stage.unregisteredTasks[task], completion },
+    }
+
+    const updatedStage = {
+      ...stage,
+      unregisteredTasks: updatedTasks,
     }
 
     onWorkflowUpdate(updateWorkflowStage(workflow, 'documentsReceived', updatedStage))
@@ -316,69 +334,102 @@ export function DocumentsReceivedStage({
               showNoteOnComplete
               className='px-3'
             />
-            {/* Export Certificate - Custom UI with upload button */}
-            <div className='flex items-start gap-3 py-2 px-3'>
-              <div
+            {/* Export Certificate - Opens detailed dialog */}
+            <div className='flex items-start gap-3 py-3 px-3'>
+              <motion.button
+                type='button'
+                role='checkbox'
+                aria-checked={stage.registeredTasks.exportCertificateCreated.completed}
+                id='export-certificate-registered'
+                disabled={!stage.registeredTasks.deregistered.completed}
+                onClick={() => {
+                  if (stage.registeredTasks?.deregistered.completed && onOpenExportCertificate) {
+                    onOpenExportCertificate()
+                  }
+                }}
                 className={cn(
-                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
+                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   stage.registeredTasks.exportCertificateCreated.completed
                     ? 'bg-foreground border-foreground'
-                    : 'border-muted-foreground/50 dark:border-muted-foreground/70',
-                  !stage.registeredTasks.deregistered.completed && 'opacity-50'
+                    : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60',
+                  !stage.registeredTasks.deregistered.completed && 'opacity-50 cursor-not-allowed'
                 )}
+                whileTap={stage.registeredTasks.deregistered.completed ? { scale: 0.85 } : undefined}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
-                {stage.registeredTasks.exportCertificateCreated.completed && (
-                  <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
-                    <path
-                      d='M5 12l5 5L20 7'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth={3}
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between gap-2'>
-                  <div>
-                    <p
-                      className={cn(
-                        'text-sm font-medium',
-                        stage.registeredTasks.exportCertificateCreated.completed &&
-                          'text-muted-foreground line-through'
-                      )}
+                <AnimatePresence>
+                  {stage.registeredTasks.exportCertificateCreated.completed && (
+                    <motion.svg
+                      viewBox='0 0 24 24'
+                      className='h-3.5 w-3.5 text-background'
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                     >
-                      Create Export Certificate
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      Upload the export certificate for the vehicle
-                    </p>
-                  </div>
-                  {onOpenExportCertificate && !stage.registeredTasks.exportCertificateCreated.completed && (
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      className='shrink-0 gap-1.5 h-7 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300'
-                      disabled={!stage.registeredTasks.deregistered.completed}
-                      onClick={onOpenExportCertificate}
-                    >
-                      <MdUpload className='h-3.5 w-3.5' />
-                      Upload
-                    </Button>
+                      <motion.path
+                        d='M5 12l5 5L20 7'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth={3}
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.2, delay: 0.1 }}
+                      />
+                    </motion.svg>
                   )}
-                </div>
-                {stage.registeredTasks.exportCertificateCreated.completion && (
-                  <div className='flex items-center gap-2 mt-1 text-xs text-muted-foreground'>
-                    <MdVerified className='h-3 w-3 text-emerald-500' />
-                    <span>
-                      {stage.registeredTasks.exportCertificateCreated.completion.notes ||
-                        `Uploaded by ${stage.registeredTasks.exportCertificateCreated.completion.completedBy}`}
+                </AnimatePresence>
+              </motion.button>
+              <div className='flex-1 min-w-0'>
+                <label
+                  htmlFor='export-certificate-registered'
+                  className={cn(
+                    'text-sm font-medium cursor-pointer select-none',
+                    stage.registeredTasks.exportCertificateCreated.completed && 'text-muted-foreground line-through',
+                    !stage.registeredTasks.deregistered.completed && 'cursor-not-allowed opacity-50'
+                  )}
+                >
+                  Create Export Certificate
+                </label>
+                <p className='text-xs text-muted-foreground mt-0.5'>
+                  Upload the export certificate for the vehicle
+                </p>
+                {/* Completion info */}
+                {stage.registeredTasks.exportCertificateCreated.completed && stage.registeredTasks.exportCertificateCreated.completion && (
+                  <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground'>
+                    {stage.registeredTasks.exportCertificateCreated.completion.notes && (
+                      <span className='font-medium text-foreground'>
+                        {stage.registeredTasks.exportCertificateCreated.completion.notes}
+                      </span>
+                    )}
+                    <span className='flex items-center gap-1'>
+                      <MdPerson className='h-3 w-3' />
+                      {stage.registeredTasks.exportCertificateCreated.completion.completedBy}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                      <MdAccessTime className='h-3 w-3' />
+                      {format(new Date(stage.registeredTasks.exportCertificateCreated.completion.completedAt), 'MMM d, yyyy')}
                     </span>
                   </div>
                 )}
               </div>
+              <AnimatePresence>
+                {stage.registeredTasks.exportCertificateCreated.completed && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className='shrink-0'
+                  >
+                    <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
+                      <MdCheck className='h-3 w-3 text-background' />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
             <WorkflowCheckbox
               id='sent-deregistration-copy'
@@ -418,67 +469,99 @@ export function DocumentsReceivedStage({
           <Separator />
           <Label className='text-sm font-medium'>Unregistered Vehicle Tasks</Label>
           <div className='border rounded-lg'>
-            {/* Export Certificate - Custom UI with upload button */}
-            <div className='flex items-start gap-3 py-2 px-3'>
-              <div
+            {/* Export Certificate - Opens detailed dialog */}
+            <div className='flex items-start gap-3 py-3 px-3'>
+              <motion.button
+                type='button'
+                role='checkbox'
+                aria-checked={stage.unregisteredTasks.exportCertificateCreated.completed}
+                id='export-certificate-unregistered'
+                onClick={() => {
+                  if (onOpenExportCertificate) {
+                    onOpenExportCertificate()
+                  }
+                }}
                 className={cn(
-                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
+                  'mt-0.5 h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
                   stage.unregisteredTasks.exportCertificateCreated.completed
                     ? 'bg-foreground border-foreground'
-                    : 'border-muted-foreground/50 dark:border-muted-foreground/70'
+                    : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60'
                 )}
+                whileTap={{ scale: 0.85 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
               >
-                {stage.unregisteredTasks.exportCertificateCreated.completed && (
-                  <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
-                    <path
-                      d='M5 12l5 5L20 7'
-                      fill='none'
-                      stroke='currentColor'
-                      strokeWidth={3}
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                    />
-                  </svg>
-                )}
-              </div>
-              <div className='flex-1 min-w-0'>
-                <div className='flex items-center justify-between gap-2'>
-                  <div>
-                    <p
-                      className={cn(
-                        'text-sm font-medium',
-                        stage.unregisteredTasks.exportCertificateCreated.completed &&
-                          'text-muted-foreground line-through'
-                      )}
+                <AnimatePresence>
+                  {stage.unregisteredTasks.exportCertificateCreated.completed && (
+                    <motion.svg
+                      viewBox='0 0 24 24'
+                      className='h-3.5 w-3.5 text-background'
+                      initial={{ scale: 0, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      exit={{ scale: 0, opacity: 0 }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
                     >
-                      Create Export Certificate
-                    </p>
-                    <p className='text-xs text-muted-foreground'>
-                      Upload the export certificate for the unregistered vehicle
-                    </p>
-                  </div>
-                  {onOpenExportCertificate && !stage.unregisteredTasks.exportCertificateCreated.completed && (
-                    <Button
-                      size='sm'
-                      variant='outline'
-                      className='shrink-0 gap-1.5 h-7 text-emerald-600 border-emerald-200 hover:bg-emerald-50 hover:border-emerald-300'
-                      onClick={onOpenExportCertificate}
-                    >
-                      <MdUpload className='h-3.5 w-3.5' />
-                      Upload
-                    </Button>
+                      <motion.path
+                        d='M5 12l5 5L20 7'
+                        fill='none'
+                        stroke='currentColor'
+                        strokeWidth={3}
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        initial={{ pathLength: 0 }}
+                        animate={{ pathLength: 1 }}
+                        transition={{ duration: 0.2, delay: 0.1 }}
+                      />
+                    </motion.svg>
                   )}
-                </div>
-                {stage.unregisteredTasks.exportCertificateCreated.completion && (
-                  <div className='flex items-center gap-2 mt-1 text-xs text-muted-foreground'>
-                    <MdVerified className='h-3 w-3 text-emerald-500' />
-                    <span>
-                      {stage.unregisteredTasks.exportCertificateCreated.completion.notes ||
-                        `Uploaded by ${stage.unregisteredTasks.exportCertificateCreated.completion.completedBy}`}
+                </AnimatePresence>
+              </motion.button>
+              <div className='flex-1 min-w-0'>
+                <label
+                  htmlFor='export-certificate-unregistered'
+                  className={cn(
+                    'text-sm font-medium cursor-pointer select-none',
+                    stage.unregisteredTasks.exportCertificateCreated.completed && 'text-muted-foreground line-through'
+                  )}
+                >
+                  Create Export Certificate
+                </label>
+                <p className='text-xs text-muted-foreground mt-0.5'>
+                  Upload the export certificate for the unregistered vehicle
+                </p>
+                {/* Completion info */}
+                {stage.unregisteredTasks.exportCertificateCreated.completed && stage.unregisteredTasks.exportCertificateCreated.completion && (
+                  <div className='flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-muted-foreground'>
+                    {stage.unregisteredTasks.exportCertificateCreated.completion.notes && (
+                      <span className='font-medium text-foreground'>
+                        {stage.unregisteredTasks.exportCertificateCreated.completion.notes}
+                      </span>
+                    )}
+                    <span className='flex items-center gap-1'>
+                      <MdPerson className='h-3 w-3' />
+                      {stage.unregisteredTasks.exportCertificateCreated.completion.completedBy}
+                    </span>
+                    <span className='flex items-center gap-1'>
+                      <MdAccessTime className='h-3 w-3' />
+                      {format(new Date(stage.unregisteredTasks.exportCertificateCreated.completion.completedAt), 'MMM d, yyyy')}
                     </span>
                   </div>
                 )}
               </div>
+              <AnimatePresence>
+                {stage.unregisteredTasks.exportCertificateCreated.completed && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0, opacity: 0 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className='shrink-0'
+                  >
+                    <div className='h-5 w-5 rounded-full bg-foreground flex items-center justify-center'>
+                      <MdCheck className='h-3 w-3 text-background' />
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
@@ -492,76 +575,142 @@ export function DocumentsReceivedStage({
           <div className='border rounded-lg divide-y'>
             {ACCESSORIES_LIST.map((item) => {
               const Icon = item.icon
-              const isChecked = stage.accessories?.[item.key] ?? false
+              const isChecked = Boolean(stage.accessories?.[item.key])
               return (
                 <div key={item.key}>
-                  <label
+                  <div
                     className='flex items-center gap-3 py-2.5 px-3 cursor-pointer hover:bg-muted/50 transition-colors'
+                    onClick={() => handleAccessoryChange(item.key, !isChecked)}
                   >
-                    <div
-                      onClick={() => handleAccessoryChange(item.key, !isChecked)}
+                    <motion.button
+                      type='button'
+                      role='checkbox'
+                      aria-checked={isChecked}
                       className={cn(
-                        'h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer',
+                        'h-5 w-5 rounded-md border-2 flex items-center justify-center transition-colors',
                         isChecked
                           ? 'bg-foreground border-foreground'
                           : 'border-muted-foreground/50 dark:border-muted-foreground/70 hover:border-foreground/60'
                       )}
+                      whileTap={{ scale: 0.85 }}
+                      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                      onClick={(e) => e.stopPropagation()}
                     >
-                      {isChecked && (
-                        <svg viewBox='0 0 24 24' className='h-3.5 w-3.5 text-background'>
-                          <path
-                            d='M5 12l5 5L20 7'
-                            fill='none'
-                            stroke='currentColor'
-                            strokeWidth={3}
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                          />
-                        </svg>
-                      )}
-                    </div>
+                      <AnimatePresence>
+                        {isChecked && (
+                          <motion.svg
+                            viewBox='0 0 24 24'
+                            className='h-3.5 w-3.5 text-background'
+                            initial={{ scale: 0, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0, opacity: 0 }}
+                            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                          >
+                            <motion.path
+                              d='M5 12l5 5L20 7'
+                              fill='none'
+                              stroke='currentColor'
+                              strokeWidth={3}
+                              strokeLinecap='round'
+                              strokeLinejoin='round'
+                              initial={{ pathLength: 0 }}
+                              animate={{ pathLength: 1 }}
+                              transition={{ duration: 0.2, delay: 0.1 }}
+                            />
+                          </motion.svg>
+                        )}
+                      </AnimatePresence>
+                    </motion.button>
                     <Icon className='h-4 w-4 text-muted-foreground shrink-0' />
-                    <div className='flex-1 min-w-0' onClick={() => handleAccessoryChange(item.key, !isChecked)}>
+                    <div className='flex-1 min-w-0'>
                       <p className={cn('text-sm font-medium', isChecked && 'text-muted-foreground')}>
                         {item.label}
                       </p>
                       <p className='text-xs text-muted-foreground'>{item.description}</p>
                     </div>
-                  </label>
+                  </div>
 
                   {/* Accessories Sub-items */}
                   {item.hasSubItems && isChecked && (
-                    <div className='pb-3 px-3 pl-11'>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className='pb-3 px-3 pl-11'
+                    >
                       <div className='grid grid-cols-2 sm:grid-cols-3 gap-2'>
                         {ACCESSORIES_SUB_ITEMS.map((subItem) => {
                           const subChecked = stage.accessories?.accessoriesSubItems?.[subItem.key] ?? false
                           return (
-                            <label
+                            <div
                               key={subItem.key}
                               className='flex items-center gap-2 cursor-pointer'
+                              onClick={() => handleAccessorySubItemChange(subItem.key, !subChecked)}
                             >
-                              <Checkbox
-                                checked={subChecked}
-                                onCheckedChange={(checked) => handleAccessorySubItemChange(subItem.key, !!checked)}
-                              />
+                              <motion.button
+                                type='button'
+                                role='checkbox'
+                                aria-checked={subChecked}
+                                className={cn(
+                                  'h-4 w-4 rounded border-2 flex items-center justify-center transition-colors',
+                                  subChecked
+                                    ? 'bg-foreground border-foreground'
+                                    : 'border-muted-foreground/50 hover:border-foreground/60'
+                                )}
+                                whileTap={{ scale: 0.85 }}
+                                transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <AnimatePresence>
+                                  {subChecked && (
+                                    <motion.svg
+                                      viewBox='0 0 24 24'
+                                      className='h-2.5 w-2.5 text-background'
+                                      initial={{ scale: 0, opacity: 0 }}
+                                      animate={{ scale: 1, opacity: 1 }}
+                                      exit={{ scale: 0, opacity: 0 }}
+                                      transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                                    >
+                                      <motion.path
+                                        d='M5 12l5 5L20 7'
+                                        fill='none'
+                                        stroke='currentColor'
+                                        strokeWidth={3}
+                                        strokeLinecap='round'
+                                        strokeLinejoin='round'
+                                        initial={{ pathLength: 0 }}
+                                        animate={{ pathLength: 1 }}
+                                        transition={{ duration: 0.2, delay: 0.1 }}
+                                      />
+                                    </motion.svg>
+                                  )}
+                                </AnimatePresence>
+                              </motion.button>
                               <span className='text-sm'>{subItem.label}</span>
-                            </label>
+                            </div>
                           )
                         })}
                       </div>
-                    </div>
+                    </motion.div>
                   )}
 
                   {/* Others Input */}
                   {item.hasInput && isChecked && (
-                    <div className='pb-3 px-3 pl-11'>
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className='pb-3 px-3 pl-11'
+                    >
                       <Input
                         placeholder='Enter other items...'
                         value={stage.accessories?.othersText || ''}
                         onChange={(e) => handleOthersTextChange(e.target.value)}
                         className='text-sm'
                       />
-                    </div>
+                    </motion.div>
                   )}
                 </div>
               )

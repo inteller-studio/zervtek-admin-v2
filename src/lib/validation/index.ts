@@ -116,9 +116,9 @@ export function validateOrThrow<T>(
   if (result.success) {
     return result.data
   }
-  // Zod 4 uses issues instead of errors
-  const issues = result.error.issues || result.error.errors || []
-  const errors = issues.map((e: { path?: (string | number)[]; message: string }) =>
+  // Zod uses issues for validation errors
+  const issues = result.error.issues
+  const errors = issues.map((e) =>
     `${e.path?.join('.') || 'root'}: ${e.message}`
   )
   throw new Error(`Validation failed for ${context}: ${errors.join(', ')}`)

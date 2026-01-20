@@ -110,7 +110,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
           <div className='text-center'>
             <MdError className='h-12 w-12 text-muted-foreground mx-auto mb-4' />
             <h2 className='text-xl font-semibold mb-2'>Ticket Not Found</h2>
-            <p className='text-muted-foreground mb-4'>The ticket you're looking for doesn't exist.</p>
+            <p className='text-muted-foreground mb-4'>The ticket you&apos;re looking for doesn&apos;t exist.</p>
             <Button onClick={() => router.push('/support')}>
               <MdArrowBack className='mr-2 h-4 w-4' />
               Back to Tickets

@@ -29,6 +29,7 @@ import { RevenueAnalytics } from './components/revenue-analytics'
 import { CostAnalysis } from './components/cost-analysis'
 import { ReceivablesReport } from './components/receivables-report'
 import { ExpensesTab } from './components/expenses-tab'
+import { MaintenanceOverlay } from '@/components/ui/maintenance-overlay'
 
 export function Accounting() {
   const [activeTab, setActiveTab] = useState('overview')
@@ -59,6 +60,7 @@ export function Accounting() {
 
   return (
     <>
+      <MaintenanceOverlay />
       <Header fixed>
         <Search className='md:w-auto flex-1' />
         <HeaderActions />

@@ -220,8 +220,10 @@ export interface DocumentsReceivedStage {
 
 export type ShippingMethod = 'roro' | 'container'
 export type BookingStatus = 'pending' | 'confirmed' | 'cancelled'
+export type ContainerSize = '20ft' | '40ft' | '40ft_hc'
 
 export interface BookingDetails {
+  // Common fields (RoRo & Container)
   bookingNumber?: string
   vesselName?: string
   voyageNumber?: string
@@ -230,7 +232,20 @@ export interface BookingDetails {
   etd?: Date // Estimated Time of Departure
   eta?: Date // Estimated Time of Arrival
   notes?: string
+  // Container-specific fields
+  containerNumber?: string
+  containerSize?: ContainerSize
+  sealNumber?: string
+  cfsLocation?: string // Container Freight Station
+  stuffingDate?: Date // When vehicle is loaded into container
+  unitsPerContainer?: number // Number of vehicles in container
 }
+
+export const CONTAINER_SIZES = [
+  { value: '20ft', label: '20ft' },
+  { value: '40ft', label: '40ft' },
+  { value: '40ft_hc', label: '40ft HC (High Cube)' },
+] as const
 
 export interface BookingStage {
   status: WorkflowStageStatus

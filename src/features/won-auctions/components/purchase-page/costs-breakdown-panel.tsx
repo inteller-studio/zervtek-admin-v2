@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { format } from 'date-fns'
+import { motion } from 'framer-motion'
 import {
   MdAttachMoney,
   MdLocalShipping,
@@ -11,33 +12,23 @@ import {
   MdWarehouse,
   MdGavel,
   MdMoreHoriz,
-  MdAdd,
   MdReceipt,
   MdTrendingUp,
   MdTrendingDown,
   MdExpandMore,
   MdExpandLess,
+  MdCreditCard,
+  MdAccountBalanceWallet,
 } from 'react-icons/md'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { cn } from '@/lib/utils'
 import { type Purchase, type CostItem, type OurCosts } from '../../data/won-auctions'
-import { type PurchaseWorkflow } from '../../types/workflow'
+import { type PurchaseWorkflow, PAYMENT_METHODS } from '../../types/workflow'
 import { mergeAllCosts } from '../../utils/workflow'
 
 interface CostsBreakdownPanelProps {
   auction: Purchase
   workflow?: PurchaseWorkflow
-  onAddCost?: () => void
 }
 
 // Category configuration with icons
@@ -61,27 +52,31 @@ const formatCurrency = (amount: number, currency: string = 'JPY') => {
   }).format(amount)
 }
 
-export function CostsBreakdownPanel({ auction, workflow, onAddCost }: CostsBreakdownPanelProps) {
-  const [selectedCategory, setSelectedCategory] = useState<CostItem['category'] | 'all'>('all')
-  const [showAllCategories, setShowAllCategories] = useState(false)
+// Get payment method label
+const getMethodLabel = (method: string) => {
+  return PAYMENT_METHODS.find((m) => m.value === method)?.label || method
+}
 
-  // Merge purchase costs with workflow costs into a unified view
+export function CostsBreakdownPanel({ auction, workflow }: CostsBreakdownPanelProps) {
+  const [showCostDetails, setShowCostDetails] = useState(false)
+
+  // === CUSTOMER PAYMENTS (Synced with Process tab) ===
+  const customerPayments = workflow?.stages.paymentProcessing
+  const invoiceTotal = auction.totalAmount
+  const totalReceived = customerPayments?.totalReceived || 0
+  const outstanding = invoiceTotal - totalReceived
+  const paymentProgress = invoiceTotal > 0 ? Math.round((totalReceived / invoiceTotal) * 100) : 0
+  const isFullyPaid = totalReceived >= invoiceTotal
+
+  // === OUR COSTS ===
   const costs: OurCosts = useMemo(() => {
     return mergeAllCosts(auction.ourCosts, workflow)
   }, [auction.ourCosts, workflow])
 
-  // Filter items by category
-  const filteredItems = useMemo(() => {
-    if (selectedCategory === 'all') return costs.items
-    return costs.items.filter((item) => item.category === selectedCategory)
-  }, [costs.items, selectedCategory])
+  const vehicleCost = auction.winningBid
+  const totalInvestment = vehicleCost + costs.totalCost
 
-  // Calculate totals
-  const totalOurCost = costs.totalCost + auction.winningBid
-  const estimatedProfit = auction.totalAmount - totalOurCost
-  const profitMarginPercent = totalOurCost > 0 ? ((estimatedProfit / totalOurCost) * 100) : 0
-
-  // Get active categories (those with costs)
+  // Get active categories
   const activeCategories = useMemo(() => {
     return Object.entries(costs.categoryTotals)
       .filter(([_, amount]) => amount > 0)
@@ -89,234 +84,335 @@ export function CostsBreakdownPanel({ auction, workflow, onAddCost }: CostsBreak
       .map(([category]) => category as CostItem['category'])
   }, [costs.categoryTotals])
 
-  // Categories to show (first 4 or all)
-  const visibleCategories = showAllCategories ? activeCategories : activeCategories.slice(0, 4)
+  // === PROFIT/LOSS ===
+  const profitLoss = totalReceived - totalInvestment
+  const isProfitable = profitLoss >= 0
+  const profitMargin = totalInvestment > 0 ? Math.abs((profitLoss / totalInvestment) * 100).toFixed(1) : '0.0'
 
   return (
-    <div className='p-6 space-y-8'>
-      {/* Financial Summary - Clean Grid */}
-      <div className='grid grid-cols-2 lg:grid-cols-4 gap-4'>
-        {/* Vehicle Cost */}
-        <div className='p-4 rounded-xl border bg-card'>
-          <p className='text-xs text-muted-foreground uppercase tracking-wider mb-1'>Vehicle Cost</p>
-          <p className='text-2xl font-bold font-data'>{formatCurrency(auction.winningBid, auction.currency)}</p>
-        </div>
-
-        {/* Our Expenses */}
-        <div className='p-4 rounded-xl border bg-card'>
-          <p className='text-xs text-muted-foreground uppercase tracking-wider mb-1'>Our Expenses</p>
-          <p className='text-2xl font-bold font-data'>{formatCurrency(costs.totalCost, auction.currency)}</p>
-        </div>
-
-        {/* Total Investment */}
-        <div className='p-4 rounded-xl bg-foreground text-background'>
-          <p className='text-xs opacity-70 uppercase tracking-wider mb-1'>Total Investment</p>
-          <p className='text-2xl font-bold font-data'>{formatCurrency(totalOurCost, auction.currency)}</p>
-        </div>
-
-        {/* Profit/Loss */}
-        <div className={cn(
-          'p-4 rounded-xl border',
-          estimatedProfit >= 0 ? 'bg-card' : 'bg-muted'
-        )}>
-          <div className='flex items-center gap-1.5 mb-1'>
-            {estimatedProfit >= 0 ? (
-              <MdTrendingUp className='h-3.5 w-3.5 text-muted-foreground' />
-            ) : (
-              <MdTrendingDown className='h-3.5 w-3.5 text-muted-foreground' />
-            )}
-            <p className='text-xs text-muted-foreground uppercase tracking-wider'>
-              {estimatedProfit >= 0 ? 'Est. Profit' : 'Est. Loss'}
+    <div className='p-4 space-y-4'>
+      {/* === HERO: PROFIT/LOSS CARD === */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className={cn(
+          'relative overflow-hidden rounded-xl border p-6',
+          'shadow-sm transition-all duration-300',
+          isProfitable
+            ? 'bg-emerald-500/5 border-emerald-500/20'
+            : 'bg-red-500/5 border-red-500/20'
+        )}
+      >
+        <div className='flex items-start justify-between'>
+          <div>
+            <p className='text-sm font-medium text-muted-foreground'>
+              Net {isProfitable ? 'Profit' : 'Loss'}
+            </p>
+            <p className={cn(
+              'text-4xl font-semibold tracking-tight mt-2 font-data',
+              isProfitable ? 'text-emerald-600 dark:text-emerald-400' : 'text-red-600 dark:text-red-400'
+            )}>
+              {isProfitable ? '+' : '-'}{formatCurrency(Math.abs(profitLoss), auction.currency)}
             </p>
           </div>
-          <p className='text-2xl font-bold font-data'>
-            {estimatedProfit >= 0 ? '' : '-'}{formatCurrency(Math.abs(estimatedProfit), auction.currency)}
-          </p>
-          <p className='text-xs text-muted-foreground mt-1'>
-            {profitMarginPercent >= 0 ? '+' : ''}{profitMarginPercent.toFixed(1)}% margin
-          </p>
+          <span className={cn(
+            'inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium',
+            isProfitable
+              ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+              : 'bg-red-500/10 text-red-600 dark:bg-red-500/20 dark:text-red-400'
+          )}>
+            {isProfitable ? <MdTrendingUp className='h-4 w-4' /> : <MdTrendingDown className='h-4 w-4' />}
+            {profitMargin}%
+          </span>
         </div>
+
+        {/* Comparison row */}
+        <div className='mt-6 pt-4 border-t border-border/50 flex gap-8'>
+          <div>
+            <p className='text-xs text-muted-foreground'>Revenue Received</p>
+            <p className='text-lg font-semibold font-data'>{formatCurrency(totalReceived, auction.currency)}</p>
+          </div>
+          <div>
+            <p className='text-xs text-muted-foreground'>Total Investment</p>
+            <p className='text-lg font-semibold font-data'>{formatCurrency(totalInvestment, auction.currency)}</p>
+          </div>
+        </div>
+        <p className='text-xs text-muted-foreground mt-3'>Based on received payments</p>
+      </motion.div>
+
+      {/* === STATS CARDS ROW === */}
+      <div className='grid gap-4 md:grid-cols-3'>
+        {/* Invoice Total */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.1, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className='group'
+        >
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border bg-card p-6',
+            'border-border/50 hover:border-border',
+            'shadow-sm hover:shadow-md',
+            'transition-all duration-300 ease-out'
+          )}>
+            <div className='absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/[0.02] to-transparent' />
+            <div className='relative'>
+              <p className='text-sm font-medium text-muted-foreground'>Invoice Total</p>
+              <p className='text-3xl font-semibold tracking-tight mt-2 font-data'>
+                {formatCurrency(invoiceTotal, auction.currency)}
+              </p>
+              <p className='text-xs text-muted-foreground mt-2'>Amount owed by customer</p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Received */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.15, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className='group'
+        >
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border bg-card p-6',
+            'border-border/50 hover:border-border',
+            'shadow-sm hover:shadow-md',
+            'transition-all duration-300 ease-out'
+          )}>
+            <div className='absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/[0.02] to-transparent' />
+            <div className='relative'>
+              <p className='text-sm font-medium text-muted-foreground'>Received</p>
+              <p className={cn(
+                'text-3xl font-semibold tracking-tight mt-2 font-data',
+                isFullyPaid && 'text-emerald-600 dark:text-emerald-400'
+              )}>
+                {formatCurrency(totalReceived, auction.currency)}
+              </p>
+              <div className='flex items-center gap-2 mt-2'>
+                <span className={cn(
+                  'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
+                  isFullyPaid
+                    ? 'bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400'
+                    : 'bg-blue-500/10 text-blue-600 dark:bg-blue-500/20 dark:text-blue-400'
+                )}>
+                  {paymentProgress}%
+                </span>
+                <span className='text-xs text-muted-foreground'>of invoice</span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Outstanding */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className='group'
+        >
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border bg-card p-6',
+            'border-border/50 hover:border-border',
+            'shadow-sm hover:shadow-md',
+            'transition-all duration-300 ease-out',
+            outstanding > 0 && 'border-amber-500/30'
+          )}>
+            <div className='absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/[0.02] to-transparent' />
+            <div className='relative'>
+              <p className='text-sm font-medium text-muted-foreground'>Outstanding</p>
+              <p className={cn(
+                'text-3xl font-semibold tracking-tight mt-2 font-data',
+                outstanding > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
+              )}>
+                {formatCurrency(outstanding, auction.currency)}
+              </p>
+              <p className='text-xs text-muted-foreground mt-2'>
+                {outstanding > 0 ? 'Awaiting payment' : 'Fully paid'}
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Revenue vs Cost Comparison */}
-      <div className='space-y-3'>
-        <div className='flex items-center justify-between text-sm'>
-          <span className='text-muted-foreground'>Sale Price to Customer</span>
-          <span className='font-bold font-data'>{formatCurrency(auction.totalAmount, auction.currency)}</span>
-        </div>
-        <div className='h-3 bg-muted rounded-full overflow-hidden flex'>
-          <div
-            className='h-full bg-foreground transition-all'
-            style={{ width: `${Math.min((totalOurCost / auction.totalAmount) * 100, 100)}%` }}
-          />
-        </div>
-        <div className='flex items-center justify-between text-xs text-muted-foreground'>
-          <span>Our Cost: {((totalOurCost / auction.totalAmount) * 100).toFixed(1)}%</span>
-          <span>Margin: {(100 - (totalOurCost / auction.totalAmount) * 100).toFixed(1)}%</span>
-        </div>
-      </div>
+      {/* === INVESTMENT CARD === */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, delay: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className='group'
+      >
+        <div className={cn(
+          'relative overflow-hidden rounded-xl border bg-card p-6',
+          'border-border/50 hover:border-border',
+          'shadow-sm hover:shadow-md',
+          'transition-all duration-300 ease-out'
+        )}>
+          <div className='absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/[0.02] to-transparent' />
 
-      {/* Expense Categories */}
-      <div className='space-y-4'>
-        <div className='flex items-center justify-between'>
-          <h3 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
-            Expense Breakdown
-          </h3>
-          {onAddCost && (
-            <Button size='sm' variant='outline' onClick={onAddCost} className='gap-2 h-8'>
-              <MdAdd className='h-4 w-4' />
-              Add Cost
-            </Button>
-          )}
-        </div>
-
-        {/* Category Cards */}
-        {activeCategories.length > 0 ? (
-          <>
-            <div className='grid grid-cols-2 lg:grid-cols-4 gap-3'>
-              {visibleCategories.map((category) => {
-                const config = CATEGORY_CONFIG[category]
-                const Icon = config.icon
-                const amount = costs.categoryTotals[category]
-                const percentage = costs.totalCost > 0 ? (amount / costs.totalCost) * 100 : 0
-                const isSelected = selectedCategory === category
-
-                return (
-                  <button
-                    key={category}
-                    onClick={() => setSelectedCategory(isSelected ? 'all' : category)}
-                    className={cn(
-                      'p-4 rounded-xl border text-left transition-all',
-                      isSelected
-                        ? 'bg-foreground text-background border-foreground'
-                        : 'bg-card hover:bg-muted/50'
-                    )}
-                  >
-                    <div className='flex items-center gap-2 mb-3'>
-                      <Icon className={cn('h-4 w-4', isSelected ? 'text-background' : 'text-muted-foreground')} />
-                      <span className='text-sm font-medium'>{config.label}</span>
-                    </div>
-                    <p className='text-lg font-bold font-data'>{formatCurrency(amount, auction.currency)}</p>
-                    <div className='mt-2 h-1 bg-muted rounded-full overflow-hidden'>
-                      <div
-                        className={cn('h-full rounded-full', isSelected ? 'bg-background' : 'bg-foreground')}
-                        style={{ width: `${percentage}%` }}
-                      />
-                    </div>
-                    <p className={cn('text-xs mt-1', isSelected ? 'text-background/70' : 'text-muted-foreground')}>
-                      {percentage.toFixed(1)}%
-                    </p>
-                  </button>
-                )
-              })}
+          <div className='relative'>
+            <div className='flex items-start justify-between mb-6'>
+              <div>
+                <p className='text-sm font-medium text-muted-foreground'>Total Investment</p>
+                <p className='text-3xl font-semibold tracking-tight mt-2 font-data'>
+                  {formatCurrency(totalInvestment, auction.currency)}
+                </p>
+              </div>
+              <MdAccountBalanceWallet className='h-6 w-6 text-muted-foreground' />
             </div>
 
-            {/* Show more/less */}
-            {activeCategories.length > 4 && (
-              <button
-                onClick={() => setShowAllCategories(!showAllCategories)}
-                className='flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors'
-              >
-                {showAllCategories ? (
-                  <>
+            {/* Two mini stats */}
+            <div className='grid grid-cols-2 gap-4'>
+              <div className='rounded-lg bg-muted/50 p-4'>
+                <p className='text-xs text-muted-foreground'>Vehicle Cost</p>
+                <p className='text-xl font-semibold mt-1 font-data'>{formatCurrency(vehicleCost, auction.currency)}</p>
+              </div>
+              <div className='rounded-lg bg-muted/50 p-4'>
+                <p className='text-xs text-muted-foreground'>Expenses</p>
+                <p className='text-xl font-semibold mt-1 font-data'>{formatCurrency(costs.totalCost, auction.currency)}</p>
+              </div>
+            </div>
+
+            {/* Expandable breakdown */}
+            {activeCategories.length > 0 && (
+              <div className='mt-4 pt-4 border-t border-border/50'>
+                <button
+                  onClick={() => setShowCostDetails(!showCostDetails)}
+                  className='flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors'
+                >
+                  {showCostDetails ? (
                     <MdExpandLess className='h-4 w-4' />
-                    Show less
-                  </>
-                ) : (
-                  <>
+                  ) : (
                     <MdExpandMore className='h-4 w-4' />
-                    Show {activeCategories.length - 4} more categories
-                  </>
-                )}
-              </button>
-            )}
-          </>
-        ) : (
-          <div className='text-center py-8 text-muted-foreground'>
-            <MdReceipt className='h-12 w-12 mx-auto mb-3 opacity-30' />
-            <p>No expenses recorded yet</p>
-          </div>
-        )}
-      </div>
+                  )}
+                  {showCostDetails ? 'Hide' : 'Show'} breakdown ({activeCategories.length} categories)
+                </button>
 
-      {/* Cost Items Table */}
-      {filteredItems.length > 0 && (
-        <div className='space-y-3'>
-          <div className='flex items-center justify-between'>
-            <h3 className='text-sm font-semibold uppercase tracking-wider text-muted-foreground'>
-              {selectedCategory === 'all' ? 'All Transactions' : `${CATEGORY_CONFIG[selectedCategory].label} Transactions`}
-            </h3>
-            <span className='text-sm text-muted-foreground'>{filteredItems.length} items</span>
-          </div>
+                {showCostDetails && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className='mt-3 flex flex-wrap gap-2'
+                  >
+                    {activeCategories.map((category) => {
+                      const config = CATEGORY_CONFIG[category]
+                      const Icon = config.icon
+                      const amount = costs.categoryTotals[category]
 
-          <Card className='overflow-hidden'>
-            <Table>
-              <TableHeader>
-                <TableRow className='bg-muted/50'>
-                  <TableHead className='font-semibold'>Description</TableHead>
-                  <TableHead className='font-semibold'>Vendor</TableHead>
-                  <TableHead className='font-semibold'>Date</TableHead>
-                  <TableHead className='font-semibold'>Ref</TableHead>
-                  <TableHead className='text-right font-semibold'>Amount</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredItems.map((item) => {
-                  const config = CATEGORY_CONFIG[item.category]
-                  const Icon = config.icon
-                  return (
-                    <TableRow key={item.id} className='hover:bg-muted/30'>
-                      <TableCell>
-                        <div className='flex items-center gap-3'>
-                          <div className='h-8 w-8 rounded-lg bg-muted flex items-center justify-center shrink-0'>
-                            <Icon className='h-4 w-4 text-muted-foreground' />
-                          </div>
-                          <div>
-                            <p className='font-medium'>{item.description}</p>
-                            {item.notes && (
-                              <p className='text-xs text-muted-foreground truncate max-w-[250px]'>
-                                {item.notes}
-                              </p>
-                            )}
-                          </div>
+                      return (
+                        <div
+                          key={category}
+                          className='inline-flex items-center gap-2 rounded-full bg-muted px-3 py-1.5'
+                        >
+                          <Icon className='h-4 w-4 text-muted-foreground' />
+                          <span className='text-sm'>{config.label}</span>
+                          <span className='text-sm font-medium font-data'>
+                            {formatCurrency(amount, auction.currency)}
+                          </span>
                         </div>
-                      </TableCell>
-                      <TableCell className='text-muted-foreground'>{item.paidTo || '-'}</TableCell>
-                      <TableCell className='text-muted-foreground'>
-                        {format(new Date(item.date), 'MMM d')}
-                      </TableCell>
-                      <TableCell>
-                        {item.invoiceRef && (
-                          <Badge variant='outline' className='text-xs font-mono'>
-                            {item.invoiceRef}
-                          </Badge>
-                        )}
-                      </TableCell>
-                      <TableCell className='text-right font-bold font-data'>
-                        {formatCurrency(item.amount, item.currency)}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })}
-              </TableBody>
-            </Table>
-          </Card>
+                      )
+                    })}
+                  </motion.div>
+                )}
+              </div>
+            )}
 
-          {/* Total Footer */}
-          <div className='flex justify-between items-center pt-4 border-t'>
-            <span className='text-muted-foreground'>
-              {selectedCategory === 'all' ? 'Total Expenses' : `${CATEGORY_CONFIG[selectedCategory].label} Total`}
-            </span>
-            <span className='text-2xl font-bold font-data'>
-              {formatCurrency(
-                selectedCategory === 'all'
-                  ? costs.totalCost
-                  : costs.categoryTotals[selectedCategory],
-                auction.currency
-              )}
-            </span>
+            {activeCategories.length === 0 && costs.totalCost === 0 && (
+              <div className='mt-4 pt-4 border-t border-border/50'>
+                <p className='text-sm text-muted-foreground text-center py-2'>No additional expenses recorded</p>
+              </div>
+            )}
           </div>
         </div>
+      </motion.div>
+
+      {/* === PAYMENT HISTORY CARD === */}
+      {customerPayments && customerPayments.payments.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className='group'
+        >
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border bg-card p-6',
+            'border-border/50 hover:border-border',
+            'shadow-sm hover:shadow-md',
+            'transition-all duration-300 ease-out'
+          )}>
+            <div className='absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-gradient-to-br from-primary/[0.02] to-transparent' />
+
+            <div className='relative'>
+              <div className='flex items-center justify-between mb-4'>
+                <p className='text-sm font-medium text-muted-foreground'>Payment History</p>
+                <Badge variant='outline' className='text-xs'>
+                  Synced with Process
+                </Badge>
+              </div>
+
+              <div className='space-y-3'>
+                {customerPayments.payments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className='flex items-center justify-between py-2 border-b border-border/30 last:border-0'
+                  >
+                    <div className='flex items-center gap-3'>
+                      <div className='h-8 w-8 rounded-full bg-emerald-500/10 flex items-center justify-center'>
+                        <MdCreditCard className='h-4 w-4 text-emerald-600 dark:text-emerald-400' />
+                      </div>
+                      <div>
+                        <p className='text-sm font-medium'>
+                          {format(new Date(payment.receivedAt), 'MMM d, yyyy')}
+                        </p>
+                        <p className='text-xs text-muted-foreground'>{getMethodLabel(payment.method)}</p>
+                      </div>
+                    </div>
+                    <p className='text-lg font-semibold text-emerald-600 dark:text-emerald-400 font-data'>
+                      {formatCurrency(payment.amount, auction.currency)}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* === NO PAYMENTS PLACEHOLDER === */}
+      {(!customerPayments || customerPayments.payments.length === 0) && (
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className='group'
+        >
+          <div className={cn(
+            'relative overflow-hidden rounded-xl border bg-card p-6',
+            'border-border/50',
+            'shadow-sm',
+            'transition-all duration-300 ease-out'
+          )}>
+            <div className='relative'>
+              <div className='flex items-center justify-between mb-4'>
+                <p className='text-sm font-medium text-muted-foreground'>Payment History</p>
+                <Badge variant='outline' className='text-xs'>
+                  Synced with Process
+                </Badge>
+              </div>
+
+              <div className='flex flex-col items-center justify-center py-8 text-center'>
+                <div className='flex h-12 w-12 items-center justify-center rounded-full bg-muted/50 mb-3'>
+                  <MdReceipt className='h-6 w-6 text-muted-foreground/50' />
+                </div>
+                <p className='text-sm text-muted-foreground'>No payments recorded yet</p>
+                <p className='text-xs text-muted-foreground mt-1'>
+                  Add payments in Process tab
+                </p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       )}
     </div>
   )

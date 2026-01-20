@@ -28,7 +28,7 @@ export function Otp() {
         </CardContent>
         <CardFooter>
           <p className='text-muted-foreground px-8 text-center text-sm'>
-            Haven't received it?{' '}
+            Haven&apos;t received it?{' '}
             <Link
               href='/sign-in'
               className='hover:text-primary underline underline-offset-4'

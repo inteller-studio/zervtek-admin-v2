@@ -1,6 +1,6 @@
 'use client'
 
-import { MdInventory2, MdUpload, MdDescription, MdCheck } from 'react-icons/md'
+import { MdInventory2, MdDescription, MdCheck } from 'react-icons/md'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -26,7 +26,6 @@ interface ShippedStageProps {
 }
 
 export function ShippedStage({
-  auction,
   workflow,
   onWorkflowUpdate,
   currentUser,

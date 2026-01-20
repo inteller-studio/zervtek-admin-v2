@@ -115,6 +115,7 @@ export function AddExpenseDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<ExpenseForm>({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     resolver: zodResolver(expenseFormSchema) as any,
     defaultValues: {
       category: undefined,

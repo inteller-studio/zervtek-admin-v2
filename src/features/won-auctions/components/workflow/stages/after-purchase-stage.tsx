@@ -587,7 +587,7 @@ export function AfterPurchaseStage({
           </div>
         ) : (
           <p className='text-xs text-muted-foreground text-center py-4'>
-            No invoices added yet. Click "Add Invoice" to add tax, fees, or other expenses.
+            No invoices added yet. Click &quot;Add Invoice&quot; to add tax, fees, or other expenses.
           </p>
         )}
       </div>
