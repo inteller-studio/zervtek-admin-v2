@@ -7,9 +7,6 @@ import { Main } from '@/components/layout/main'
 import { HeaderActions } from '@/components/layout/header-actions'
 import { Search } from '@/components/search'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { AnimatedTabs, AnimatedTabsContent, type TabItem } from '@/components/ui/animated-tabs'
-import { MdInbox, MdPersonAdd } from 'react-icons/md'
-import { useRBAC } from '@/hooks/use-rbac'
 import {
   submissions as initialSubmissions,
   type Submission,
@@ -26,15 +23,8 @@ import { UnifiedLeadsTable } from './components/unified-leads-table'
 import { InquiryModal } from './components/inquiry-modal'
 import { SignupModal } from './components/signup-modal'
 import { OnboardingModal } from './components/onboarding-modal'
-import { AssignCustomersTab } from './components/assign-customers-tab'
-
-type MainTab = 'leads' | 'assign_customers'
 
 export function Leads() {
-  const { isAdmin } = useRBAC()
-
-  // Main tab state (Leads vs Assign Customers)
-  const [mainTab, setMainTab] = useState<MainTab>('leads')
 
   // Submissions state (for updates)
   const [submissions, setSubmissions] = useState(initialSubmissions)
@@ -298,27 +288,6 @@ export function Leads() {
         ? selectedOnboarding?.id
         : null
 
-  // Main tabs configuration
-  const mainTabs: TabItem[] = useMemo(() => {
-    const tabs: TabItem[] = [
-      {
-        id: 'leads',
-        label: 'All Leads',
-        icon: MdInbox,
-        badge: submissions.length,
-        badgeColor: 'primary',
-      },
-    ]
-    if (isAdmin) {
-      tabs.push({
-        id: 'assign_customers',
-        label: 'Assign Customers',
-        icon: MdPersonAdd,
-      })
-    }
-    return tabs
-  }, [submissions.length, isAdmin])
-
   return (
     <TooltipProvider>
       <Header fixed>
@@ -345,49 +314,20 @@ export function Leads() {
         {/* Stats Overview */}
         <LeadsStatsOverview leads={submissions} />
 
-        {/* Main Content with Tabs */}
-        {isAdmin ? (
-          <AnimatedTabs
-            tabs={mainTabs}
-            value={mainTab}
-            onValueChange={(v) => setMainTab(v as MainTab)}
-            variant='compact'
-          >
-            <AnimatedTabsContent value='leads' className='mt-4'>
-              <LeadsFilters
-                filters={filters}
-                onFiltersChange={setFilters}
-                resultCount={filteredSubmissions.length}
-              >
-                <div className='p-4'>
-                  <UnifiedLeadsTable
-                    data={filteredSubmissions}
-                    selectedId={selectedId}
-                    onRowClick={handleRowClick}
-                  />
-                </div>
-              </LeadsFilters>
-            </AnimatedTabsContent>
-
-            <AnimatedTabsContent value='assign_customers' className='mt-4 px-4'>
-              <AssignCustomersTab />
-            </AnimatedTabsContent>
-          </AnimatedTabs>
-        ) : (
-          <LeadsFilters
-            filters={filters}
-            onFiltersChange={setFilters}
-            resultCount={filteredSubmissions.length}
-          >
-            <div className='p-4'>
-              <UnifiedLeadsTable
-                data={filteredSubmissions}
-                selectedId={selectedId}
-                onRowClick={handleRowClick}
-              />
-            </div>
-          </LeadsFilters>
-        )}
+        {/* Main Content */}
+        <LeadsFilters
+          filters={filters}
+          onFiltersChange={setFilters}
+          resultCount={filteredSubmissions.length}
+        >
+          <div className='p-4'>
+            <UnifiedLeadsTable
+              data={filteredSubmissions}
+              selectedId={selectedId}
+              onRowClick={handleRowClick}
+            />
+          </div>
+        </LeadsFilters>
       </Main>
 
       {/* Inquiry Modal */}
