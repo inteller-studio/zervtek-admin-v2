@@ -66,6 +66,7 @@ export function MakesTable({ data }: MakesTableProps) {
               <TableCell>
                 <div className='flex items-center gap-2'>
                   {make.logo && (
+                    /* eslint-disable-next-line @next/next/no-img-element */
                     <img
                       src={make.logo}
                       alt={make.name}

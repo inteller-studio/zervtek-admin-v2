@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { format } from 'date-fns'
-import { MdBuild, MdAdd, MdChat, MdImage, MdDescription, MdSkipNext, MdWarning } from 'react-icons/md'
+import { MdBuild, MdAdd, MdChat, MdImage, MdDescription, MdSkipNext } from 'react-icons/md'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
@@ -58,8 +58,6 @@ export function RepairStoredStage({
 }: RepairStoredStageProps) {
   const stage = workflow.stages.repairStored
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [skipDialogOpen, setSkipDialogOpen] = useState(false)
-  const [skipReason, setSkipReason] = useState('')
   const [updateType, setUpdateType] = useState<RepairUpdateType>('comment')
   const [content, setContent] = useState('')
   const [files, setFiles] = useState<{ id: string; name: string; size: number; type: string; file: File }[]>([])
@@ -125,12 +123,10 @@ export function RepairStoredStage({
       skipped: true,
       skippedBy: currentUser,
       skippedAt: new Date(),
-      skipReason: skipReason.trim() || 'No repair needed',
+      skipReason: 'No repair needed',
       status: 'skipped' as const,
     }
     onWorkflowUpdate(updateWorkflowStage(workflow, 'repairStored', updatedStage))
-    setSkipDialogOpen(false)
-    setSkipReason('')
 
     // Navigate to next step when skipped
     if (onComplete) {
@@ -253,56 +249,10 @@ export function RepairStoredStage({
               </DialogContent>
             </Dialog>
 
-            <Dialog open={skipDialogOpen} onOpenChange={setSkipDialogOpen}>
-              <DialogTrigger asChild>
-                <Button variant='outline' size='default'>
-                  <MdSkipNext className='h-4 w-4 mr-2' />
-                  Skip Stage
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle className='flex items-center gap-2'>
-                    <MdWarning className='h-5 w-5 text-amber-500' />
-                    Skip Repair/Storage Stage
-                  </DialogTitle>
-                  <DialogDescription>
-                    Skip this stage if no repair or storage is needed for this vehicle.
-                  </DialogDescription>
-                </DialogHeader>
-                <form onSubmit={(e) => { e.preventDefault(); handleSkipStage(); }}>
-                  <div className='space-y-4 py-4'>
-                    <div className='space-y-2'>
-                      <Label>Reason for Skipping (optional)</Label>
-                      <Textarea
-                        autoFocus
-                        placeholder='e.g., No repair needed, Vehicle in good condition...'
-                        value={skipReason}
-                        onChange={(e) => setSkipReason(e.target.value)}
-                        rows={2}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-                            e.preventDefault()
-                            handleSkipStage()
-                          }
-                        }}
-                      />
-                      <p className='text-[10px] text-muted-foreground'>Press Ctrl+Enter to submit</p>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button type='button' variant='outline' onClick={() => setSkipDialogOpen(false)}>
-                      Cancel
-                    </Button>
-                    <Button type='submit' variant='secondary'>
-                      <MdSkipNext className='h-4 w-4 mr-2' />
-                      Skip Stage
-                      <span className='ml-2 text-[10px] opacity-50 font-mono'>↵</span>
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </DialogContent>
-            </Dialog>
+            <Button variant='outline' size='default' onClick={handleSkipStage}>
+              <MdSkipNext className='h-4 w-4 mr-2' />
+              Skip Stage
+            </Button>
           </div>
 
           {/* Updates Timeline */}

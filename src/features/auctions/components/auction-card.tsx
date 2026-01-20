@@ -34,6 +34,7 @@ export function AuctionCard({
         {/* Image Section - Use 2nd image as main if available */}
         <div className='relative h-44 w-full overflow-hidden bg-muted'>
           {auction.vehicleInfo.images.length > 0 ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
             <img
               src={auction.vehicleInfo.images[1] || auction.vehicleInfo.images[0]}
               alt={`${auction.vehicleInfo.year} ${auction.vehicleInfo.make} ${auction.vehicleInfo.model}`}

@@ -59,7 +59,6 @@ import {
   MdContentCopy,
   MdCheck,
   MdZoomIn,
-  MdFullscreen,
   MdPhotoLibrary,
   MdCalendarToday,
   MdAccountBalance,
@@ -70,7 +69,6 @@ import {
   MdAccessTime,
 } from 'react-icons/md'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { cn } from '@/lib/utils'
@@ -168,7 +166,7 @@ export function Auctions() {
   const [copiedLot, setCopiedLot] = useState(false)
   const [copiedLink, setCopiedLink] = useState(false)
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false)
-  const [showThumbnails, setShowThumbnails] = useState(false)
+  const [_showThumbnails, setShowThumbnails] = useState(false)
 
   // Get unique makes and models from data
   const uniqueMakes = useMemo(() => {
@@ -429,7 +427,7 @@ export function Auctions() {
     }
   }
 
-  const getStatusBadge = (status: Auction['status']) => {
+  const _getStatusBadge = (status: Auction['status']) => {
     const colors: Record<Auction['status'], string> = {
       draft: 'bg-slate-500/10 text-slate-600 border-slate-500/20',
       scheduled: 'bg-blue-500/10 text-blue-600 border-blue-500/20',
@@ -664,6 +662,7 @@ export function Auctions() {
                       }}
                       className='h-36 w-52 rounded-lg overflow-hidden bg-muted shrink-0 hover:ring-2 hover:ring-primary/50 transition-all group relative'
                     >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={selectedAuction.vehicleInfo.images[0]}
                         alt={`${selectedAuction.vehicleInfo.make} ${selectedAuction.vehicleInfo.model}`}
@@ -1445,6 +1444,7 @@ export function Auctions() {
                         : 'opacity-50 hover:opacity-100'
                     )}
                   >
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={img}
                       alt={`Thumbnail ${idx + 1}`}

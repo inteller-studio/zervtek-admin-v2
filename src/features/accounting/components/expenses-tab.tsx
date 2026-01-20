@@ -22,7 +22,7 @@ import {
 } from 'recharts'
 import { PieChart, Pie } from 'recharts'
 import { toast } from 'sonner'
-import type { Expense, ExpenseCategory, DateRange } from '../types/accounting'
+import type { Expense, DateRange } from '../types/accounting'
 import { expenses as allExpenses, getExpenseSummary, expenseCategoryLabels } from '../data/expenses'
 import { ExpensesList } from './expenses-list'
 import { AddExpenseDialog } from './add-expense-dialog'
